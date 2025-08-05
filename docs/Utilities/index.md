@@ -6,9 +6,9 @@ has_children: true
 ---
 This section provides essential tools and scripts to support your workflow in materials simulation and analysis. It includes:
 
--  **Utility scripts** explanation of the utilities scripts included in the tutorial package.
 -  **Visualization tools** to inspect molecular and crystal structures
 -  **Python packages** for structure manipulation, DFT setup, and post-processing
+
 
 ##  Visualization Tools
 

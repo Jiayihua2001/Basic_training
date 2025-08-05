@@ -22,8 +22,12 @@ nav_order: 2            # 2,3,4 for the others
 - Make a folder for each [butane conformers](https://www.masterorganicchemistry.com/2020/05/29/newman-projection-of-butane-and-gauche-conformation/) (named by different dihedral angle. `60.in`,`180.in`,`300.in`) and rename each `.in` files to `geometry.in`. Try to prepare `control.in` by reading from `geometry.in` this time by `write_control.py`:
 
   ```bash
-  python write_control.py --task relaxation --species_default light
+  python write_control.py --input_geometry --species_default light 
   ```
+then add this line for non-periodic relaxation:
+```text
+relax_geometry trm 1e-2
+```
 - Then copy `submit.sh` to each folders, submit the jobs and grep the energy after DFT calculations finished, same as [Turotial_1](../Tutorial_2/).
 
 **TODO**: Compute **ΔE = E – E<sub>min</sub>**. Plot ΔE vs dihedral angle → identify global minimum among local minimums.

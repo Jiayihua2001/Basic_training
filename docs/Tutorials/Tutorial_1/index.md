@@ -38,10 +38,11 @@ For detailed settings, please check [FHI-aims Manual](chrome-extension://efaidnb
 ---
 
 ## EX1: H2 binding energy evaluation
-### 1. Generate `control.in` Files by [`write_control.py`](../../Utilities/Tutorial_scripts) script:
+### 1. Generate `control.in` Files by [`write_control.py`] script:
   ```bash
-  python write_control.py --task energy --species_define --elements H --species_default light
+  python write_control.py --elements H --species_default light
   ```
+  Run ``python write_control.py --help`` for full flag descriptions.
 ### 2. Generate `geometry.in` Files at Different H–H Distances
 
 Use the helper script `distance_generator.py` to create H₂ geometries with bond lengths from 0.5 Å to 1.0 Å:
@@ -99,9 +100,9 @@ To evaluate the cost, grep the time of each runs:
 
 ## EX3: Structure optimization/relaxation
 
-Try to pick the run with the lowest-energy, make a new folder to put the `geometry` and `submit.sh` in. Then regenerate the `control.in` file for relaxation:
-  ```bash
-  python write_control.py --task relaxation --species_define --elements H 
+Try to pick the run with the lowest-energy, make a new folder to put the `geometry` and `submit.sh` in. Then add this command to the `control.in` file for non-periodic relaxation:
+  ```text
+  relax_geometry trm 1e-2
   ```
 **TODO**:
 - Try to compare the difference between the `control.in` for single point energy and relaxtion.

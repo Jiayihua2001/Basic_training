@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 # gem "webrick"        # required when using Ruby >= 3 and Jekyll <= 4.2.2
+
 gem "jekyll-default-layout"
 gem "jekyll", "~> 4.3.2"
 gem "just-the-docs", "~> 0.5.4" # Use the latest release if needed

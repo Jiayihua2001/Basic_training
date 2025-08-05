@@ -1,12 +1,15 @@
 title: Basic Training
 description: Basic Training for new students
-theme: just-the-docs
+theme: jekyll-theme-minimal
 
 url: https://Jiayihua2001.github.io/Basic_training/
 
 aux_links: # remove if you don't want this link to appear on your pages
   Template Repository: https://github.com/Jiayihua2001/Basic_training.git
 
-
+remote_theme: pages-themes/minimal@v0.2.0
 plugins:
-  - jekyll-default-layout
+- jekyll-remote-theme # add this line to the plugins list if you already have one
+
+# plugins:
+#   - jekyll-default-layout

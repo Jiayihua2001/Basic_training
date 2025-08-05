@@ -4,6 +4,7 @@ parent: "HPC Onboard"
 title: "Arjuna"
 nav_order: 1
 ---
+Currently 24 nodes are in use for you to access.
 
 ## Logging In to Arjuna
 

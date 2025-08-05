@@ -14,7 +14,7 @@ nav_order: 3            # 2,3,4 for the others
   ```bash
   conda create -n ase_env python=3.10
   conda activate ase_env
-  pip install ase
+  pip install ase matplotlib numpy
   ```
 ---
 
