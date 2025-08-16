@@ -40,7 +40,7 @@ Activate the [conda environment](../../HPC%20Onboard/virtual_env) `ase_env` you 
     * `ax … cz` are the **Cartesian components in ångström**.
     * To convert lattice parameters (a,b,c,α,β,γ) to Cartesian vectors, you could use `ase.geometry.cellpar_to_cell([a,b,c,α,β,γ])`.
 
-2.  Place atoms in fractional coordinates: [Diamond-cubic (DC)](https://msestudent.com/diamond-cubic-unit-cell/) (Si, 8 atoms) and [Body-centered-cubic (BCC)](https://msestudent.com/body-centered-cubic-bcc-unit-cell/) (Na, 2 atoms). 
+2.  Place atoms in fractional coordinates: [Diamond-cubic (DC)](https://msestudent.com/diamond-cubic-unit-cell/) (Si, 8 atoms in conventional cell) and [Body-centered-cubic (BCC)](https://msestudent.com/body-centered-cubic-bcc-unit-cell/) (Na, 2 atoms in conventional cell). 
 Always use `atom_frac` to start the line if you use fractional coordinates, each line should looks like this format:
 ```text
 atom_frac 0.5 0.5 0.5 Si
@@ -48,10 +48,12 @@ atom_frac 0.5 0.5 0.5 Si
 Or you could try to use `ase` to create Atoms object and write your geometry.in file, for example:
 ```bash
 from ase.build import bulk
+si_dc_prim = bulk('Si', crystalstructure='diamond', a=5.5)
 si_dc_conv = bulk('Si', crystalstructure='diamond', a=5.5, cubic=True)
+na_bcc_prim = bulk('Na', crystalstructure='bcc', a=4.5)
 na_bcc_conv = bulk('Na', crystalstructure='bcc', a=4.5, cubic=True)
 from ase.io import write
-write("geometry.in",si_dc_conv)
+write("geometry.in",si_dc_prim)
 ```
 3. Visual-check in **OVITO**.
 
@@ -80,8 +82,8 @@ Run single-point calculations for each k grid `n`, collect total energies, and p
 Copy the converged `k_grid` into `relax/control.in`, add this for periodic relaxation
 
 ```
-relax_geometry  trm 1e-2 
-# trm: optimization type (same as bfgs) 
+relax_geometry  bfgs 1e-2 
+# bfgs: optimization type (same as trm) 
 # 1e-2 :the maximum force tolerance per atom (in eV/Å) to be considered converged.
 relax_unit_cell fixed_angles # fixed_angles or full
 ```
@@ -93,15 +95,15 @@ then run relaxation until forces fall below 0.01 eV Å⁻¹. Compare the relaxed
 First, we need to pick a kpath linking high-symmetry points in the
 Brillouin zone:
 
-* **FCC Si**: L-Γ-X-W-K.
-* **BCC Na**: N-Γ-H-N-P.
+* **FCC Si(primitive cell)**: L-Γ-X-W-K.
+* **BCC Na(primitive cell)**: N-Γ-H-N-P.
 
 
 <img src="../../images/band.PNG"
      alt="band_fcc"
      width="350">
 
-**Figure1 :** L-Γ-X-W-K band structure of Silicon (bottom) and FCC Brillouin zone illustration(top).
+**Figure1 :** L-Γ-X-W-K band structure of Silicon (bottom) and FCC Brillouin zone illustration(top) of primitive cell.
 Add the following to **`control.in`**:
 ```text
 # ------------ Band structure  ----------------------------
@@ -116,27 +118,28 @@ The arguments after `output band` are defined here:
 - Npts      – number of k-points *along this segment* (≥10 gives smooth lines).
 - start/end    – label of the high symmetry K points.
 
-The following tables give you the frac coordinate of high symmetry points in FCC and BCC:
+Choose the High-symmetry points according to the cell type (primitive&conventional) in your `geometry.in` for consistency.
+The following tables([source](https://lampz.tugraz.at/~hadley/ss1/bzones)) give you the frac coordinate of high symmetry points in FCC and BCC (primitive cell):
 
-**Table 1 – High-symmetry points for the FCC Brillouin zone**
+**Table 1 – High-symmetry points for the FCC Brillouin zone (primitive cell)**
 
 |   Point   | *k*<sub>x</sub> | *k*<sub>y</sub> | *k*<sub>z</sub> |
 | :-------: | :-------------: | :-------------: | :-------------: |
 |     L     |       0.5       |       0.5       |       0.5       |
 |   Gamma   |       0.0       |       0.0       |       0.0       |
 |     X     |       0.0       |       0.5       |       0.5       |
-|     W     |       0.25      |       0.5       |       0.75      |
-|     K     |      0.375      |      0.375      |      0.375      |
+|     W     |       0.25      |       0.75      |       0.5       |
+|     K     |      0.375      |       0.75      |      0.375      |
 
 ---
 
-**Table 2 – High-symmetry points for the BCC Brillouin zone**
+**Table 2 – High-symmetry points for the BCC Brillouin zone (primitive cell)**
 
 |   Point   | *k*<sub>x</sub> | *k*<sub>y</sub> | *k*<sub>z</sub> |
 | :-------: | :-------------: | :-------------: | :-------------: |
-|     N     |       0.5       |       0.0       |       0.0       |
+|     N     |       0.0       |       0.5       |       0.0       |
 |   Gamma   |       0.0       |       0.0       |       0.0       |
-|     H     |       0.5       |       −0.5      |       0.5       |
+|     H     |       -0.5      |       0.5       |       0.5       |
 |     P     |       0.25      |       0.25      |       0.25      |
 
 ---
@@ -145,12 +148,24 @@ FCC example: L → Γ → X, 21 points on each leg:
 output band   0.5 0.5 0.5    0.0 0.0 0.0    21   L       Gamma
 output band   0.0 0.0 0.0    0.0 0.5 0.5    21   Gamma   X
 ```
+
 We will run the test with relaxed structure after step 1.3, by renaming the `geometry.in.next_step` to `geometry.in`, add it and the `submit.sh` to current `./band` path, then submit the job.
+
 After the run finished, plot with `aimsplot.py`  to obtain bands and DOS.
 Run ``python aimsplot.py --help`` for full flag descriptions.
+
 ---
 
-### 1.5 Quick self-check (Si & Na)
+### 1.5 Too Complex? Automate It Easily
+
+The [Graphical Interface for Materials Simulation (GIMS)](https://gims.ms1p.org/static/index.html#) provides an automated platform for building crystal structures, generating `control.in` files, and performing post-processing tasks such as band structure and DOS analysis.
+
+Once you're familiar with how it works, you can use this tool to streamline your research workflow.
+
+---
+
+
+### 1.6 Quick self-check (Si & Na)
 
 1. Plot Convergence plot → chosen k-mesh.
 2. Compare optimised lattice constants vs. literature.
@@ -182,17 +197,19 @@ You could build the structure from scratch using `atom_frac`, but you could also
 ```bash
 from ase.build import bulk
 # BCC Iron with lattice constant 3.0 Å
-iron_bcc = bulk('Fe', crystalstructure='bcc', a=3.0, cubic= True)
+iron_bcc_prim = bulk('Fe', crystalstructure='bcc', a=3.0)
+iron_bcc_conv = bulk('Fe', crystalstructure='bcc', a=3.0, cubic= True)
 # FCC Iron with lattice constant 3.5 Å
-iron_fcc = bulk('Fe', crystalstructure='fcc', a=3.5, cubic= True)
+iron_fcc_prim = bulk('Fe', crystalstructure='fcc', a=3.5)
+iron_fcc_conv = bulk('Fe', crystalstructure='fcc', a=3.5, cubic= True)
 
 #write it into geometry.in
 from ase.io import read,write
-write("geometry.in",iron_bcc)
+write("geometry.in",iron_bcc_prim)
 ```
 ### 2.2 k-point convergence
 
-Same protocol as §1.2, but rebuild the `control.in` with Fe species, set `relativistic atomic_zora scalar` and different `k_grid` in `control.in` and test both lattices;
+Same protocol as §1.2, but rebuild the `control.in` with Fe species, set `relativistic atomic_zora scalar`,`spin none` and different `k_grid` in `control.in` and test both lattices;
 - `relativistic atomic_zora scalar` is used to account for relativistic effects in atoms — especially heavy element, whose atomic number is greater than 20 — without including spin-orbit coupling.
 
 ### 2.3 Energy vs. lattice constant
@@ -202,19 +219,19 @@ After you selected k_grid density, scan through different lattice constant *a* (
 
 **Hint:** 
 - Simply change `xc pbe` in control.in file to use PBE as xc-functional. 
-- Set `spin collinear` in control.in and initial moments (in geometry.in) to 2, to consider system in magnetic state.
-- Initial moments refers to the initial guess of [magnetic moment](https://en.wikipedia.org/wiki/Magnetic_moment) for the [spin polarization](https://en.wikipedia.org/wiki/Spin_polarization) on each atom in [Bohr magnetons (μB)](https://en.wikipedia.org/wiki/Bohr_magneton). Setting in `geometry.in` should looks like (if use fractional coordinate):
-```text
-atom_frac	0.0	0.0	0.0	Fe
-initial_moment	2
-atom_frac	0.5	0.5	0.0	Fe
-initial_moment	2
-```
+- Set `spin collinear` in control.in and initial moments (in geometry.in) to 2 (If you use ase code to generate `geometry.in`, the `initial_moment` should be given, you do not need to change it), to consider system in magnetic state. 
+  - Initial moments refers to the initial guess of [magnetic moment](https://en.wikipedia.org/wiki/Magnetic_moment) for the [spin polarization](https://en.wikipedia.org/wiki/Spin_polarization) on each atom in [Bohr magnetons (μB)](https://en.wikipedia.org/wiki/Bohr_magneton). Setting in `geometry.in` should looks like (if use fractional coordinate):
+  ```text
+  atom_frac	0.0	0.0	0.0	Fe
+  initial_moment	2
+  atom_frac	0.5	0.5	0.0	Fe
+  initial_moment	2
+  ```
 
 ### 2.4 Band structure
-- Relax the ground state structure for magnetic BCC iron using PBE in §2.3 as you learned in §1.3.
-- Use what you learned in §1.4 to make a band structure and density of states figure for the relaxed structure. 
-- Compare your band structure to the black stars in Figure 2 of the [research paper](https://www.nature.com/articles/s41524-021-00649-8).
+- Relax the ground state structure for magnetic BCC iron using PBE in §2.3 as you learned in §1.3 and §1.5.
+- Use what you learned in §1.4 to make a band structure and density of states figure for the relaxed structure. You can also simply input the aims calc folder to [GIMS](../../Utilities/) to automatically plot the graphs.
+- Compare your band structure to Figure 1 of the [research paper](https://www.nature.com/articles/s41524-021-00649-8). Among FHI-aims output files, band10XX represents spin up data, band20XX represents spin down data.
 
 ### 2.5  Quick self-check (BCC/FCC Fe)
 - With converged k-points settings, plot the total energy vs. lattice parame-
@@ -253,7 +270,7 @@ Make geometry.in file for DC Germanium according to Table 4.
 
     ```text
     xc hse06 0.11 
-    hse_unit bohr-1 
+    hse_unit bohr 
     ```
     0.11 is [screening parameter](https://pubs.aip.org/aip/jcp/article-abstract/125/22/224106/953719/Influence-of-the-exchange-screening-parameter-on?redirectedFrom=fulltext) omega, hse_unit defines the unit of omega.
 

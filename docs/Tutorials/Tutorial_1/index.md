@@ -9,7 +9,7 @@ nav_order: 1            # 2,3,4 for the others
 
 ## 📖 Learning objectives:
 - FHI-aims basic
-- submitting jobs on Arjuna
+- submitting jobs on Trace or Arjuna.
 - numerical convergence & scaling
 - structure optimization.
 
@@ -38,7 +38,12 @@ For detailed settings, please check [FHI-aims Manual](chrome-extension://efaidnb
 ---
 
 ## EX1: H2 binding energy evaluation
-### 1. Generate `control.in` Files by [`write_control.py`] script:
+### 1. Activate your virtual env. Generate `control.in` Files by `write_control.py` script(under utils directory):
+
+before running `write_control.py`, please change the `BASE_SPECIES_PATH` in the script to the correct path of FHI-aims species directory on the HPC you use.
+-BASE_SPECIES_PATH on Trace: /trace/group/marom/shared/programs/fhi_aims_latest/fhi-aims.240507/species_defaults/defaults_2020/
+-BASE_SPECIES_PATH on Arjuna: /home/marom_group/programs/fhi_aims_2023/fhi-aims.221103/species_defaults/defaults_2020/
+
   ```bash
   python write_control.py --elements H --species_default light
   ```
@@ -94,15 +99,15 @@ To evaluate the cost, grep the time of each runs:
   ```bash
   grep '| Total time                                  :' */aims.out > times.txt
   ```
-**TODO**: Try to write a loop to run and make a table to compare the accuracy and cost between different basis tier and species default.
+**TODO**: You will get 2 kinds of time (max(cpu_time) and wall_clock(cpu1)), use wall_clock for evaluation. Try to write a loop to run and make a table to compare the accuracy and cost between different basis tier and species default.
 
 ---
 
 ## EX3: Structure optimization/relaxation
 
-Try to pick the run with the lowest-energy, make a new folder to put the `geometry` and `submit.sh` in. Then add this command to the `control.in` file for non-periodic relaxation:
+Try to pick the run with the lowest-energy, Put the `geometry` and `submit.sh` in the `1/relaxation` folder. Then add this command to the `control.in` file for non-periodic relaxation: 
   ```text
-  relax_geometry trm 1e-2
+  relax_geometry bfgs 1e-2
   ```
 **TODO**:
 - Try to compare the difference between the `control.in` for single point energy and relaxtion.
@@ -110,10 +115,10 @@ Try to pick the run with the lowest-energy, make a new folder to put the `geomet
 
 ### Final H–H Distance
 
-After relaxation, check final structure `geometry.in.next_step` use visulization tool or ase code:
+After relaxation, check final structure `geometry.in.next_step` use visulization tool or use python to execute the following code:
 ```python
 from ase.io import read
-ase_atoms = read("path/to/geometry.in.next_step")
+ase_atoms = read("path/to/geometry.in.next_step",format="aims")
 distance = ase_atoms.get_distance(0, 1)
 ```
 

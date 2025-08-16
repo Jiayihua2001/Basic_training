@@ -6,9 +6,21 @@ has_children: true
 ---
 This section provides essential tools and scripts to support your workflow in materials simulation and analysis. It includes:
 
--  **Visualization tools** to inspect molecular and crystal structures
--  **Python packages** for structure manipulation, DFT setup, and post-processing
+-  **GIMS** automation platform for FHI-aims.
+-  **Visualization tools** to inspect molecular and crystal structures.
+-  **Python packages** for structure manipulation, DFT setup, and post-processing.
 
+## GIMS
+
+[The Graphical Interface for Materials Simulation (GIMS)](https://gims.ms1p.org/static/index.html#) is a web-based platform designed to simplify and automate common tasks for FHI-aims in computational materials science. It provides an intuitive user interface for:
+
+- Building crystal structures from scratch or importing from databases.
+
+- Generating input files for various electronic structure codes, including control.in for FHI-aims.
+
+- Post-processing simulation results, such as band structures and density of states (DOS), with built-in visualization tools.
+
+GIMS is particularly useful for new users who want to avoid manual setup, as well as experienced researchers aiming to accelerate workflow efficiency.
 
 ##  Visualization Tools
 

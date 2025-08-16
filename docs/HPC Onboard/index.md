@@ -12,6 +12,9 @@ Welcome! This onboarding session will help you get up and running with different
 * **Arjuna:**
   A quick intro to Arjuna HPC cluster.
 
+* **Trace:**
+  A quick intro to Trace HPC cluster.
+
 * **Linux Basics:**
   Key Linux commands and workflows you’ll use every day in the terminal.
 

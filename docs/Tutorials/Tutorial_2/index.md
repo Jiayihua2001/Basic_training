@@ -26,11 +26,13 @@ nav_order: 2            # 2,3,4 for the others
   ```
 then add this line for non-periodic relaxation:
 ```text
-relax_geometry trm 1e-2
+relax_geometry bfgs 1e-2
 ```
+- If you want to use MPI to accelerate computation, please set 
+`KS_method parallel` in `control.in`, also in `submit.sh`, please change the n in allocation `#SBATCH -<n>` and the cores used in mpirun `mpirun -np <n>` to the number of cores you like to use.
 - Then copy `submit.sh` to each folders, submit the jobs and grep the energy after DFT calculations finished, same as [Turotial_1](../Tutorial_2/).
 
-**TODO**: Compute **ΔE = E – E<sub>min</sub>**. Plot ΔE vs dihedral angle → identify global minimum among local minimums.
+**TODO**: Compute **ΔE = E – E<sub>min</sub>**. Usually we want to convert eV (in DFT results) to KJ/mol by timing the factor 96.485. Plot ΔE vs dihedral angle → identify global minimum among local minimums.
 
 ---
 
@@ -64,7 +66,7 @@ Here is the structure of **fumaronitrile**:
 ---
 
 ### 1.  Relax neutral molecule, get E(0).
-Rename `fumaronitrile.in` to `geometry.in`, try to relax it, you already know how to do that!
+Rename `fumaronitrile.in` to `geometry.in`, try to relax it, you already know how to do that! Start from the relaxed neutral structure for the following calculation by naming `geometry.in.next_step` as `geometry.in`,then add the line `initial_moment 1` to the beginning of the file.
 
 ### 2.  Adiabatic & Vertical **IP**
 
@@ -74,6 +76,7 @@ Key edits in `control.in` (adiabatic):
 spin             collinear
 charge           +1.
 fixed_spin_moment 1
+
 ```
 Delete `relax_geometry` for **vertical** calculation.
 
