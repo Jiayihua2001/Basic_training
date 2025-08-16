@@ -2,7 +2,7 @@
 layout: default
 parent: "HPC Onboard"
 title: "slurm_basic"
-nav_order: 2            # 2,3,4 for the others
+nav_order: 4            # 2,3,4 for the others
 ---
 
 

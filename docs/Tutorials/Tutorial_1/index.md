@@ -38,11 +38,12 @@ For detailed settings, please check [FHI-aims Manual](chrome-extension://efaidnb
 ---
 
 ## EX1: H2 binding energy evaluation
-### 1. Activate your virtual env. Generate `control.in` Files by `write_control.py` script(under utils directory):
+### 1. Activate your virtual env. Generate `control.in` Files by `write_control.py` script:
 
-before running `write_control.py`, please change the `BASE_SPECIES_PATH` in the script to the correct path of FHI-aims species directory on the HPC you use.
--BASE_SPECIES_PATH on Trace: /trace/group/marom/shared/programs/fhi_aims_latest/fhi-aims.240507/species_defaults/defaults_2020/
--BASE_SPECIES_PATH on Arjuna: /home/marom_group/programs/fhi_aims_2023/fhi-aims.221103/species_defaults/defaults_2020/
+before running `write_control.py` (under utils directory), please change the `BASE_SPECIES_PATH` in the script to the correct path of FHI-aims species directory on the HPC you use.
+
+- BASE_SPECIES_PATH on Trace: /trace/group/marom/shared/programs/fhi_aims_latest/fhi-aims.240507/species_defaults/defaults_2020/
+- BASE_SPECIES_PATH on Arjuna: /home/marom_group/programs/fhi_aims_2023/fhi-aims.221103/species_defaults/defaults_2020/
 
   ```bash
   python write_control.py --elements H --species_default light

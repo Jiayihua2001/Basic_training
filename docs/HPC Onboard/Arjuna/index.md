@@ -18,8 +18,8 @@ Currently 24 nodes are in use for you to access.
 ---
 
 - **FHI-aims Submission Script:**  
-  You can download the `submit.sh` file for FHI-aims on Trace using the link below:  
-  [📥 Download `submit.sh` for FHI-aims on Trace](submit.sh)
+  You can download the `submit.sh` file for FHI-aims on Arjuna using the link below:  
+  [📥 Download `submit.sh` for FHI-aims on Arjuna](submit.sh)
 
 ## Transferring Files Between Local and Arjuna
 

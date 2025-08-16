@@ -2,7 +2,7 @@
 layout: default
 parent: "HPC Onboard"
 title: "Trace"
-nav_order: 4
+nav_order: 2
 ---
 
 ## Logging In to Trace
@@ -14,6 +14,7 @@ nav_order: 4
   ssh <AndrewID>@trace.cmu.edu
 ````
 ---
+
 ## Local and Group Directories
 
 - **Group Directory:**  
@@ -23,7 +24,6 @@ nav_order: 4
   You can download the `submit.sh` file for FHI-aims on Trace using the link below:  
   [📥 Download `submit.sh` for FHI-aims on Trace](submit.sh)
 
----
 
 ## Common Commands
 

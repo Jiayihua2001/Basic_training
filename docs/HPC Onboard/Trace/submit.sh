@@ -1,8 +1,8 @@
 #!/bin/sh
-#SBATCH -J test 
+#SBATCH -J basic_training 
 #SBATCH -n 128 
 #SBATCH -p batch
-#SBATCH -t 1:00:00
+#SBATCH -t 00:10:00
 #SBATCH -N 1 
 #SBATCH -A marom
  
