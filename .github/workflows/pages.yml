@@ -28,7 +28,7 @@ jobs:
       - name: Build site
         run: bundle exec jekyll build --source docs --destination _site  # use --source . if not using /docs
 
-      - uses: actions/upload-pages-artifact@v1
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: ./_site
 
