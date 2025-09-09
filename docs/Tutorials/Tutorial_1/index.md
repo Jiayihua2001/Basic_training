@@ -5,7 +5,7 @@ title: "Tutorial_1"
 nav_order: 1            # 2,3,4 for the others
 ---
 
-# Tutorial 1 : H₂ Binding, Convergence, and Relaxation
+# Tutorial 1 : H₂ Binding, Convergence, and Relaxation / Simple Molecules and Conformers
 
 ## 📖 Learning objectives:
 - FHI-aims basic
