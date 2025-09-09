@@ -1,13 +1,11 @@
 ---
 layout: default
-title: "Tutorial_2"
 parent: "Tutorials"
+title: "Tutorial_2"
 nav_order: 2
 ---
 
 # Tutorial 2 – Periodic Systems
-
----
 
 ## Learning Objectives
 - Apply periodic-boundary conditions (PBCs) in **FHI-aims**,
