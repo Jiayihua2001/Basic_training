@@ -13,7 +13,7 @@ Currently 24 nodes are in use for you to access.
 - **SSH Login:**
   ```bash
   ssh <AndrewID>@arjuna-local.lan.local.cmu.edu
-````
+  ```
 
 ---
 
@@ -42,8 +42,23 @@ scp <local_file> <AndrewID>@arjuna-local.lan.local.cmu.edu:<remote_destination>
 # Directory
 scp -r <local_dir> <AndrewID>@arjuna-local.lan.local.cmu.edu:<remote_destination>
 ```
-
 ---
+
+## Preparation before computation:
+
+- **Log in to Arjuna**
+  ```bash
+  ssh <AndrewID>@arjuna-local.lan.local.cmu.edu
+  ```
+- **Activate your virtual env**
+  ```bash
+  module load miniconda3-4.9.2-gcc-11.2.0-et7ujxr
+  conda activate ase_env
+  ```
+- **Activate your `aims_env`**
+  ```bash
+  source /home/27735A_group/shared/bin/aims_env.sh
+  ```
 
 For more detailed information, please refer to the official [Arjuna User Guide](https://arjunacluster.github.io/ArjunaUsers/getting_started/).
 

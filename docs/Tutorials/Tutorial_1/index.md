@@ -15,7 +15,9 @@ nav_order: 1            # 2,3,4 for the others
 
 > **Notation used**
 > - Distances are in Å
-> - Activate your virtual env if the python script needs ase. If you don't have one, go [create one](../../HPC%20Onboard/virtual_env) !
+> - Activate your virtual env if the python script needs ase. If you don't have one, go [create one](../../HPC%20Onboard/virtual_env) 
+> - Please find `submit.sh` and `write_control.py` in `utils/trace` or `utils/arjuna` folder.
+> - Please find any other useful python scripts under Tutorial_1 and subfolders.
 
 ---
 ##  FHI-aims basic
@@ -42,14 +44,11 @@ For detailed settings, please check [FHI-aims Manual](chrome-extension://efaidnb
 ### **Follow the steps**
 
 - **Generate `control.in` Files by `write_control.py` script:**
-    > Before running `write_control.py`, please make sure the `BASE_SPECIES_PATH` in the script is correct path of FHI-aims species directory.
-    > - BASE_SPECIES_PATH on Arjuna: /home/27735A_group/shared/species_defaults/defaults_2020
-
+ 
     ```bash
-    python /home/27735A_group/shared/example/write_control.py \
-    --elements H --species_default light
+    python write_control.py --elements H --species_default light
     ```
-    Run ``python /home/27735A_group/shared/example/write_control.py --help`` for full flag descriptions.
+    Run ``python write_control.py --help`` for full flag descriptions.
 
     The `control.in` will looks like:
     ```bash
@@ -81,11 +80,6 @@ For detailed settings, please check [FHI-aims Manual](chrome-extension://efaidnb
     * **[OVITO](https://www.ovito.org/)** for 3D structural visualization
 
 - **Copy your submit.sh file to your current path**
-  copy the submit.sh file by :
-    ```bash
-    cp /home/27735A_group/shared/example/submit.sh .
-    ```
----
 
 - **Run FHI-aims Calculations**
     Before submitting jobs, please make sure you have activated your `aims_env`.
@@ -252,8 +246,7 @@ To evaluate the cost, grep the time of each runs:
 - Make a folder for each [serine conformers](https://aminoacidsguide.com/Ser.html) (named by different dihedral angle. `60.in`,`180.in`,`300.in`) and rename each `.in` files to `geometry.in`. Try to prepare `control.in` by reading from `geometry.in` this time by `write_control.py`:
 
   ```bash
-  python /home/27735A_group/shared/example/write_control.py \
-  --input_geometry --species_default light 
+  python write_control.py --input_geometry --species_default light 
   ```
   then add this line for non-periodic relaxation:
   ```text
