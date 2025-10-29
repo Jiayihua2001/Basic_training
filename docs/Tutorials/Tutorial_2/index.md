@@ -23,17 +23,40 @@ In this tutorial, we will explore:
 
 > **Please Note**
 > - Distances are in Å
+> - Always copy the Tutorials to your working directory first from `/home/27735A_group/shared/example`, where you can find the files needed for the assignments.
 > - The arguments or discussion in all you assignments should be supported by **data**, **tables** or preferably **graphs**.
 > - Activate your virtual env if the python script needs ase.
 > - **All input/output files and scripts used for the performance of hands-on assignments and the final project should be placed in an organized directory and available for review. A README file explaining what all the files are should be placed in the directory.**
-> - Please find `submit.sh` and `write_control.py` in `utils/trace` or `utils/arjuna` folder.
-> - Please find any other useful python scripts under Tutorial_1 and subfolders.
 
-## Preparation 
 
+## Preparation
+- **Log in to Arjuna**
+  ```bash
+  ssh <AndrewID>@arjuna-local.lan.local.cmu.edu
+  ```
+- **Enter your working directory**
+  ```bash
+  cd /home/27735A_group/<AndrewID>
+  ```
+  - You are at the working directory now, type `pwd` to get your current path. 
+  - Any computations should be finished under this folder, not your home path.
+  
+- **Activate your virtual env**
+  ```bash
+  module load miniconda3-4.9.2-gcc-11.2.0-et7ujxr
+  conda activate ase_env
+  ```
+- **Activate your `aims_env`**
+  ```bash
+  source /home/27735A_group/shared/bin/aims_env.sh
+  ```
+- **Prepare the Tutorial files**
+  ```bash
+  cp -r /home/27735A_group/shared/example/Tutorial_3 .
+  ```
 - **Enter folder and run bash script**
   ```bash
-  cd Tutorial_2
+  cd Tutorial_3
   bash dir_tree.sh
   ```
 ---
