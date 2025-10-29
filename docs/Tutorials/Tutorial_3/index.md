@@ -246,6 +246,7 @@ This will automatically collect energies from all `vac_*` directories and genera
 * **(5 points)** Next, perform a k-point convergence test by varying the k-grid from 6×6×1 up to 22×22×1 (or until you reach convergence),with step 2. For each k-grid, keep the vacuum spacing fixed at 20 Å and use the PBE functional without vdW corrections. Record k-grid settings and corresponding total energies in a table, and plot both E(n) and |dE/dn| as a function of k-grid density n. Determine the converged k-grid.
 
 * **(3 points)** Using the converged k-grid, perform vacuum convergence tests by varying the vacuum spacing from 10 Å to 50 Å (suggested: 10, 15, 20, 25, 30... Å). For each vacuum size, maintain the same interlayer distance (3.30 Å) and only change the total z-component of the unit cell. Plot total energy E versus vacuum thickness. Choose the converged vacuum thickness.
+
 ---
 
 ### **1.5 Stacking configurations in bilayer graphene**
@@ -397,6 +398,7 @@ Choose the best stacking with optimal distance of each functional. Then answer t
 - What is the equilibrium distance for each functional?
 - How do results compare to the DMC(diffusion quantum Monte Carlo) result in Figure 3 of this [paper](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.115501)?
 - Which functional gives the most close distance with the DMC result according to the Table 1 in the paper? 
+
 ---
 
 ### **1.7 Band Structure and Density of States (DOS)**
@@ -630,6 +632,7 @@ converged k-grid
   ```
 
 Plot total energy E vs. k-grid density n. Look for where the energy curve flattens. Choose the smallest n where convergence is achieved.
+
 ---
 
 
@@ -757,6 +760,7 @@ For each functional (PBE, PBE+TS, PBE+MBD):
 - (5 points) Perform convergence test. Determine minimum converged vacuum and k_grid.
 - (10 points) For each of 6 adsorption configurations, vary the height of molecules over graphene. Plot the adsorption energy curve as a function of TCNQ–graphene distance for dispersion correction methods (PBE,PBE_TS,PBE_MBD). From the curve, identify the optimal binding height (minimum energy), equilibrium adsorption energy, and compare how the energy curve changes for different configurations and heights. Compare between different dispersion correction methods.
 - (5 points) Compare the optimal adsorption configurations, equilibrium distances and adsorption energy you get with the result in [literature](https://www.sciencedirect.com/science/article/pii/S0008622316308831). (Note: Compare the PBE_vdW result in paper with PBE_TS result you obtained.)
+
 ---
 
 ### **Assignment 5** Dispersion Correction and Adsorption Site (20 points)
