@@ -166,9 +166,6 @@ Test k-grid densities from 4×4×1 to 16×16×1. For each k-grid:
 1. Create a separate directory (e.g.,`k_6x6x1`, etc.)
 2. Copy `geometry.in` and modify `control.in` with the specific k-grid
 3. Copy `submit.sh` and submit the job
-   ```bash
-   cp submit.sh .
-   ```
 4. After completion, extract the total energy from `aims.out`
 
 **Automated approach:**
@@ -185,7 +182,6 @@ python Surfaces.py --plot_k_grid_2d
 
 **Expected behavior:**
 Plot total energy E vs. k-grid density n. Look for where the energy curve flattens. Choose the smallest n where convergence is achieved.
-
 
 
 ### **1.4 Vacuum convergence test**
@@ -272,7 +268,7 @@ When two graphene layers come together, the relative lateral positioning of atom
 **Build stacking configurations:**
 
 ```bash
-cd ../stacking/AA #(or AB)
+cd ../../stacking/AA #(or AB)
 ```
 
 Use `Surfaces.py` to build different stacking configurations:
@@ -338,7 +334,7 @@ Now we test how different functionals perform for vdW interactions. For the both
 First, we need the energy of an isolated graphene monolayer:
 
 ```bash
-cd ../distance_scan/pbe/monolayer
+cd ../AA/distance_scan/pbe/monolayer
 ```
 
 Create a single-layer graphene structure with the same vacuum and k-grid:
@@ -353,19 +349,20 @@ layer.center(vacuum=<optimal>/2, axis=2)
 write("geometry.in", layer, format='aims')
 ```
 
-Copy `control.in` by `cp ../../../kpts/control.in .` , use  your converged k-grid and test among different functionals (PBE, PBE+TS, PBE+MBD).
+Copy `control.in` use your converged k-grid and `submit.sh`, then submit the job by `sbatch submit.sh`.
 
 **Step 2: Scan interlayer distances for bilayer**
 
 For each stacking (AA and AB), create structures with different interlayer distances:
-
+Copy submit.sh in current folder.
 Suggested distances: **from 3.0 to 4.5 Å with a step 0.1 Å**
 
 ```bash
 cd ..
-cp submit.sh .
 cp monolayer/control.in .
+cp monolayer/submit.sh .
 ```
+Remember to check `control.in` to use the correct functionals.
 
 Generate all structures automatically:
 
@@ -406,7 +403,7 @@ Choose the best stacking with optimal distance of each functional. Then answer t
 Before setting up the band structure and DOS calculations, let us choose the structure that is optimal in 1.6  as `geometry.in` for the following calculation:
 
 ```bash
-cd ../band 
+cd ../../band 
 ```
 
 Use the geometry with the equilibrium interlayer distance obtained from your binding energy curves.
@@ -439,10 +436,7 @@ output dos                        -20 10 3001 0.1
 | K     | 0.33333 | 0.33333 | 0.0 |
 
 Run the calculation:
-```bash
-cp submit.sh .
-sbatch submit.sh
-```
+Copy `submit.sh` in current folder , submit the job by `sbatch submit.sh`
 
 **Plotting Results:**
 
@@ -522,9 +516,9 @@ To investigate TCNQ adsorption, follow these steps in order:
 
 #### **Step 1: Build the Graphene Slab**
 
-Navigate to the convergence folder:
+Back to Tutorial_3 folder, Navigate to the convergence folder:
 ```bash
-cd ../../../../tcnq_adsorption/convergence
+cd tcnq_adsorption/convergence
 ```
 
 Create a single-layer graphene slab with vacuum:
@@ -671,7 +665,7 @@ python Surfaces.py --create_tcnq_adsorption_series --vacuum <optimal>
 
 
 ### **2.5 Calculating adsorption energies**
-
+Use `PBE_TS` for demonstration here: 
 **Step 1: Calculate reference energies**
 
 **Isolated TCNQ molecule in a box:**
