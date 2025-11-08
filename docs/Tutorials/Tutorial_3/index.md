@@ -210,9 +210,6 @@ For each vacuum spacing:
 2. Copy the corresponding `geometry.in`
 3. Copy `control.in` with **converged k-grid from Assignment 1**
 4. Copy `submit.sh` and submit the job
-   ```bash
-   cp submit.sh .
-   ```
 5. Extract total energy from `aims.out`
 
 **Important:** Use the **same converged k-grid** from Assignment 1 for all vacuum tests to isolate the effect of vacuum spacing.
@@ -334,7 +331,7 @@ Now we test how different functionals perform for vdW interactions. For the both
 First, we need the energy of an isolated graphene monolayer:
 
 ```bash
-cd ../AA/distance_scan/pbe/monolayer
+cd ../AA/distance_scan/pbe_mbd/monolayer
 ```
 
 Create a single-layer graphene structure with the same vacuum and k-grid:
@@ -413,8 +410,8 @@ Add the following to your `control.in` file:
 ```text
 xc            pbe
 many_body_dispersion
-# Use the optimal functional.
-k_grid        n n 1 # converged k_grid
+
+k_grid        n n 1 
 use_dipole_correction                         .true.
 compensate_multipole_errors                   .true.
 relativistic       atomic_zora scalar
@@ -550,17 +547,16 @@ Generate `control.in` after you have the final `geometry.in`:
 ```bash
 cp geometry_tcnq_hollow_x.in geometry.in
 python write_control.py --input_geometry
-cp submit.sh .
 ```
-
+Copy `submit.sh` in the current folder.
 Edit `control.in` to set the calculation parameters you require. Example minimal settings:
   ```bash
   xc            pbe
-  vdw_correction_hirshfeld  # PBE+TS
+  vdw_correction_hirshfeld  
   spin          none
   relativistic  none  
   charge        0.
-  k_grid        4 4 1  # Adjust after convergence
+  k_grid        4 4 1  
   use_dipole_correction                         .true.
   compensate_multipole_errors                   .true.
   ```
@@ -614,7 +610,7 @@ For TCNQ adsorption on single-layer graphene, we need to systematically converge
    Copy the `geometry.in` with the optimal vacuum to the `k_grid` folder, as well as `control.in` and `submit.sh`.
 2. **Test different k-point grids** (e.g., 2×2×1, 3×3×1, 4×4×1):
    ```bash
-   python Surfaces.py --make_k_grid_2d --k_grid_min 2 --k_grid_max 5 --k_grid_step 1
+   python Surfaces.py --make_k_grid_2d --k_grid_min 2 --k_grid_max 8 --k_grid_step 1
    ```
 
 3. **For each k-grid**, calculate E_ads using the same procedure
@@ -633,6 +629,9 @@ Plot total energy E vs. k-grid density n. Look for where the energy curve flatte
 ### **2.4 Building and Placing Molecules on Surfaces**
 
 #### **1. Build the molecule structure and graphene slab:**
+
+Please enter one of the three("PBE","PBE_TS","PBE_MBD") folders.
+
 ```bash
 python Surfaces.py --build_molecule --molecule tcnq
 python Surfaces.py --build_graphene_slab --layers 1 --size 7 7 --vacuum <optimal>
@@ -670,7 +669,7 @@ Use `PBE_TS` for demonstration here:
 
 **Isolated TCNQ molecule in a box:**
 ```bash
-cd ../PBE_TS/molecule_ref
+cd ../molecule_ref
 # Copy tcnq.in as geometry.in
 # no k_grid for molecule.
 # Calculate E_molecule
@@ -710,7 +709,7 @@ For each height:
 You can use the automated functions in `Surfaces.py` to perform this scan and plot the adsorption curve. The relevant command is:
 
 ```bash
-cp ../geometry_graphene.in .
+cp ../../geometry_graphene.in .
 python Surfaces.py --create_height_scan --tcnq_site <site> --tcnq_orientation <x|y>  --height_min 2.8 --height_max 3.6 --height_step 0.1 --vacuum <optimal>
 ```
 
