@@ -1,3 +1,5 @@
+https://jiayihua2001.github.io/Basic_training/
+
 # just-the-docs-template
 
 This is a *bare-minimum* template to create a [Jekyll] site that:
