@@ -8,9 +8,20 @@ has_children: true
 Welcome to the Basic Training Document for Noa Marom's Research Group
 
 This guide provides essential tutorials and utility scripts to help you get started.
-Before beginning your training journey, please download all the necessary files here:
+Before beginning your training journey, please:
 
-👉 <a href="Tutorials_files.zip" download>📥 Download Tutorial Files</a>
+1. **Download** all the necessary files here:
+   👉 <a href="Tutorials_files.zip" download>📥 Download Tutorial Files</a>
+
+2. **Unzip and add the directory to your HPC, then enter it:**
+   ```bash
+   cd Tutorials_files
+   ```
+2. **Run the setup script** to configure your environment:
+   ```bash
+   ./setup_utils.sh
+   ```
+   (Or `bash setup_utils.sh` if the script is not executable.)
 
 
 
