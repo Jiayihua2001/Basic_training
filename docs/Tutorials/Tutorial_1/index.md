@@ -46,9 +46,9 @@ For detailed settings, please check [FHI-aims Manual](chrome-extension://efaidnb
 - **Generate `control.in` Files by `write_control.py` script:**
  
     ```bash
-    python write_control.py --elements H --species_default light
+    python ~/write_control.py --elements H --species_default light
     ```
-    Run ``python write_control.py --help`` for full flag descriptions.
+    Run ``python ~/write_control.py --help`` for full flag descriptions.
 
     The `control.in` will looks like:
     ```bash
@@ -87,10 +87,12 @@ For detailed settings, please check [FHI-aims Manual](chrome-extension://efaidnb
     The help script `distance_generator.py` can create folders for each distance, also help paste `control.in` and `submit.sh` in each folder. Then you can enter each folder, submit the job by :
 
     ```bash
-    sbatch submit.sh
+    sbatch ~/submit.sh
     ```
 
-    Submit each folder to your cluster, You’ll know the run is finished when:
+    > **Tip:** If your job runs out of time, you can edit `~/submit.sh` and increase the wall time limit (e.g. change `#SBATCH -t 1:00:00` to a longer duration).
+
+    Submit each folder to your cluster, You'll know the run is finished when:
 
     * You see `Have a nice day.` at the end of `aims.out`
     * Or check status on HPC with:
@@ -246,7 +248,7 @@ To evaluate the cost, grep the time of each runs:
 - Make a folder for each [serine conformers](https://aminoacidsguide.com/Ser.html) (named by different dihedral angle. `60.in`,`180.in`,`300.in`) and rename each `.in` files to `geometry.in`. Try to prepare `control.in` by reading from `geometry.in` this time by `write_control.py`:
 
   ```bash
-  python write_control.py --input_geometry --species_default light 
+  python ~/write_control.py --input_geometry --species_default light 
   ```
   then add this line for non-periodic relaxation:
   ```text

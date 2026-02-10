@@ -28,35 +28,10 @@ In this tutorial, we will explore:
 > - Activate your virtual env if the python script needs ase.
 > - **All input/output files and scripts used for the performance of hands-on assignments and the final project should be placed in an organized directory and available for review. A README file explaining what all the files are should be placed in the directory.**
 
-
 ## Preparation
-- **Log in to Arjuna**
-  ```bash
-  ssh <AndrewID>@arjuna-local.lan.local.cmu.edu
-  ```
-- **Enter your working directory**
-  ```bash
-  cd /home/27735A_group/<AndrewID>
-  ```
-  - You are at the working directory now, type `pwd` to get your current path. 
-  - Any computations should be finished under this folder, not your home path.
-  
-- **Activate your virtual env**
-  ```bash
-  module load miniconda3-4.9.2-gcc-11.2.0-et7ujxr
-  conda activate ase_env
-  ```
-- **Activate your `aims_env`**
-  ```bash
-  source /home/27735A_group/shared/bin/aims_env.sh
-  ```
-- **Prepare the Tutorial files**
-  ```bash
-  cp -r /home/27735A_group/shared/example/Tutorial_3 .
-  ```
 - **Enter folder and run bash script**
   ```bash
-  cd Tutorial_3
+  cd Tutorial_2
   bash dir_tree.sh
   ```
 ---
@@ -134,7 +109,7 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
 **Create the `control.in`**:
 
   ```bash
-  python write_control.py --elements Si
+  python ~/write_control.py --elements Si
   ```
   The control.in setting should looks like:
 
@@ -153,12 +128,12 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
   For your convenience, you can always this command to create and submit jobs for all k_grid automatically:
 
   ```bash
-  python Automation.py --make_k_grid
+  python ~/Automation.py --make_k_grid
   ```
   After the job finished, use this command to plot the convergence curve automatically:
 
   ```bash
-  python Automation.py --plot_k_grid
+  python ~/Automation.py --plot_k_grid
   ```
 
 
@@ -169,9 +144,9 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
   ```bash
   cd ../relax
   cp ../kpts/geometry.in .
-  python write_control.py --elements Si 
+  python ~/write_control.py --elements Si 
   ```
-**Copy submit.sh to current folder and `sbatch submit.sh` to submit the job.**
+**Copy submit.sh to current folder and `sbatch ~/submit.sh` to submit the job.**
 
 Add the converged `k_grid` setting into `control.in`, also add these settings for periodic relaxation:
 
@@ -188,7 +163,7 @@ Add the converged `k_grid` setting into `control.in`, also add these settings fo
 
 Run this comand:
 ```bash
-python Automation.py --get_lattice_constant
+python ~/Automation.py --get_lattice_constant
 ```
 You will extract structure information from `geometry.in.next_step` in your current folder automatically, if you want to extract from other files , add `--lattice_file_name <your_filename>` to this command.
 
@@ -216,7 +191,7 @@ By plotting the band structure along paths connecting these high-symmetry points
 **Enter band folder and Prepare `control.in`**
   ```bash
   cd ../band
-  python write_control.py --elements Si
+  python ~/write_control.py --elements Si
   ```
 **Add Bandgap Settting manually**
   Add the converged `k_grid` and bandgap/dos setting into `control.in`:
@@ -268,13 +243,13 @@ output band   0.0 0.5 0.5    0.25 0.75 0.5  21    X      W
 output band   0.25 0.75 0.5  0.375 0.75 0.375  21    W    K
 ```
 
-We will run the test with relaxed structure after step 1.3, by renaming the `geometry.in.next_step` to `geometry.in`, add it and the `submit.sh` to current `./band` path, then submit the job by `sbatch submit.sh`.
+We will run the test with relaxed structure after step 1.3, by renaming the `geometry.in.next_step` to `geometry.in`, add it and the `submit.sh` to current `./band` path, then submit the job by `sbatch ~/submit.sh`.
   ```bash
   cp ../relax/geometry.in.next_step ./geometry.in
   ```
 
-After the run finishes, use `aimsplot.py` to plot the band structure and density of states (DOS).
-Run `python aimsplot.py --help` for full flag descriptions and to customize the figure appearance.
+After the run finishes, use `~/aimsplot.py` to plot the band structure and density of states (DOS).
+Run `python ~/aimsplot.py --help` for full flag descriptions and to customize the figure appearance.
 
 ---
 
@@ -336,7 +311,7 @@ You could build the structure from scratch using `atom_frac`, but you could also
 ### **2.2 k-point convergence**
 
   ```bash
-  python write_control.py --elements Fe
+  python ~/write_control.py --elements Fe
   ```
 
 Same protocol as EX1 , but rebuild the `control.in` with Fe species, set `relativistic atomic_zora scalar`,`spin none` and different `k_grid` in `control.in` and test both lattices;
@@ -345,12 +320,12 @@ Same protocol as EX1 , but rebuild the `control.in` with Fe species, set `relati
 For your convenience, you can use this command to create and submit jobs for all k_grid values automatically. You can estimate a rough range of k_grid satisfying `N*a > 40`:
 
   ```bash
-  python Automation.py --make_k_grid --k_grid_min 10 --k_grid_max 18
+  python ~/Automation.py --make_k_grid --k_grid_min 10 --k_grid_max 18
   ```
 After the job finished, use this command to plot the convergence curve automatically:
 
   ```bash
-  python Automation.py --plot_k_grid
+  python ~/Automation.py --plot_k_grid
   ```
 
 ### **2.3 Energy vs. lattice constant**
@@ -360,18 +335,18 @@ You can use our automation script to save your effort, lattice type can be `bcc`
   ```bash
   mkdir lattice_grid
   cd lattice_grid
-  cp ../submit.sh .
+  cp ~/submit.sh .
   cp ../control.in .
   ```
 **Remember to add k_grid to `control.in` file !**
 
   ```bash
-  python Automation.py --Fe_grid_search --lattice_type bcc
+  python ~/Automation.py --Fe_grid_search --lattice_type bcc
   ```
 
 After the calculation finished, use this command to plot E vs lattice constant automatically:
   ```bash
-  python Automation.py --plot_Fe_grid_search
+  python ~/Automation.py --plot_Fe_grid_search
   ```
 **Hint:** 
 - To use PBE as the exchange-correlation functional, simply change `xc pw-lda` to `xc pbe` in the `control.in` file.
