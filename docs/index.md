@@ -24,7 +24,7 @@ Before beginning your training journey, please:
       ```
    elif you are using Arjuna:
       ```bash
-      bash setup_utils.sh trace
+      bash setup_utils.sh arjuna
       ```
 
 
