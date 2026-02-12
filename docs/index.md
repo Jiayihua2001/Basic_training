@@ -18,12 +18,14 @@ Before beginning your training journey, please:
    cd Tutorials_files
    ```
 2. **Run the setup script** to configure your environment:
-   ```bash
-   ./setup_utils.sh
-   ```
-   (Or `bash setup_utils.sh` if the script is not executable.)
-
-
+   if you are using trace,run:
+      ```bash
+      bash setup_utils.sh trace
+      ```
+   elif you are using Arjuna:
+      ```bash
+      bash setup_utils.sh trace
+      ```
 
 
 
