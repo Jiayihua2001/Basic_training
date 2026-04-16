@@ -28,13 +28,13 @@ nav_order: 1            # 2,3,4 for the others
 - Materials simulations including structure relaxation, molecular dynamics, and property evaluation
 
 FHI-aims uses numeric atom-centered orbitals and supports a wide range of functionals, dispersion corrections, and parallel execution on HPC clusters.
-For detailed settings, please check [FHI-aims Manual](chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://fhi-aims.org/uploads/documents/FHI-aims.221103_1.pdf)
+For detailed settings, please check [FHI-aims Manual](https://fhi-aims.org/uploads/documents/FHI-aims.221103_1.pdf)
 
 
 ### 📁 Required Files in a FHI-aims Calculation
 
 - `geometry.in`: Defines the atomic structure of the system.
-- `control.in`: Specifies the calculation settings, must include species orbit definitions appended at the end (copied from species_defaults/)
+- `control.in`: Specifies the calculation settings (xc functional, spin, etc.), must include species basis-set definitions appended at the end (copied from `species_defaults/` in your FHI-aims installation, organized by accuracy level: `light`, `intermediate`, `tight`)
 - `submit.sh`: A SLURM batch script to run FHI-aims on HPC.
 
 ---
@@ -131,7 +131,7 @@ For detailed settings, please check [FHI-aims Manual](chrome-extension://efaidnb
 
 
 
-Now, you have successdully set up a simple DFT workflow to evaluate the **H₂ binding energy** by generating a **dissociation curve** !
+Now, you have successfully set up a simple DFT workflow to evaluate the **H₂ binding energy** by generating a **dissociation curve** !
 
 ---
 
@@ -176,7 +176,7 @@ To evaluate the cost, grep the time of each runs:
   ```text
   relax_geometry bfgs 1e-2
   ```
-- Compare the difference between the `control.in` for single point energy and relaxtion.
+- Compare the difference between the `control.in` for single point energy and relaxation. The key difference is the `relax_geometry` keyword: without it FHI-aims computes the energy at the given geometry (single point); with it, FHI-aims iteratively moves atoms to minimize forces until convergence.
 
 - **Make a “relaxation movie”** in **OVITO** from FHI-aims output by excuting `extract_traj_frame.py` help script, then drag the output `.xyz` file in **OVITO**.
 
@@ -260,7 +260,7 @@ To evaluate the cost, grep the time of each runs:
 ### **Assignment 3**: Relative Energies of Serine Conformers (20 Points)
 
 
-* (10 Points) Compute **ΔE = E – E<sub>min</sub>**. Usually we want to convert eV (in DFT results) to KJ/mol by timing the factor 96.485. Plot ΔE vs dihedral angle → identify global minimum among local minimums.
+* (10 Points) Compute **ΔE = E – E<sub>min</sub>**. Usually we want to convert eV (in DFT results) to kJ/mol by multiplying by the factor 96.485 (1 eV = 96.485 kJ/mol). Plot ΔE vs dihedral angle → identify global minimum among local minima.
 * (10 Points) Compare the **relative energies of conformers** after relaxation you obtained with:
   * Local Density Approximation (**LDA**)
   * **[DFT with hybrid functional B3LYP](https://www.researchgate.net/publication/231638970_Conformational_behavior_of_serine_An_experimental_matrix-isolation_FT-IR_and_theoretical_DFTB3LYP6-31G_study?utm_source=chatgpt.com)**. (click to access to papers)
@@ -287,8 +287,8 @@ Here is the structure of **fumaronitrile**:
 
 
 ### **Vertical & Adiabatic**
-- Vertical (V): Energy difference between the excited state and the ground state while the geometry is held constant.
-- Adiabatic (A): Energy difference between the excited state after post-excitation relaxation and the ground state. 
+- Vertical (V): Energy difference computed at the **neutral ground-state geometry** — the ionized species is **not** relaxed. This corresponds to the instantaneous ionization/attachment process (Franck–Condon principle).
+- Adiabatic (A): Energy difference where the ionized species is **relaxed to its own equilibrium geometry**. This gives the true thermodynamic IP or EA.
 
 <img src="../../images/vertical_adiabatic.PNG"
      alt="vertical_adiabatic plot"
@@ -302,7 +302,7 @@ Here is the structure of **fumaronitrile**:
 
 - **Relax neutral molecule, get E(0) and prepare geometry.in**
 
-    Rename `fumaronitrile.in` to `geometry.in`, try to relax it, you already know how to do that! Start from the relaxed neutral structure for the following calculation, add the line `initial_moment 1` to the beginning of the `geometry.in.next_step` file, then copy it under the "vertical/adiabatic" dir by(for example) :
+    Rename `fumaronitrile.in` to `geometry.in`, try to relax it, you already know how to do that! Start from the relaxed neutral structure for the following calculation. Since the ionized species has an unpaired electron (doublet state), add the line `initial_moment 1` after the first atom line in `geometry.in.next_step` to provide an initial spin guess. Then copy it under the "vertical/adiabatic" dir by (for example) :
     ```bash
     cp geometry.in.next_step ./IP/adiabatic/geometry.in
     ```

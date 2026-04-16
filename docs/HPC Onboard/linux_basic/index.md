@@ -40,15 +40,17 @@ nav_order: 3            # 2,3,4 for the others
 * `scp <src> user@host:<dest>`: Secure copy to/from remote
 
   * e.g., `scp file.txt your_name@trace.cmu.edu:/dest/on/trace`
-  * e.g., `scp -rf target_dir your_name@bridges2.psc.edu:/dest/on/bridges`
+  * e.g., `scp -r target_dir your_name@bridges2.psc.edu:/dest/on/bridges`
 
-* `ssh user@host`: Secure shell into remote machine in ternimal
+* `ssh user@host`: Secure shell into remote machine in terminal
     * e.g., `ssh user_name@trace.cmu.edu`
     * e.g., `ssh user_name@bridges2.psc.edu`
     * e.g., `ssh user_name@arjuna-local.lan.local.cmu.edu`
 
 
 ### **📦 Package Management (Ubuntu/Debian)**
+
+> **Note:** On HPC clusters you typically do **not** have `sudo` privileges. Use `module load` for system-provided software and `conda`/`pip` for Python packages. The commands below apply only to personal Linux machines where you have root access.
 
 * `sudo apt update`: Update package lists
 * `sudo apt install <package>`: Install software
@@ -246,6 +248,7 @@ Example `job_script.sh`:
 
 
 module load python/3.10        # Load required module
+eval "$(conda shell.bash hook)"  # Initialize conda in non-interactive shell
 conda activate your_env        # Activate required environment
 srun python myscript.py        # Run job using srun
 ```
@@ -254,11 +257,13 @@ srun python myscript.py        # Run job using srun
 
 ### **🚀 Running Tasks with `srun`**
 
-* Run a task in parallel:
+* Launch multiple task copies in parallel (here, 4 copies of `my_program`):
 
   ```bash
   srun -n 4 ./my_program
   ```
+
+> **Note:** `srun` can be used both inside `sbatch` scripts (to launch the actual computation step) and interactively on the command line for quick tests. The `-n` flag specifies the **number of MPI tasks** (processes), not threads.
 
 ### **📊 Job Monitoring**
 

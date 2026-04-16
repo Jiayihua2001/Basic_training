@@ -155,7 +155,9 @@ Add the converged `k_grid` setting into `control.in`, also add these settings fo
   relax_geometry  bfgs 1e-2 
   relax_unit_cell fixed_angles # fixed_angles or full
   ```
-*bfgs: optimization type (same as trm)*
+  - `fixed_angles`: optimizes lattice vector lengths while keeping the cell angles (α, β, γ) fixed — appropriate for cubic systems where you only want to optimize the lattice constant.
+  - `full`: allows both lengths and angles to change — needed for lower-symmetry systems.
+*bfgs: a quasi-Newton geometry optimizer (an alternative is trm, the trust-region method — both are available in FHI-aims but use different algorithms)*
 
 *1e-2 :the maximum force tolerance per atom (in eV/Å) to be considered converged.*
 
@@ -206,9 +208,9 @@ By plotting the band structure along paths connecting these high-symmetry points
   output dos_tetrahedron   -18.0   0.0   2000
   ```
   The arguments after `output band` are defined here:
-  - kx ky kz  – fractional coordinates of the start / end points.
-  - Npts      – number of k-points *along this segment* (≥10 gives smooth lines).
-  - start/end    – label of the high symmetry K points.
+  - kx ky kz  – fractional coordinates of the start / end k-points **in reciprocal space** (not real space). These are fractions of the reciprocal lattice vectors.
+  - Npts      – number of k-points *along this segment* (≥20 gives smooth lines; 10 may look jagged).
+  - start/end    – text labels for the high-symmetry points (used only for axis labels in plots, not by FHI-aims itself).
 
 Choose the High-symmetry points according to the cell type (primitive&conventional) in your `geometry.in` for consistency.
 The following tables([source](https://lampz.tugraz.at/~hadley/ss1/bzones)) give you the frac coordinate of high symmetry points in FCC and BCC (primitive cell):
@@ -250,6 +252,47 @@ We will run the test with relaxed structure after step 1.3, by renaming the `geo
 
 After the run finishes, use `~/aimsplot.py` to plot the band structure and density of states (DOS).
 Run `python ~/aimsplot.py --help` for full flag descriptions and to customize the figure appearance.
+
+### **How to extract the band gap**
+
+The **band gap** is the energy difference between the **valence band maximum (VBM)** — the highest occupied state — and the **conduction band minimum (CBM)** — the lowest unoccupied state.
+
+**Direct vs. indirect gap:**
+- **Direct gap**: The VBM and CBM occur at the **same k-point**. Electrons can transition between them without a change in crystal momentum. Example: GaAs.
+- **Indirect gap**: The VBM and CBM occur at **different k-points**. A phonon (lattice vibration) is needed to supply the momentum difference. Example: Si has its VBM at Γ and CBM near X.
+
+<img src="../../images/band.PNG"
+     alt="band_fcc"
+     width="350">
+
+In the Si band structure above, notice that the top of the valence band (at Γ) and the bottom of the conduction band (between Γ and X) are at different k-points — this is an **indirect** band gap.
+
+> **A note on terminology:** In molecular chemistry, the energy gap is called the **HOMO-LUMO gap** (Highest Occupied / Lowest Unoccupied Molecular Orbital). In solid-state physics, the equivalent concept is the **band gap** between VBM and CBM. FHI-aims uses "HOMO-LUMO gap" in its output for **all** systems — including periodic solids like Si — so don't be confused by this: for a crystal, the "HOMO" is the VBM and the "LUMO" is the CBM.
+
+**Method 1 — From `aims.out`:**
+
+FHI-aims reports the band gap directly in `aims.out` at each SCF iteration. After your calculation finishes, extract it with:
+```bash
+grep 'ESTIMATED overall HOMO-LUMO gap' aims.out
+```
+You will see output like (the last occurrence is the converged value):
+```
+ESTIMATED overall HOMO-LUMO gap:      0.615 eV between HOMO at k-point 1 and LUMO at k-point 30
+```
+FHI-aims also tells you whether the gap is direct or indirect, and reports the smallest direct gap:
+```
+| This appears to be an indirect band gap.
+| Smallest direct gap :      2.516 eV for k_point 1 at  0.000  0.000  0.000
+```
+(The example above is from an actual Si LDA calculation with 8x8x8 k-grid.)
+
+Note that these values are estimated from the SCF k-mesh — the true band extrema may lie between your k-grid points, so use a well-converged k-grid.
+
+**Method 2 — From the band structure plot (more reliable):**
+
+The `output band` calculation samples many k-points along high-symmetry paths, giving a much finer picture. Visually identify the VBM (highest point of the topmost filled band) and CBM (lowest point of the bottommost empty band) in your plot. The energy difference between them is the band gap. If they occur at different k-points, the gap is indirect. You can also use `~/aimsplot.py` or [GIMS](https://gims.ms1p.org/static/index.html#) to extract the gap numerically from the band data files.
+
+> **Note for metals (e.g., Na, Fe):** Metals have **no band gap** — bands cross the Fermi level, meaning there are always available states for electrons. In the DOS, you will see non-zero density at the Fermi energy. This is the key distinction between metals and semiconductors.
 
 ---
 
@@ -314,8 +357,16 @@ You could build the structure from scratch using `atom_frac`, but you could also
   python ~/write_control.py --elements Fe
   ```
 
-Same protocol as EX1 , but rebuild the `control.in` with Fe species, set `relativistic atomic_zora scalar`,`spin none` and different `k_grid` in `control.in` and test both lattices;
+Same protocol as EX1 , but rebuild the `control.in` with Fe species, set `relativistic atomic_zora scalar`,`spin none` and different `k_grid` in `control.in` and test both lattices. (We use `spin none` here for the k-point convergence test to keep it fast; the magnetic calculation with `spin collinear` is introduced in §2.3.)
 - `relativistic atomic_zora scalar` is used to account for relativistic effects in atoms — especially heavy element, whose atomic number is greater than 20 — without including spin-orbit coupling.
+
+> **Dealing with energy fluctuations in k-point convergence for metals:**
+>
+> Unlike semiconductors (e.g., Si), metals like Fe have partially occupied states near the Fermi level. As you change the k-grid, states can jump in/out of the occupied manifold, causing the total energy to **oscillate** rather than converge smoothly. To fix this, add **occupation smearing** to your `control.in`:
+> ```text
+> occupation_type  gaussian  0.1
+> ```
+> This applies a Gaussian broadening (0.1 eV width, which is the FHI-aims default for periodic systems) to smooth the step-function occupation at the Fermi level. You may also try `fermi` (Fermi-Dirac) or `mp` (Methfessel-Paxton) instead of `gaussian`. A typical broadening width is 0.01–0.1 eV — too small and oscillations persist, too large and you smear out real electronic structure features. When reporting converged energies, note that a small smearing correction is included. For publication-quality results, you can test multiple broadening widths and extrapolate to zero broadening.
 
 For your convenience, you can use this command to create and submit jobs for all k_grid values automatically. You can estimate a rough range of k_grid satisfying `N*a > 40`:
 
@@ -416,7 +467,7 @@ write('geometry.in', ge_dc)
     xc hse06 0.11 
     hse_unit bohr 
     ```
-    0.11 is [screening parameter](https://pubs.aip.org/aip/jcp/article-abstract/125/22/224106/953719/Influence-of-the-exchange-screening-parameter-on?redirectedFrom=fulltext) omega, hse_unit defines the unit of omega.
+    0.11 is the [screening parameter](https://pubs.aip.org/aip/jcp/article-abstract/125/22/224106/953719/Influence-of-the-exchange-screening-parameter-on?redirectedFrom=fulltext) omega **in bohr<sup>-1</sup>** (≈ 0.2 Å<sup>-1</sup>), which is the standard HSE06 value. The `hse_unit bohr` line is **required** here — without it, FHI-aims defaults to Å<sup>-1</sup> and 0.11 Å<sup>-1</sup> would be incorrect.
 
 ### **3.3 Test with different xc-functionals.**
 

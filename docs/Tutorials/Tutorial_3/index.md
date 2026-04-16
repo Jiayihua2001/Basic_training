@@ -77,9 +77,9 @@ If you'd like to manually build the bilayer graphene structure (AA stacking), us
    - The in-plane lattice vectors are:
      ```
      lattice_vector   2.46000000   0.00000000   0.00000000
-     lattice_vector   -1.23000000   2.13000000   0.00000000
+     lattice_vector   -1.23000000   2.13042000   0.00000000
      ```
-     (where 2.13 Å = 2.46 × √3 / 2 and -1.23 Å = -2.46 / 2)
+     (where 2.13042 Å = 2.46 × √3 / 2 and -1.23 Å = -2.46 / 2)
 
 2. **Add the out-of-plane lattice vector (z direction):**
    - The starting point of interlayer spacing is 3.3 Å; add a vacuum layer to avoid spurious interactions along *z*. Use, for example, 20 Å vacuum:
@@ -105,7 +105,7 @@ If you'd like to manually build the bilayer graphene structure (AA stacking), us
    ```
    # Bilayer graphene (AA stacking; manual positions from hex.jpg)
    lattice_vector   2.46000000   0.00000000   0.00000000
-   lattice_vector   -1.23000000   2.13000000   0.00000000
+   lattice_vector   -1.23000000   2.13042000   0.00000000
    lattice_vector   0.00000000   0.00000000  23.30000000
 
    atom_frac  0.00000000  0.00000000  0.00000000  C
@@ -157,6 +157,11 @@ k_grid        n n 1          # Test n = 6, 8, 10, 12, 14, 16..
 use_dipole_correction                         .true.
 compensate_multipole_errors                   .true.
 ```
+
+> **Why these keywords?**
+> - `use_dipole_correction`: Corrects the artificial electric field that arises from the periodic boundary condition along the vacuum direction in slab/2D calculations.
+> - `compensate_multipole_errors`: Improves the accuracy of the electrostatic potential in systems with large vacuum regions.
+> - Both are recommended for all slab and 2D calculations in FHI-aims.
 
 **Important:** For 2D systems, use `k_grid n n 1` format (same grid in x,y; single point in z).
 

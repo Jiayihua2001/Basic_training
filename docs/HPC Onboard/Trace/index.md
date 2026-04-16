@@ -12,7 +12,7 @@ nav_order: 2
 - **SSH Login:**
   ```bash
   ssh <AndrewID>@trace.cmu.edu
-````
+  ```
 ---
 
 ## Local and Group Directories

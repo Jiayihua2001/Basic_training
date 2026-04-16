@@ -34,6 +34,7 @@ Example `job_script.sh`:
 
 
 module load python/3.10        # Load required module
+eval "$(conda shell.bash hook)"  # Initialize conda in non-interactive shell
 conda activate your_env        # Activate required environment
 srun python myscript.py        # Run job using srun
 ```
@@ -42,11 +43,13 @@ srun python myscript.py        # Run job using srun
 
 ### **🚀 Running Tasks with `srun`**
 
-* Run a task in parallel:
+* Launch multiple task copies in parallel (here, 4 copies of `my_program`):
 
   ```bash
   srun -n 4 ./my_program
   ```
+
+> **Note:** `srun` can be used both inside `sbatch` scripts (to launch the actual computation step) and interactively on the command line for quick tests. The `-n` flag specifies the **number of MPI tasks** (processes), not threads.
 
 ### **📊 Job Monitoring**
 
