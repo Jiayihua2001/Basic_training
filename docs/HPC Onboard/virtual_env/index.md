@@ -6,7 +6,9 @@ nav_order: 6            # 2,3,4 for the others
 ---
 
 
-## **📦 Virtual Environment: `conda` and `pip`**
+## **📦 Python environments: `conda` (env + package manager) and `pip` (package manager)**
+
+`conda` and `pip` are not the same kind of tool: **`conda` manages both Python environments and the packages inside them**, while **`pip` only installs packages into whichever environment is currently active**. The convention in this group is to create the environment with `conda create`, activate it, and then use `pip` for any Python-only package that conda doesn't carry.
 
 ### Quick start: Try to setup your Virtual environment
 ---

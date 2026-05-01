@@ -18,15 +18,16 @@ Before beginning your training journey, please:
    cd Tutorials_files
    ```
 2. **Run the setup script** to configure your environment:
-   if you are using trace,run:
-      ```bash
-      bash setup_utils.sh trace
-      ```
-   elif you are using Arjuna:
-      ```bash
-      bash setup_utils.sh arjuna
-      ```
+   - If you are on Trace:
+     ```bash
+     bash setup_utils.sh trace
+     ```
+   - If you are on Arjuna:
+     ```bash
+     bash setup_utils.sh arjuna
+     ```
 
+If you are doing the VASP tutorials instead, follow the [Perlmutter onboarding](HPC%20Onboard/Perlmutter/) and the [VASP tutorials](Tutorials/VASP/) — `setup_utils.sh` only covers the FHI-aims tooling.
 
 
 
