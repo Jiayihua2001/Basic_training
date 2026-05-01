@@ -1,9 +1,7 @@
 title: Basic Training
 description: Basic Training for new students
 
-remote_theme: just-the-docs/just-the-docs
-plugins:
-  - jekyll-remote-theme
+theme: just-the-docs
 
 url: https://Jiayihua2001.github.io/Basic_training/
 
