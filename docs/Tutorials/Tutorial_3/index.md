@@ -1,6 +1,7 @@
 ---
 layout: default
-parent: "Tutorials"
+parent: "FHI-aims"
+grand_parent: "Tutorials"
 title: "Tutorial_3"
 nav_order: 3
 ---

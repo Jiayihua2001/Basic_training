@@ -10,10 +10,13 @@ Welcome! This onboarding session will help you get up and running with different
 ### **What we'll cover:**
 
 * **Arjuna:**
-  A quick intro to Arjuna HPC cluster.
+  A quick intro to Arjuna HPC cluster (FHI-aims tutorials).
 
 * **Trace:**
-  A quick intro to Trace HPC cluster.
+  A quick intro to Trace HPC cluster (FHI-aims tutorials).
+
+* **Perlmutter (NERSC):**
+  Logging in, file systems, modules, and how to run VASP 6.4.3 on the CPU partition. This is the cluster used for the [VASP tutorials](../Tutorials/VASP/).
 
 * **Linux Basics:**
   Key Linux commands and workflows you’ll use every day in the terminal.

@@ -2,7 +2,7 @@
 layout: default
 parent: "HPC Onboard"
 title: "linux_basic"
-nav_order: 3            # 2,3,4 for the others
+nav_order: 4            # 2,3,4 for the others
 ---
 
 ## **🔧 Basic Linux Commands**

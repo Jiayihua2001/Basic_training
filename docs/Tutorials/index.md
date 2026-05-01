@@ -1,11 +1,15 @@
 ---
 layout: default
 title: "Tutorials"
-nav_order: 3            # 2,3,4 for the others
+nav_order: 3
 has_children: true
 ---
-## Quick Guide of the Tutorial:
-- [Tutorial_1](../Tutorials/Tutorial_1/) : H₂ Binding, Convergence, and Relaxation/Simple Organic Molecules
-- [Tutorial_2](../Tutorials/Tutorial_2/) : Periodic Systems.
-- [Tutorial_3](../Tutorials/Tutorial_3/) : 2D materials and surfaces.
 
+# Tutorials
+
+The tutorials are organised by the DFT code in use. Pick the section that matches the project you are starting with.
+
+- [FHI-aims](./FHI-aims/) — all-electron, NAO-based DFT. Three tutorials covering molecules, periodic systems, and 2D/surface systems.
+- [VASP](./VASP/) — plane-wave + PAW DFT, used by the quantum-materials subgroup. Four tutorials covering VASP basics and bulk InAs at PBE, PBE+SOC, and HSE.
+
+> Before starting any tutorial, follow the [Quick Onboard](../) instructions to download the tutorial files and run `setup_utils.sh` for your cluster. For VASP work the relevant cluster is [Perlmutter](../HPC%20Onboard/Perlmutter/).
