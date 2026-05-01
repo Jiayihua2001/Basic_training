@@ -6,6 +6,6 @@ gem "csv"
 gem "logger"
 gem "jekyll-default-layout"
 gem "jekyll", "~> 4.3.4"
-gem "just-the-docs", "~> 0.5.4" # Use the latest release if needed
+gem "just-the-docs"             # track the latest release; matches the deployed site's remote_theme default branch
 
 
