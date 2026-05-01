@@ -224,20 +224,7 @@ The whole chain finishes in a few minutes for 2 atoms on 1 node. If the `band/` 
 
 ## 3.6 Plotting and analysis
 
-You have two equally good choices.
-
-### Option A — VASPKIT (recommended)
-
-```bash
-cd ../band
-vaspkit -task 211        # PBE band structure
-cd ../dos
-vaspkit -task 111        # total + projected DOS
-```
-
-VASPKIT writes data files (`BAND.dat`, `KLABELS`, `TDOS.dat`, …) and a Python plotting script you can edit.
-
-### Option B — vaspvis (publication-quality)
+Use [`vaspvis`](https://github.com/caizefeng/vaspvis) — it is the recommended plotting toolchain for the VASP tutorials.
 
 ```python
 from vaspvis import Band, Dos
@@ -246,16 +233,7 @@ Band(folder="band/", projected=False).plot_plain(output="InAs_pbe_band.png")
 Dos(folder="dos/").plot_plain(output="InAs_pbe_dos.png")
 ```
 
-### Option C — pymatgen
-
-```python
-from pymatgen.io.vasp.outputs import Vasprun, BSVasprun
-from pymatgen.electronic_structure.plotter import BSDOSPlotter
-
-bs = BSVasprun("band/vasprun.xml").get_band_structure(line_mode=True)
-dos = Vasprun("dos/vasprun.xml").complete_dos
-BSDOSPlotter().get_plot(bs, dos).savefig("InAs_pbe.png")
-```
+> If you do not have `vaspvis` available, `vaspkit -task 211` (band) and `vaspkit -task 111` (DOS) will export the same data into ASCII tables you can plot manually.
 
 ### What you should see
 

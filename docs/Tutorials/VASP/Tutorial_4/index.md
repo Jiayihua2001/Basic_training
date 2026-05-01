@@ -120,16 +120,7 @@ SOC roughly quadruples the runtime relative to Tutorial_3 (more bands, complex s
 
 ## 4.5 Plot and analyse
 
-VASPKIT (recommended for the quick look):
-
-```bash
-cd ../band
-vaspkit -task 211       # picks up LSORBIT automatically
-cd ../dos
-vaspkit -task 111
-```
-
-`vaspvis` works the same way as in Tutorial 3; it transparently handles `LSORBIT = .TRUE.`:
+Use [`vaspvis`](https://github.com/caizefeng/vaspvis); it transparently handles `LSORBIT = .TRUE.`:
 
 ```python
 from vaspvis import Band, Dos
@@ -137,6 +128,8 @@ from vaspvis import Band, Dos
 Band(folder="band/", projected=False).plot_plain(output="InAs_soc_band.png")
 Dos(folder="dos/").plot_plain(output="InAs_soc_dos.png")
 ```
+
+> Fallback: `vaspkit -task 211` / `-task 111` exports raw band/DOS data if you cannot use `vaspvis`.
 
 ### What you should see
 

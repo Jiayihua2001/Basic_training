@@ -187,14 +187,7 @@ A GPU HSE+SOC run for the InAs primitive cell finishes in roughly 10–20 minute
 
 ## 5.6 Plot and analyse
 
-```bash
-cd ../band
-vaspkit -task 213           # plots an HSE band, dropping the IBZKPT weighted points
-cd ../dos
-vaspkit -task 111
-```
-
-`vaspvis` is built specifically to handle the HSE zero-weight scheme and is the easiest path to publication-quality figures:
+Use [`vaspvis`](https://github.com/caizefeng/vaspvis) — it is built to handle the HSE zero-weight scheme and is the easiest path to a publication-quality band/DOS figure:
 
 ```python
 from vaspvis import Band, Dos
@@ -203,7 +196,9 @@ Band(folder="band/", projected=False, hse=True).plot_plain(output="InAs_hse_band
 Dos(folder="dos/").plot_plain(output="InAs_hse_dos.png")
 ```
 
-Setting `hse=True` tells `vaspvis` to drop the IBZKPT-weighted points and plot only the line-mode segment.
+`hse=True` tells `vaspvis` to drop the IBZKPT-weighted points and plot only the line-mode segment.
+
+> Fallback: `vaspkit -task 213` performs the same zero-weight filtering and exports raw band data if you cannot use `vaspvis`.
 
 ### What you should see
 
