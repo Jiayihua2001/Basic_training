@@ -2,263 +2,178 @@
 layout: default
 parent: "VASP"
 grand_parent: "Tutorials"
-title: "Tutorial_2"
+title: "Calculation Types"
 nav_order: 2
 ---
 
-# Tutorial 2 — Bulk InAs (PBE)
+# Tutorial 2 — Calculation Types
 
 ## 📖 Learning objectives
 
-* Run a complete SCF → DOS → band-structure workflow on a bulk semiconductor.
-* Use `incar.py` and either `kpoints.py` or VASPKIT to generate the input files.
-* Submit a multi-step job on Perlmutter that pipes the SCF Fermi energy into the DOS `INCAR`.
-* See first-hand why plain PBE underestimates the InAs band gap.
-
-> **Notation**
-> * Lattice constants and bond lengths are in Å.
-> * `<repo>` stands for your NERSC allocation (e.g. `m4055`); update each `submit.sh`.
-> * Working directory: anywhere under `$SCRATCH`.
+* Recognise the calculation types you will run in the rest of the VASP tutorials (SCF, DOS, band, OPT) and the modifiers that combine with them (SOC, DFT+U, HSE).
+* Read and write a sensible `INCAR` for the Marom-group setup (`EDIFF = 1E-6`, `GGA_COMPAT = .FALSE.`, no `NBANDS`).
+* Pick reasonable `KPAR` / `NCORE` values for Perlmutter.
 
 ---
 
-## 2.1 Set up the working tree
+## 2.1 The shared "general" INCAR block
 
-InAs has the zinc-blende structure (FCC, two atoms in the primitive cell). Make a fresh tree:
-
-```bash
-mkdir -p $SCRATCH/InAs/pbe/{scf,dos,band}
-cd       $SCRATCH/InAs/pbe
-```
-
-### POSCAR
-
-Two-atom primitive cell, lattice parameter from Materials Project (`a` ≈ 6.0584 Å, primitive vectors `a/2 (eᵢ + eⱼ)`):
+Every INCAR in these tutorials starts with the same general block. Generate it with `python incar.py --scf` (or `--dos`, `--band`, `--opt`); the calculation-specific block follows.
 
 ```text
-In As
-1.0
-   0.000000   3.029200   3.029200
-   3.029200   0.000000   3.029200
-   3.029200   3.029200   0.000000
-In As
-1 1
-direct
-   0.000000   0.000000   0.000000
-   0.250000   0.250000   0.250000
+# --- general -----------------------------------------------------------------
+ALGO       = Fast        # Davidson + RMM-DIIS mixture
+PREC       = Normal      # Precision level
+EDIFF      = 1E-6        # SCF break condition (VASP-wiki: 1E-6 best compromise)
+NELM       = 500         # Max electronic steps
+ENCUT      = 400         # Plane-wave cutoff (eV); ENMAX from POTCAR is the floor
+LASPH      = .TRUE.      # Non-spherical gradient corrections
+GGA_COMPAT = .FALSE.     # Restore full Bravais lattice symmetry; required for MAE
+SIGMA      = 0.05        # Smearing width (eV)
+
+# --- parallelisation (Perlmutter 1-node CPU defaults) -----------------------
+KPAR       = 4           # k-point parallelism (1 k-group per 4 MPI ranks)
+NCORE      = 1           # auto-reset to 1 by VASP when OpenMP / GPU is on; harmless
 ```
 
-Save it as `POSCAR` in the run directory and copy it into `scf/`, `dos/`, `band/`. View it in [VESTA](https://jp-minerals.org/vesta/en/) (`File → Import`) to confirm In and As sit at the FCC and tetrahedral interstitial sites.
+Notes on the choices:
 
-### POTCAR
+* `EDIFF = 1E-6` — see [VASP wiki / EDIFF](https://www.vasp.at/wiki/index.php/EDIFF). Convergence is roughly quadratic, so the cost of going from `1E-5` to `1E-6` is small.
+* `GGA_COMPAT = .FALSE.` — see [VASP wiki / GGA_COMPAT](https://www.vasp.at/wiki/index.php/GGA_COMPAT).
+* `ENCUT = 400` works for In/As. Always check `ENMAX` in your `POTCAR`s and pick `ENCUT ≥ 1.3 × max(ENMAX)` if you are scanning lattice constants.
+* **No `NBANDS`** — the [VASP default](https://www.vasp.at/wiki/index.php/NBANDS) is `max((NELECT+2)/2 + max(NIONS/2, 3), ⌊0.6 · NELECT⌋)`. SOC doubles it internally. Override only if VASP warns "too few bands".
 
-```bash
-bash potcar.sh In As
-grep TITEL POTCAR
-# Expected:
-#   TITEL = PAW_PBE In 08Apr2002
-#   TITEL = PAW_PBE As 22Sep2009
-```
+### Picking `KPAR` and `NCORE` on Perlmutter
 
-The species order on line 6 of `POSCAR` (`In As`) must match the `TITEL` order. Copy `POTCAR` into `scf/`, `dos/`, `band/`.
+The Marom group [Perlmutter sbatch template](../../../HPC%20Onboard/Perlmutter/#vasp-sbatch-templates) uses **16 MPI ranks/node × 8 OpenMP threads** on CPU and **4 MPI ranks/node × 1 OMP × 4 GPUs** on GPU. The [VASP wiki](https://www.vasp.at/wiki/index.php/NCORE) notes that `NCORE` is automatically forced to 1 whenever OpenMP threading or GPU acceleration is active, so the only knob you really tune is `KPAR`:
+
+| Run                         | Ranks total | KPAR | Ranks per k-group | NCORE |
+|-----------------------------|------------:|-----:|------------------:|------:|
+| CPU 1 node (Tutorials 3 & 4)| 16          | 4    | 4                 | 1     |
+| CPU 2 nodes (HSE fallback)  | 32          | 8    | 4                 | 1     |
+| GPU 1 node, 4 GPUs (HSE)    | 4           | 4    | 1                 | 1     |
+
+`KPAR` must divide both the rank count and the number of irreducible k-points. For CPU runs without OpenMP (legacy or pure-MPI workflows) you would set `NCORE ≈ √(ranks per k-group)` instead; that is the only situation where `NCORE > 1` actually does anything.
 
 ---
 
-## 2.2 SCF step
+## 2.2 Calculation types
 
-Inside `scf/`:
+Each block below is what `incar.py` appends to the general block.
 
-```bash
-cd scf
-python ~/bin/incar.py --scf --encut 400
-python ~/bin/kpoints.py --grid -d 7 7 7      # or: vaspkit -task 102 (Gamma 7 7 7)
+### Self-Consistent Field (`--scf`)
+Converges the charge density from a superposition of atomic densities. Produces `CHG`, `CHGCAR`, and (with `LWAVE = .TRUE.`) `WAVECAR` for downstream calculations.
+
+```text
+ICHARG = 2
+ISMEAR = 0          # Gaussian smearing during self-consistency
+LCHARG = .TRUE.
+LWAVE  = .FALSE.    # set .TRUE. only when you need WAVECAR (HSE)
+LREAL  = .FALSE.    # reciprocal-space projectors; switch to Auto for > ~30 atoms
 ```
 
-Resulting **`scf/INCAR`** (calc-specific block only — the [general block](../Tutorial_1/#13-the-shared-general-incar-block) is on top):
+### Density of States (`--dos`)
+Non-self-consistent eigenvalue evaluation on a denser grid, using a converged `CHGCAR` from the SCF step.
+
+```text
+ICHARG = 11
+ISMEAR = -5         # tetrahedron with Bloechl correction
+LCHARG = .FALSE.
+LWAVE  = .FALSE.
+LORBIT = 11         # lm-decomposed PROCAR / DOSCAR
+NEDOS  = 3001
+EMIN   = emin       # filled in at submit time from the SCF Fermi level
+EMAX   = emax
+```
+
+### Band structure (`--band`)
+Same as DOS but the KPOINTS file is a line-mode path along high-symmetry points.
+
+```text
+ICHARG = 11
+ISMEAR = 0
+LCHARG = .FALSE.
+LWAVE  = .FALSE.
+LORBIT = 11
+```
+
+### Ionic optimisation (`--opt`)
+Relaxes ions (and optionally cell shape/volume) until forces fall below `|EDIFFG|`.
 
 ```text
 ICHARG = 2
 ISMEAR = 0
-LCHARG = .TRUE.
-LWAVE  = .FALSE.
-LREAL  = .FALSE.
-```
-
-`scf/KPOINTS`:
-
-```text
-Automatic kpoint scheme
-0
-Gamma
-7 7 7
-```
-
-A 7×7×7 Γ-centred grid is plenty for this 2-atom cell. Once you are familiar, run a quick convergence test on `ENCUT` and the k-grid before trusting the gap.
-
----
-
-## 2.3 DOS step
-
-Inside `dos/`:
-
-```bash
-cd ../dos
-python ~/bin/incar.py --dos --encut 400
-python ~/bin/kpoints.py --grid -d 15 15 15   # or: vaspkit -task 102 (Gamma 15 15 15)
-```
-
-`dos/INCAR` calc-specific block:
-
-```text
-ICHARG = 11
-ISMEAR = -5
 LCHARG = .FALSE.
 LWAVE  = .FALSE.
-LORBIT = 11
-NEDOS  = 3001
-EMIN   = emin     # replaced at submission time
-EMAX   = emax
+IBRION = 2          # conjugate gradient
+NSW    = 50         # max ionic steps
+EDIFFG = -1E-2      # force convergence (eV/A); negative => force criterion
+ISIF   = 3          # relax positions, cell shape, volume
 ```
-
-The placeholder `emin`/`emax` is rewritten by the submission script (next section) using the Fermi energy from the SCF `OUTCAR`, ±3 eV.
 
 ---
 
-## 2.4 Band-structure step
+## 2.3 Modifiers
 
-Inside `band/`:
+Combine these flags with one of the four calculation types above.
 
-```bash
-cd ../band
-python ~/bin/incar.py --band --encut 400
-python ~/bin/kpoints.py --band -c GXWLGK -n 50
-# or, equivalently, with VASPKIT:
-#    vaspkit -task 303    (then choose the Setyawan-Curtarolo path)
-```
-
-`band/INCAR` calc-specific block:
+### Spin-orbit coupling (`--soc`)
 
 ```text
-ICHARG = 11
-ISMEAR = 0
-LCHARG = .FALSE.
-LWAVE  = .FALSE.
-LORBIT = 11
+LSORBIT = .TRUE.
+MAGMOM  = 6*0       # 3 components per atom; "N*0" is shorthand for non-magnetic
 ```
 
-`band/KPOINTS` (line-mode along Γ-X-W-L-Γ-K, 50 points/segment) is auto-generated. The first few lines look like:
+Run **`vasp_ncl`** for SOC calculations. The default `NBANDS` is doubled internally to accommodate spinors.
+
+### HSE06 hybrid (`--hse`)
 
 ```text
-Line_mode KPOINTS file
-50
-Line_mode
-Reciprocal
-0.0   0.0   0.0   ! G
-0.5   0.0   0.5   ! X
-
-0.5   0.0   0.5   ! X
-0.5   0.25  0.75  ! W
-...
+LHFCALC  = .TRUE.
+HFSCREEN = 0.2      # range-separation parameter, 1/A
+AEXX     = 0.25     # 25% exact exchange (HSE06 standard)
+PRECFOCK = Fast     # softer FFT mesh in the exchange routine
+TIME     = 0.4      # damping time-step
 ```
 
-> **Heads-up:** the `Line-mode` style uses **fractional reciprocal-lattice coordinates** of the *primitive* cell. If you start from a conventional cell (e.g. cubic 8-atom InAs) the coordinates change.
+* For HSE **SCF** keep `ALGO = Fast` and add `LWAVE = .TRUE.` so you can re-use the WAVECAR.
+* For HSE **band/DOS** override to `ALGO = Damped` and `ICHARG = 0` (eigenvalues recomputed from `WAVECAR`). The KPOINTS file must be the zero-weight scheme — see [VASP wiki / Hybrid functionals: band-structure calculations](https://www.vasp.at/wiki/index.php/Hybrid_functional_calculations:_band_structure).
+
+`incar.py --band --hse` already applies these overrides.
+
+### DFT+U (Dudarev) (`--dftu`)
+
+```text
+LDAU     = .TRUE.
+LDAUTYPE = 2
+LDAUL    =  2  -1   # one l-quantum number per species in POSCAR order; -1 disables
+LDAUU    =  4.5 0.0
+LDAUJ    =  0.0 0.0
+LMAXMIX  =  4       # 4 for d, 6 for f
+```
+
+The Marom group typically tunes `LDAUU` against an HSE reference using Bayesian optimisation; document the reference whenever you set a non-trivial U.
 
 ---
 
-## 2.5 Submit the chained job
+## 2.4 Workflow at a glance
 
-📥 Save the script below as `submit.sh` in the parent directory (`$SCRATCH/InAs/pbe/`).
-
-```bash
-#!/bin/bash
-#SBATCH -J InAs_pbe
-#SBATCH -A <repo>
-#SBATCH -C cpu
-#SBATCH -q regular
-#SBATCH -N 1
-#SBATCH -t 00:30:00
-#SBATCH -o slurm-%j.out
-
-module load vasp/6.4.3-cpu
-export OMP_NUM_THREADS=2
-export OMP_PLACES=threads
-export OMP_PROC_BIND=spread
-
-# 1) SCF
-cd scf
-srun -n 64 -c 4 --cpu-bind=cores vasp_std > vasp.out
-
-# 2) Pull Fermi energy and patch dos/INCAR
-efermi=$(awk '/E-fermi/ {print $3}' OUTCAR | tail -n 1)
-emin=$(echo "$efermi - 3.0" | bc -l)
-emax=$(echo "$efermi + 3.0" | bc -l)
-sed -i "s/EMIN   = emin/EMIN   = $emin/" ../dos/INCAR
-sed -i "s/EMAX   = emax/EMAX   = $emax/" ../dos/INCAR
-
-# 3) Hand the converged charge density to band/ and dos/
-cp CHG CHGCAR ../band/
-cp CHG CHGCAR ../dos/
-
-# 4) Band
-cd ../band
-srun -n 64 -c 4 --cpu-bind=cores vasp_std > vasp.out
-
-# 5) DOS
-cd ../dos
-srun -n 64 -c 4 --cpu-bind=cores vasp_std > vasp.out
+```
+scf/   --INCAR/POSCAR/POTCAR/KPOINTS--> CHGCAR (and optionally WAVECAR for HSE)
+   │
+   ├── cp CHG* ../band/        ──> band/   sbatch ─► EIGENVAL, PROCAR
+   └── cp CHG* ../dos/         ──> dos/    sbatch ─► DOSCAR, PROCAR
 ```
 
-Submit:
-
-```bash
-sbatch submit.sh
-sqs -u $USER          # follow the queue
-tail -f scf/OSZICAR   # live-monitor SCF convergence
-```
-
-The whole chain finishes in a few minutes for 2 atoms on 1 node. If the `band/` or `dos/` step warns *"Charge file is empty"*, the SCF step did not write `CHG*` — check that the SCF `INCAR` had `LCHARG = .TRUE.`.
+For HSE swap `CHG*` for `WAVECAR`. The bulk-InAs tutorials (Tutorial_3 PBE, Tutorial_4 PBE+SOC, Tutorial_5 HSE) all follow this pattern.
 
 ---
 
-## 2.6 Plotting and analysis
+## 2.5 Sanity-check before you submit
 
-You have two equally good choices.
+* `grep TITEL POTCAR` matches the species order in `POSCAR` line 6.
+* `INCAR` contains `EDIFF = 1E-6`, `GGA_COMPAT = .FALSE.`, and no `NBANDS` line.
+* `KPOINTS` makes sense for the calculation type (grid for SCF/DOS/OPT, line-mode for band, zero-weight scheme for HSE band).
+* Submission script loads `vasp/6.4.3-cpu` and uses `vasp_ncl` if you set `LSORBIT = .TRUE.`.
 
-### Option A — VASPKIT (recommended)
-
-```bash
-cd ../band
-vaspkit -task 211        # PBE band structure
-cd ../dos
-vaspkit -task 111        # total + projected DOS
-```
-
-VASPKIT writes data files (`BAND.dat`, `KLABELS`, `TDOS.dat`, …) and a Python plotting script you can edit.
-
-### Option B — pymatgen
-
-```python
-from pymatgen.io.vasp.outputs import Vasprun, BSVasprun
-from pymatgen.electronic_structure.plotter import BSDOSPlotter
-
-bs = BSVasprun("band/vasprun.xml").get_band_structure(line_mode=True)
-dos = Vasprun("dos/vasprun.xml").complete_dos
-BSDOSPlotter().get_plot(bs, dos).savefig("InAs_pbe.png")
-```
-
-### What you should see
-
-* The valence-band maximum (VBM) and conduction-band minimum (CBM) both at Γ → InAs is a **direct-gap** semiconductor.
-* The PBE band gap is ≈ **0 eV** (sometimes faintly negative depending on lattice constant). Experiment: 0.354 eV at 300 K. This is the well-known "PBE underestimates band gaps" problem caused by self-interaction error.
-* The DOS is roughly zero between ≈ −3 eV and the Fermi level on the valence side and zero just above it on the conduction side.
-
----
-
-## 2.7 Assignment
-
-* **(5 points)** Write the InAs `POSCAR` and check the structure in VESTA. Capture a screenshot.
-* **(5 points)** Run a quick `ENCUT` convergence (300, 350, 400, 450 eV at fixed 7×7×7 grid) and a k-point convergence (5³, 7³, 9³, 11³ at fixed `ENCUT = 400`). Plot total energy vs each parameter and explain your choice.
-* **(10 points)** Plot the PBE band structure and DOS for converged settings. Quote your computed band gap (or "metallic" if the bands cross). Compare with the experimental value (0.354 eV) and explain the discrepancy in one paragraph.
-* **(5 points)** Inspect `EIGENVAL` and identify the band index of the VBM and CBM. Why do these matter for SOC and HSE later?
-
-When you are happy with the PBE result, move on to [Tutorial_3 — Bulk InAs (PBE+SOC)](../Tutorial_3/).
+When all of those check out, move on to [Tutorial 3 — Bulk InAs (PBE)](../Tutorial_3/).

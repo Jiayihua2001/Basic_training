@@ -7,7 +7,7 @@ nav_order: 3
 
 # NERSC Perlmutter
 
-Perlmutter is the HPE Cray EX system at the National Energy Research Scientific Computing Center (NERSC). It is the cluster of choice for the quantum-materials subgroup and hosts the VASP build used in the [VASP tutorials](../../Tutorials/VASP/). Refer to the official NERSC documentation for anything not covered here:
+Perlmutter is the HPE Cray EX system at the National Energy Research Scientific Computing Center (NERSC). It is the cluster of choice for the quantum-materials subgroup and hosts the VASP builds used in the [VASP tutorials](../../Tutorials/VASP/). Refer to the official NERSC documentation for anything not covered here:
 
 - [Perlmutter overview](https://docs.nersc.gov/systems/perlmutter/)
 - [Connecting to NERSC](https://docs.nersc.gov/connect/)
@@ -16,12 +16,14 @@ Perlmutter is the HPE Cray EX system at the National Energy Research Scientific 
 
 ---
 
-## Architecture (CPU partition)
+## Architecture
 
-* **CPU nodes:** 3,072. Each node has two AMD EPYC 7763 (Milan) CPUs → **128 physical cores / 256 hyper-threads** and 512 GB of DDR4.
-* **GPU nodes** (not used in these tutorials): 1,792 nodes, four NVIDIA A100 each.
+| Partition | Nodes | CPU                              | Accelerator        | Memory  | Slurm constraint |
+|-----------|------:|----------------------------------|--------------------|--------:|------------------|
+| **CPU**   | 3,072 | 2× AMD EPYC 7763 (Milan), 64 c each → 128 physical cores | —          | 512 GB | `-C cpu` |
+| **GPU**   | 1,792 | 1× AMD EPYC 7763 (Milan), 64 c   | 4× NVIDIA A100     | 256 GB | `-C gpu` |
 
-The VASP tutorials assume the CPU partition with `--constraint=cpu`.
+The VASP tutorials use both partitions: the standard SCF / DOS / band runs target CPU, and the HSE (Tutorial 5) prefers GPU because the exact-exchange operator is well-suited to A100 OpenACC kernels.
 
 ---
 
@@ -73,7 +75,8 @@ rsync -avz local_dir/ <username>@perlmutter.nersc.gov:$SCRATCH/dest/
 
 ```bash
 module avail vasp                 # list available builds
-module load vasp/6.4.3-cpu        # tutorials use this build
+module load vasp/6.4.3-cpu        # CPU build (Tutorials 1–4 default)
+module load vasp/6.4.3-gpu        # GPU build (Tutorial 5 HSE recommended)
 which vasp_std                    # confirm it loaded
 ```
 
@@ -89,11 +92,11 @@ Each module exposes three executables — pick the one that matches your INCAR:
 
 ## Slurm essentials on Perlmutter
 
-Every CPU job must request `--constraint=cpu`, an allocation, and a QOS:
+Every job must request a partition (`-C cpu` or `-C gpu`), an allocation, and a QOS:
 
 | QOS           | Use                                  | Wall-time     |
 |---------------|--------------------------------------|---------------|
-| `debug`       | quick tests, < 30 min                | up to 30 min  |
+| `debug`       | quick tests                          | up to 30 min  |
 | `regular`     | normal production                    | up to 24 h    |
 | `interactive` | live shell on a compute node         | up to 4 h     |
 
@@ -107,49 +110,81 @@ sqs                                   # NERSC wrapper around squeue
 
 ---
 
-## VASP sbatch template (Perlmutter CPU)
+## VASP sbatch templates
 
-NERSC's recommended hybrid OpenMP/MPI launch is **64 MPI ranks per node × 2 OpenMP threads** (`-c 4` because Perlmutter exposes two hyper-threads per physical core; never run on hyper-threads — `--cpu-bind=cores` enforces that). Adjust the binary (`vasp_std` ↔ `vasp_ncl`) and the parallelisation tags inside `INCAR` to match the calculation.
+Two canonical Marom-group templates. Copy whichever applies, replace `corresponding_vasp_binary` with `vasp_std` / `vasp_ncl` / `vasp_gam`, and pick a wall-time appropriate to the calculation (the tutorials suggest values).
 
-📥 [Download `submit.sh`](submit.sh)
+### CPU — `vasp/6.4.3-cpu`
+
+📥 [Download `submit_cpu.sh`](submit_cpu.sh)
+
+1 node × **16 MPI ranks × 8 OpenMP threads** = 128 physical cores. NERSC enforces `--cpu_bind=cores` so the run never lands on hyper-threads.
 
 ```bash
 #!/bin/bash
-#SBATCH -J vasp_job
-#SBATCH -A <your_repo>          # e.g. m4055
-#SBATCH -C cpu
-#SBATCH -q regular              # use 'debug' for quick tests
+#SBATCH -J basic_training
+#SBATCH -A m3578
 #SBATCH -N 1
-#SBATCH -t 02:00:00
-#SBATCH -o slurm-%j.out
+#SBATCH -C cpu
+#SBATCH -q regular
+#SBATCH -t corresponding_time
 
 module load vasp/6.4.3-cpu
 
-export OMP_NUM_THREADS=2
+#OpenMP settings:
+export OMP_NUM_THREADS=8
 export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
-# 1 node × 64 MPI ranks × 2 OpenMP threads = 128 cores used
-srun -n 64 -c 4 --cpu-bind=cores vasp_std > vasp.out
+srun -n 16 -c 16 --cpu_bind=cores corresponding_vasp_binary
 ```
 
-For SOC calculations swap `vasp_std` → `vasp_ncl`. For HSE start with **2 nodes** (`#SBATCH -N 2`, `srun -n 128 ...`).
+### GPU — `vasp/6.4.3-gpu`
 
-### Picking `KPAR` and `NCORE`
+📥 [Download `submit_gpu.sh`](submit_gpu.sh)
 
-NERSC and the [VASP wiki](https://www.vasp.at/wiki/index.php/KPAR) recommend combining k-point, band, and plane-wave parallelism. For **64 ranks on 1 node**:
+1 node × **4 MPI ranks** (one per A100) × 1 OMP thread × 4 GPUs. `--exclusive` keeps the whole node so the four GPUs can talk over NVLink without contention; `NCCL_IGNORE_CPU_AFFINITY=1` works around an NCCL/affinity quirk that NERSC documents.
 
-* `KPAR` must divide both the total MPI rank count and the number of irreducible k-points. `KPAR = 4` (16 ranks per k-group) is a safe default for the InAs tutorials.
-* `NCORE` ≈ √(ranks per k-group). With 16 ranks per group, `NCORE = 4` works well.
+```bash
+#!/bin/bash
+#SBATCH -J basic_training
+#SBATCH -A m3578
+#SBATCH -N 1
+#SBATCH -C gpu
+#SBATCH -G 4
+#SBATCH -q regular
+#SBATCH --exclusive
+#SBATCH -t corresponding_time
 
-For **128 ranks on 2 nodes** (HSE), use `KPAR = 8`, `NCORE = 4`. These values are pre-set in the example INCARs in the [VASP tutorials](../../Tutorials/VASP/).
+module load vasp/6.4.3-gpu
 
-> When you change the node count, update `KPAR`/`NCORE` together so the totals still divide cleanly. Mismatched values silently fall back to less-efficient layouts.
+export NCCL_IGNORE_CPU_AFFINITY=1
+
+#OpenMP settings:
+export OMP_NUM_THREADS=1
+export OMP_PLACES=threads
+export OMP_PROC_BIND=spread
+
+srun -n 4 -c 32 --cpu_bind=cores --gpu-bind=none -G 4 corresponding_binary
+```
+
+### Picking `KPAR` / `NCORE` for these layouts
+
+The [VASP wiki](https://www.vasp.at/wiki/index.php/NCORE) makes one critical point: **`NCORE` is auto-reset to 1 whenever OpenMP or GPU is enabled**. Both templates above use OpenMP/GPU, so the only knob is `KPAR`.
+
+| Run                                  | Ranks total | KPAR | Ranks per k-group | NCORE |
+|--------------------------------------|------------:|-----:|------------------:|------:|
+| CPU 1 node (Tutorials 3 & 4)         | 16          | 4    | 4                 | 1     |
+| CPU 2 nodes (HSE fallback)           | 32          | 8    | 4                 | 1     |
+| GPU 1 node, 4 GPUs (HSE Tutorial 5)  | 4           | 4    | 1                 | 1     |
+
+`KPAR` must divide both the rank count and the number of irreducible k-points. If you ever go back to a pure-MPI launch (no OpenMP), set `NCORE ≈ √(ranks per k-group)` instead — that is the only setting where `NCORE > 1` actually does work.
 
 ---
 
 ## Common pitfalls
 
-* **No `-C cpu`** — the job will be rejected by Slurm.
+* **Missing `-C cpu` / `-C gpu`** — Slurm will reject the job at submission.
+* **Wrong binary** — `vasp_std` for non-magnetic / collinear, `vasp_ncl` whenever `LSORBIT = .TRUE.`. The CPU and GPU modules expose all three (`vasp_std`, `vasp_ncl`, `vasp_gam`).
 * **Charge density file mix-ups** — when you copy `CHG*` or `WAVECAR` between `scf/`, `band/`, and `dos/`, make sure the source job actually wrote them (`LCHARG = .TRUE.` and `LWAVE = .TRUE.` respectively).
 * **Out-of-quota** — if `$SCRATCH` is full your job will be rejected at submit time. Run `myquota` before submitting.

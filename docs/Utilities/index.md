@@ -107,6 +107,26 @@ pip install ase
 pip install pymatgen
 ```
 
+### 🔸 [vaspvis](https://github.com/caizefeng/vaspvis)
+- Python plotting toolkit for VASP band structures, DOS, and band-unfolding.
+- Wraps a clean object-oriented API around `vasprun.xml` / `EIGENVAL` / `PROCAR`, including correct handling of HSE zero-weight k-points and slab/supercell unfolding.
+- Used in the [VASP tutorials](../Tutorials/VASP/) for the publication-quality figures.
+
+```bash
+pip install vaspvis
+```
+
+Minimum example for a PBE band structure (Tutorials 3–4):
+
+```python
+from vaspvis import Band
+
+bs = Band(folder="band/", projected=False)
+bs.plot_plain(output="InAs_band.png")
+```
+
+For HSE bands (Tutorial 5) the same call works because `vaspvis` reads the IBZKPT-augmented KPOINTS from the run folder and drops the weighted points automatically.
+
 ---
 
 ## VASP helper scripts

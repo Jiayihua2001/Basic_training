@@ -205,9 +205,9 @@ def parse_args():
     p.add_argument("--encut", type=int, default=400,
                    help="ENCUT in eV (default 400).")
     p.add_argument("--kpar",  type=int, default=4,
-                   help="KPAR (default 4 for 64 MPI ranks/node).")
-    p.add_argument("--ncore", type=int, default=4,
-                   help="NCORE (default 4 for 64 MPI ranks/node).")
+                   help="KPAR (default 4 for 16 MPI ranks/node CPU or 4 GPUs).")
+    p.add_argument("--ncore", type=int, default=1,
+                   help="NCORE (default 1; auto-reset to 1 by OpenMP / GPU anyway).")
     p.add_argument("--ldaul", type=int, nargs="+",
                    help="LDAUL list, one per species.")
     p.add_argument("--ldauu", type=float, nargs="+",

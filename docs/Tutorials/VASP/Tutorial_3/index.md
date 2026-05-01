@@ -2,142 +2,274 @@
 layout: default
 parent: "VASP"
 grand_parent: "Tutorials"
-title: "Tutorial_3"
+title: "Bulk InAs (PBE)"
 nav_order: 3
 ---
 
-# Tutorial 3 — Bulk InAs (PBE+SOC)
+# Tutorial 3 — Bulk InAs (PBE)
 
 ## 📖 Learning objectives
 
-* Add spin-orbit coupling (SOC) to the InAs workflow.
-* Understand why SOC requires the **non-collinear** binary `vasp_ncl`.
-* See the SOC-induced splitting of the InAs valence band (the "split-off" Γ⁷ band).
+* Run a complete SCF → DOS → band-structure workflow on a bulk semiconductor.
+* Use `incar.py` and either `kpoints.py` or VASPKIT to generate the input files.
+* Submit a multi-step job on Perlmutter that pipes the SCF Fermi energy into the DOS `INCAR`.
+* See first-hand why plain PBE underestimates the InAs band gap.
 
-> SOC is essential for any heavy-element semiconductor (In, Sb, Bi, Pb, …) and changes the band structure qualitatively, not just quantitatively. PBE+SOC is the minimum acceptable level of theory for InAs.
-
----
-
-## 3.1 What changes vs. Tutorial_2
-
-| Aspect | PBE (Tutorial_2) | PBE+SOC (this tutorial) |
-|--------|-----------------|--------------------------|
-| Binary | `vasp_std` | **`vasp_ncl`** |
-| INCAR additions | — | `LSORBIT = .TRUE.`, `MAGMOM = 6*0` |
-| Wave-function size | 1 spin channel | 2 spinor components — VASP doubles `NBANDS` internally |
-| Cost | × 1 | ≈ × 4–8 (more bands, complex orbitals) |
-| Symmetry | full point group | reduced — set `ISYM = -1` only if the run aborts on symmetry |
-
-The folder layout, KPOINTS, and POTCAR are identical to Tutorial_2.
+> **Notation**
+> * Lattice constants and bond lengths are in Å.
+> * `<repo>` stands for your NERSC allocation (e.g. `m4055`); update each `submit.sh`.
+> * Working directory: anywhere under `$SCRATCH`.
 
 ---
 
-## 3.2 Prepare the tree
+## 3.1 Set up the working tree
 
-Reuse the InAs POSCAR and POTCAR from Tutorial_2:
+InAs has the zinc-blende structure (FCC, two atoms in the primitive cell). Make a fresh tree:
 
 ```bash
-mkdir -p $SCRATCH/InAs/pbe-soc/{scf,dos,band}
-cd       $SCRATCH/InAs/pbe-soc
-cp $SCRATCH/InAs/pbe/POSCAR  scf/  &&  cp scf/POSCAR dos/  &&  cp scf/POSCAR band/
-cp $SCRATCH/InAs/pbe/POTCAR  scf/  &&  cp scf/POTCAR dos/  &&  cp scf/POTCAR band/
+mkdir -p $SCRATCH/InAs/pbe/{scf,dos,band}
+cd       $SCRATCH/InAs/pbe
 ```
+
+### POSCAR
+
+Two-atom primitive cell, lattice parameter from Materials Project (`a` ≈ 6.0584 Å, primitive vectors `a/2 (eᵢ + eⱼ)`):
+
+```text
+In As
+1.0
+   0.000000   3.029200   3.029200
+   3.029200   0.000000   3.029200
+   3.029200   3.029200   0.000000
+In As
+1 1
+direct
+   0.000000   0.000000   0.000000
+   0.250000   0.250000   0.250000
+```
+
+Save it as `POSCAR` in the run directory and copy it into `scf/`, `dos/`, `band/`. View it in [VESTA](https://jp-minerals.org/vesta/en/) (`File → Import`) to confirm In and As sit at the FCC and tetrahedral interstitial sites.
+
+### POTCAR
+
+```bash
+bash potcar.sh In As
+grep TITEL POTCAR
+# Expected:
+#   TITEL = PAW_PBE In 08Apr2002
+#   TITEL = PAW_PBE As 22Sep2009
+```
+
+The species order on line 6 of `POSCAR` (`In As`) must match the `TITEL` order. Copy `POTCAR` into `scf/`, `dos/`, `band/`.
 
 ---
 
-## 3.3 Generate the INCARs
+## 3.2 SCF step
+
+Inside `scf/`:
 
 ```bash
 cd scf
-python ~/bin/incar.py --scf  --soc --encut 400
-python ~/bin/kpoints.py --grid -d 7 7 7
-
-cd ../dos
-python ~/bin/incar.py --dos  --soc --encut 400
-python ~/bin/kpoints.py --grid -d 15 15 15
-
-cd ../band
-python ~/bin/incar.py --band --soc --encut 400
-python ~/bin/kpoints.py --band -c GXWLGK -n 50
+python ~/bin/incar.py --scf --encut 400
+python ~/bin/kpoints.py --grid -d 7 7 7      # or: vaspkit -task 102 (Gamma 7 7 7)
 ```
 
-Each `INCAR` ends with the SOC block:
+Resulting **`scf/INCAR`** (calc-specific block only — the [general block](../Tutorial_2/#21-the-shared-general-incar-block) is on top):
 
 ```text
-LSORBIT = .TRUE.
-MAGMOM  = 6*0          # 3 components per atom; 2 atoms => 6 zeros
+ICHARG = 2
+ISMEAR = 0
+LCHARG = .TRUE.
+LWAVE  = .FALSE.
+LREAL  = .FALSE.
 ```
 
-* `MAGMOM` for SOC is **3 numbers per atom** (m_x, m_y, m_z). Using `6*0` for non-magnetic InAs is the simplest choice.
-* For magnetic systems specify a non-zero starting moment (e.g. `0 0 2.5 0 0 -2.5` for an antiferromagnetic pair). `incar.py --soc --magmom "0 0 2.5 0 0 -2.5"` writes that for you.
-* Setting `ISYM = -1` disables symmetrisation — only do this if VASP aborts with a symmetry error. With clean InAs and `MAGMOM = 6*0` you should not need it.
+`scf/KPOINTS`:
+
+```text
+Automatic kpoint scheme
+0
+Gamma
+7 7 7
+```
+
+A 7×7×7 Γ-centred grid is plenty for this 2-atom cell. Once you are familiar, run a quick convergence test on `ENCUT` and the k-grid before trusting the gap.
 
 ---
 
-## 3.4 Submit
+## 3.3 DOS step
 
-📥 `submit.sh`:
+Inside `dos/`:
+
+```bash
+cd ../dos
+python ~/bin/incar.py --dos --encut 400
+python ~/bin/kpoints.py --grid -d 15 15 15   # or: vaspkit -task 102 (Gamma 15 15 15)
+```
+
+`dos/INCAR` calc-specific block:
+
+```text
+ICHARG = 11
+ISMEAR = -5
+LCHARG = .FALSE.
+LWAVE  = .FALSE.
+LORBIT = 11
+NEDOS  = 3001
+EMIN   = emin     # replaced at submission time
+EMAX   = emax
+```
+
+The placeholder `emin`/`emax` is rewritten by the submission script (next section) using the Fermi energy from the SCF `OUTCAR`, ±3 eV.
+
+---
+
+## 3.4 Band-structure step
+
+Inside `band/`:
+
+```bash
+cd ../band
+python ~/bin/incar.py --band --encut 400
+python ~/bin/kpoints.py --band -c GXWLGK -n 50
+# or, equivalently, with VASPKIT:
+#    vaspkit -task 303    (then choose the Setyawan-Curtarolo path)
+```
+
+`band/INCAR` calc-specific block:
+
+```text
+ICHARG = 11
+ISMEAR = 0
+LCHARG = .FALSE.
+LWAVE  = .FALSE.
+LORBIT = 11
+```
+
+`band/KPOINTS` (line-mode along Γ-X-W-L-Γ-K, 50 points/segment) is auto-generated. The first few lines look like:
+
+```text
+Line_mode KPOINTS file
+50
+Line_mode
+Reciprocal
+0.0   0.0   0.0   ! G
+0.5   0.0   0.5   ! X
+
+0.5   0.0   0.5   ! X
+0.5   0.25  0.75  ! W
+...
+```
+
+> **Heads-up:** the `Line-mode` style uses **fractional reciprocal-lattice coordinates** of the *primitive* cell. If you start from a conventional cell (e.g. cubic 8-atom InAs) the coordinates change.
+
+---
+
+## 3.5 Submit the chained job
+
+📥 Save the script below as `submit.sh` in the parent directory (`$SCRATCH/InAs/pbe/`). It follows the Marom-group [Perlmutter CPU template](../../../HPC%20Onboard/Perlmutter/#vasp-sbatch-templates): 16 MPI ranks × 8 OpenMP threads (= 128 physical cores on one CPU node).
 
 ```bash
 #!/bin/bash
-#SBATCH -J InAs_pbe_soc
-#SBATCH -A <repo>
+#SBATCH -J InAs_pbe
+#SBATCH -A m3578              # update to your repo if different
+#SBATCH -N 1
 #SBATCH -C cpu
 #SBATCH -q regular
-#SBATCH -N 1
-#SBATCH -t 01:00:00
+#SBATCH -t 00:30:00
 #SBATCH -o slurm-%j.out
 
 module load vasp/6.4.3-cpu
-export OMP_NUM_THREADS=2
+
+# OpenMP settings:
+export OMP_NUM_THREADS=8
 export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
+# 1) SCF
 cd scf
-srun -n 64 -c 4 --cpu-bind=cores vasp_ncl > vasp.out
+srun -n 16 -c 16 --cpu_bind=cores vasp_std > vasp.out
 
+# 2) Pull Fermi energy and patch dos/INCAR
 efermi=$(awk '/E-fermi/ {print $3}' OUTCAR | tail -n 1)
 emin=$(echo "$efermi - 3.0" | bc -l)
 emax=$(echo "$efermi + 3.0" | bc -l)
 sed -i "s/EMIN   = emin/EMIN   = $emin/" ../dos/INCAR
 sed -i "s/EMAX   = emax/EMAX   = $emax/" ../dos/INCAR
 
+# 3) Hand the converged charge density to band/ and dos/
 cp CHG CHGCAR ../band/
 cp CHG CHGCAR ../dos/
 
+# 4) Band
 cd ../band
-srun -n 64 -c 4 --cpu-bind=cores vasp_ncl > vasp.out
+srun -n 16 -c 16 --cpu_bind=cores vasp_std > vasp.out
 
+# 5) DOS
 cd ../dos
-srun -n 64 -c 4 --cpu-bind=cores vasp_ncl > vasp.out
+srun -n 16 -c 16 --cpu_bind=cores vasp_std > vasp.out
 ```
 
-Note **`vasp_ncl`** instead of `vasp_std`. SOC roughly quadruples the runtime relative to Tutorial_2; budget ~5–10 minutes of wall time on 1 node.
+Submit:
+
+```bash
+sbatch submit.sh
+sqs -u $USER          # follow the queue
+tail -f scf/OSZICAR   # live-monitor SCF convergence
+```
+
+The whole chain finishes in a few minutes for 2 atoms on 1 node. If the `band/` or `dos/` step warns *"Charge file is empty"*, the SCF step did not write `CHG*` — check that the SCF `INCAR` had `LCHARG = .TRUE.`.
 
 ---
 
-## 3.5 Plot and analyse
+## 3.6 Plotting and analysis
+
+You have two equally good choices.
+
+### Option A — VASPKIT (recommended)
 
 ```bash
 cd ../band
-vaspkit -task 211       # picks up LSORBIT automatically
+vaspkit -task 211        # PBE band structure
 cd ../dos
-vaspkit -task 111
+vaspkit -task 111        # total + projected DOS
+```
+
+VASPKIT writes data files (`BAND.dat`, `KLABELS`, `TDOS.dat`, …) and a Python plotting script you can edit.
+
+### Option B — vaspvis (publication-quality)
+
+```python
+from vaspvis import Band, Dos
+
+Band(folder="band/", projected=False).plot_plain(output="InAs_pbe_band.png")
+Dos(folder="dos/").plot_plain(output="InAs_pbe_dos.png")
+```
+
+### Option C — pymatgen
+
+```python
+from pymatgen.io.vasp.outputs import Vasprun, BSVasprun
+from pymatgen.electronic_structure.plotter import BSDOSPlotter
+
+bs = BSVasprun("band/vasprun.xml").get_band_structure(line_mode=True)
+dos = Vasprun("dos/vasprun.xml").complete_dos
+BSDOSPlotter().get_plot(bs, dos).savefig("InAs_pbe.png")
 ```
 
 ### What you should see
 
-* The valence band that was three-fold degenerate at Γ in pure PBE now **splits** into a four-fold heavy-/light-hole pair (Γ⁸) and a lower **split-off** band (Γ⁷). The InAs split-off energy is ≈ 0.39 eV experimentally.
-* The conduction-band minimum stays at Γ; the gap is still much smaller than experiment because PBE-level self-interaction error is not fixed by SOC alone.
-* Far from Γ, SOC is a small perturbation — the band shapes look very similar to Tutorial_2.
+* The valence-band maximum (VBM) and conduction-band minimum (CBM) both at Γ → InAs is a **direct-gap** semiconductor.
+* The PBE band gap is ≈ **0 eV** (sometimes faintly negative depending on lattice constant). Experiment: 0.354 eV at 300 K. This is the well-known "PBE underestimates band gaps" problem caused by self-interaction error.
+* The DOS is roughly zero between ≈ −3 eV and the Fermi level on the valence side and zero just above it on the conduction side.
 
 ---
 
-## 3.6 Assignment
+## 3.7 Assignment
 
-* **(5 points)** Run the PBE+SOC SCF/DOS/band workflow and submit the converged outputs.
-* **(10 points)** Overlay the PBE and PBE+SOC band structures in a single figure (use `vaspkit` or your favourite plotter). Identify the split-off band and report the Γ⁷–Γ⁸ splitting at Γ. Compare with the experimental value.
-* **(5 points)** Compare the DOS at and below the Fermi level between PBE and PBE+SOC. Where do you see the largest changes, and why?
-* **(5 points)** Quote the wall-time difference between Tutorial_2 and Tutorial_3. Where is the extra cost spent (use the `OUTCAR` "Total CPU time" breakdown).
+* **(5 points)** Write the InAs `POSCAR` and check the structure in VESTA. Capture a screenshot.
+* **(5 points)** Run a quick `ENCUT` convergence (300, 350, 400, 450 eV at fixed 7×7×7 grid) and a k-point convergence (5³, 7³, 9³, 11³ at fixed `ENCUT = 400`). Plot total energy vs each parameter and explain your choice.
+* **(10 points)** Plot the PBE band structure and DOS for converged settings. Quote your computed band gap (or "metallic" if the bands cross). Compare with the experimental value (0.354 eV) and explain the discrepancy in one paragraph.
+* **(5 points)** Inspect `EIGENVAL` and identify the band index of the VBM and CBM. Why do these matter for SOC and HSE later?
 
-Once SOC is satisfying, move on to [Tutorial_4 — Bulk InAs (HSE06)](../Tutorial_4/) to fix the band-gap problem.
+When you are happy with the PBE result, move on to [Tutorial 4 — Bulk InAs (PBE+SOC)](../Tutorial_4/).
