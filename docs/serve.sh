@@ -10,8 +10,12 @@
 set -e
 cd "$(dirname "$0")"
 
-# Pin to Homebrew Ruby (Apple's system 2.6 is too old for Jekyll 4.3).
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+# Activate the conda env created by setup_dev.sh.
+# Run `bash setup_dev.sh` first if you've never set this up.
+CONDA_BASE="${CONDA_BASE:-/global/common/software/nersc/pe/conda/26.1.0/Miniforge3-25.11.0-1}"
+# shellcheck disable=SC1091
+source "$CONDA_BASE/etc/profile.d/conda.sh"
+conda activate basic-training-jekyll
 
 # First-run safety net: install gems into docs/vendor/bundle/ if missing.
 if [ ! -d vendor/bundle ]; then

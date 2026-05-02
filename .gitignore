@@ -17,6 +17,9 @@ vendor/
 # macOS Finder metadata
 .DS_Store
 
+# Local dev server / setup logs
+*.log
+
 # Editor swap / backup files
 *.swp
 *.swo
