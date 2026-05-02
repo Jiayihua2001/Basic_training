@@ -23,7 +23,7 @@ Perlmutter is the HPE Cray EX system at the National Energy Research Scientific 
 | **CPU**   | 3,072 | 2× AMD EPYC 7763 (Milan), 64 c each → 128 physical cores | —          | 512 GB | `-C cpu` |
 | **GPU**   | 1,792 | 1× AMD EPYC 7763 (Milan), 64 c   | 4× NVIDIA A100     | 256 GB | `-C gpu` |
 
-Both partitions are exposed in the [VASP tutorials](../../Tutorials/VASP/): SCF/DOS/band runs (Tutorials 3 & 4) target CPU. Tutorial 5 (HSE) is also shown on CPU for accessibility, but the GPU build (`vasp/6.4.3-gpu`) is much faster for exact exchange — the operator maps cleanly onto A100 OpenACC kernels — so switch to it if you can.
+Both partitions are exposed in the [VASP tutorials](../../Tutorials/VASP/): SCF/DOS/band runs (Tutorials 3 & 4) target CPU. Tutorial 5 (HSE) is also shown on CPU for accessibility, but the GPU build (`vasp/6.4.3-gpu`) is much faster for exact exchange — the operator maps cleanly onto OpenACC kernels — so switch to it if you can.
 
 ---
 
@@ -61,7 +61,7 @@ ssh -i ~/.ssh/nersc <username>@perlmutter.nersc.gov
 | `$SCRATCH`  | `/pscratch/sd/<u>/<user>`           | very large, **purged**, Lustre  | running jobs, checkpoints, working data            |
 | `$CFS`      | `/global/cfs/cdirs/<repo>`          | medium, permanent, snapshotted  | shared project data and reference structures       |
 
-Run all VASP jobs from `$SCRATCH`. Move finished CHGCAR/WAVECAR files you want to keep to `$CFS` before they age out.
+Run all VASP jobs in this tutorial from `$SCRATCH`. Move finished files you want to keep to `$CFS` before they age out.
 
 Transfer data with `scp` or `rsync` (use `sshproxy` for password-less transfers):
 
@@ -86,7 +86,7 @@ Each module exposes three executables — pick the one that matches your INCAR:
 |-------------|-------------------------------------------------------------|
 | `vasp_std`  | Standard k-point set (most calculations)                    |
 | `vasp_gam`  | Γ-point only (large supercells, gas-phase reference cells)  |
-| `vasp_ncl`  | Non-collinear / spin-orbit (`LSORBIT = .TRUE.`)             |
+| `vasp_ncl`  | Non-collinear / spin-orbit coupling         |
 
 ---
 
@@ -113,16 +113,16 @@ Remaining node-hours used to be available via `iris balance` on the command line
 
 ## VASP sbatch templates
 
-Two canonical Marom-group templates. Both leave **two values for you to fill in** before submitting:
+Two canonical Marom-group templates, based on this [performance guide for running VASP efficiently on Perlmutter](https://drive.google.com/file/d/1hRArOePMcIXI044wm1Hl-p6BK569_vaT/view?usp=sharing). Both leave **two values for you to fill in** before submitting:
 
 - `-t HH:MM:SS` — wall-time. Pick one that fits your calculation; the VASP tutorials suggest concrete values per stage.
-- `VASP_BINARY` — `vasp_std` (most calculations), `vasp_ncl` (anything with `LSORBIT = .TRUE.`), or `vasp_gam` (Γ-only supercells).
+- `VASP_BINARY` — `vasp_std` (most calculations), `vasp_ncl` (anything with `LNONCOLLINEAR = .TRUE.`), or `vasp_gam` (Γ-only supercells).
 
 ### CPU — `vasp/6.4.3-cpu`
 
 📥 [Download `submit_cpu.sh`](submit_cpu.sh)
 
-1 node × **16 MPI ranks × 8 OpenMP threads** = 128 physical cores. `--cpu_bind=cores` keeps ranks on physical cores rather than hyperthreads.
+1 node × **16 MPI ranks × 8 OpenMP threads** = 128 physical cores. `--cpu_bind=cores` distributes ranks across physical cores (avoiding hyperthreads).
 
 ```bash
 #!/bin/bash
@@ -180,15 +180,6 @@ The [VASP wiki](https://www.vasp.at/wiki/index.php/NCORE) makes one critical poi
 |-------------------------------------------|------------:|-----:|------------------:|------:|
 | CPU 1 node (Tutorials 3 & 4)              | 16          | 4    | 4                 | 1     |
 | CPU 4 nodes (HSE Tutorial 5)              | 64          | 16   | 4                 | 1     |
-| GPU 1 node, 4 GPUs (HSE alternative)      | 4           | 4    | 1                 | 1     |
+| GPU 1 node, 4 GPUs (HSE alternative)      | 4           | 1    | 4                 | 1     |
 
-`KPAR` must divide both the rank count and the number of irreducible k-points. If you ever go back to a pure-MPI launch (no OpenMP), set `NCORE ≈ √(ranks per k-group)` instead — that is the only setting where `NCORE > 1` actually does work.
-
----
-
-## Common pitfalls
-
-* **Missing `-C cpu` / `-C gpu`** — Slurm will reject the job at submission.
-* **Wrong binary** — `vasp_std` for non-magnetic / collinear, `vasp_ncl` whenever `LSORBIT = .TRUE.`. The CPU and GPU modules expose all three (`vasp_std`, `vasp_ncl`, `vasp_gam`).
-* **Charge density file mix-ups** — when you copy `CHG*` or `WAVECAR` between `scf/`, `band/`, and `dos/`, make sure the source job actually wrote them (`LCHARG = .TRUE.` and `LWAVE = .TRUE.` respectively).
-* **Out-of-quota** — if `$SCRATCH` is full your job will be rejected at submit time. Run `myquota` before submitting.
+`KPAR` must divide the rank count, and ideally also the number of irreducible k-points.

@@ -21,6 +21,6 @@ These tutorials introduce the VASP workflow used by the quantum-materials subgro
 ## Before you start
 
 1. You have a NERSC account and `vasp6` group access — see [HPC Onboard / Perlmutter](../../HPC%20Onboard/Perlmutter/).
-2. The helper scripts `incar.py`, `kpoints.py`, `potcar.sh` are on your `PATH`. Download them from the [Utilities page](../../Utilities/) and edit `potcar.sh` to point at your local `potpaw_PBE` repository.
+2. The helper scripts `incar.py`, `kpoints.py`, `potcar.sh` are on your `PATH`. Download them from the [Utilities page](../../Utilities/) and edit `potcar.sh` to point at your local `potpaw_PBE` repository — on Perlmutter use `/global/cfs/cdirs/m3578/shared_folder/Pseudopotentials/potpaw_PBE`.
 3. Optional but recommended: install [VASPKIT](https://vaspkit.com/) for input-file generation and built-in band/DOS plotting, and [vaspvis](https://github.com/caizefeng/vaspvis) for publication-quality band/DOS figures from the Python side.
 4. Install a structure viewer — [VESTA](https://jp-minerals.org/vesta/en/) is the easiest for VASP `POSCAR`/`CHGCAR`, [OVITO](https://www.ovito.org/) is good for trajectories.
