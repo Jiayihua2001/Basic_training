@@ -9,7 +9,7 @@ nav_order: 3
 
 Perlmutter is the HPE Cray EX system at the National Energy Research Scientific Computing Center (NERSC). It is the cluster of choice for the quantum-materials subgroup and hosts the VASP builds used in the [VASP tutorials](../../Tutorials/VASP/). Refer to the official NERSC documentation for anything not covered here:
 
-- [Perlmutter overview](https://docs.nersc.gov/systems/perlmutter/)
+- [Perlmutter architecture](https://docs.nersc.gov/systems/perlmutter/architecture/)
 - [Connecting to NERSC](https://docs.nersc.gov/connect/)
 - [Running jobs (Slurm)](https://docs.nersc.gov/jobs/)
 - [VASP at NERSC](https://docs.nersc.gov/applications/vasp/)
@@ -23,7 +23,7 @@ Perlmutter is the HPE Cray EX system at the National Energy Research Scientific 
 | **CPU**   | 3,072 | 2× AMD EPYC 7763 (Milan), 64 c each → 128 physical cores | —          | 512 GB | `-C cpu` |
 | **GPU**   | 1,792 | 1× AMD EPYC 7763 (Milan), 64 c   | 4× NVIDIA A100     | 256 GB | `-C gpu` |
 
-The VASP tutorials use both partitions: the standard SCF / DOS / band runs target CPU, and the HSE (Tutorial 5) prefers GPU because the exact-exchange operator is well-suited to A100 OpenACC kernels.
+Both partitions are exposed in the [VASP tutorials](../../Tutorials/VASP/): SCF/DOS/band runs (Tutorials 3 & 4) target CPU. Tutorial 5 (HSE) is also shown on CPU for accessibility, but the GPU build (`vasp/6.4.3-gpu`) is much faster for exact exchange — the operator maps cleanly onto A100 OpenACC kernels — so switch to it if you can.
 
 ---
 
@@ -75,8 +75,8 @@ rsync -avz local_dir/ <username>@perlmutter.nersc.gov:$SCRATCH/dest/
 
 ```bash
 module avail vasp                 # list available builds
-module load vasp/6.4.3-cpu        # CPU build (Tutorials 1–4 default)
-module load vasp/6.4.3-gpu        # GPU build (Tutorial 5 HSE recommended)
+module load vasp/6.4.3-cpu        # CPU build (default for the VASP tutorials)
+module load vasp/6.4.3-gpu        # GPU build (faster alternative for HSE)
 which vasp_std                    # confirm it loaded
 ```
 
@@ -104,21 +104,25 @@ Quick checks before submitting:
 
 ```bash
 sacctmgr show user $USER -p           # which repos you can charge
-iris balance                          # remaining node-hours
 sqs                                   # NERSC wrapper around squeue
 ```
+
+Remaining node-hours used to be available via `iris balance` on the command line; that command is gone. Check the **My Account → CPU / GPU** tab in the [IRIS web portal](https://iris.nersc.gov) instead.
 
 ---
 
 ## VASP sbatch templates
 
-Two canonical Marom-group templates. Copy whichever applies, replace `corresponding_vasp_binary` with `vasp_std` / `vasp_ncl` / `vasp_gam`, and pick a wall-time appropriate to the calculation (the tutorials suggest values).
+Two canonical Marom-group templates. Both leave **two values for you to fill in** before submitting:
+
+- `-t HH:MM:SS` — wall-time. Pick one that fits your calculation; the VASP tutorials suggest concrete values per stage.
+- `VASP_BINARY` — `vasp_std` (most calculations), `vasp_ncl` (anything with `LSORBIT = .TRUE.`), or `vasp_gam` (Γ-only supercells).
 
 ### CPU — `vasp/6.4.3-cpu`
 
 📥 [Download `submit_cpu.sh`](submit_cpu.sh)
 
-1 node × **16 MPI ranks × 8 OpenMP threads** = 128 physical cores. NERSC enforces `--cpu_bind=cores` so the run never lands on hyper-threads.
+1 node × **16 MPI ranks × 8 OpenMP threads** = 128 physical cores. `--cpu_bind=cores` keeps ranks on physical cores rather than hyperthreads.
 
 ```bash
 #!/bin/bash
@@ -127,16 +131,16 @@ Two canonical Marom-group templates. Copy whichever applies, replace `correspond
 #SBATCH -N 1
 #SBATCH -C cpu
 #SBATCH -q regular
-#SBATCH -t corresponding_time
+#SBATCH -t HH:MM:SS              # CHANGE: wall-time, e.g. 02:00:00
 
 module load vasp/6.4.3-cpu
 
-#OpenMP settings:
+# OpenMP settings
 export OMP_NUM_THREADS=8
 export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
-srun -n 16 -c 16 --cpu_bind=cores corresponding_vasp_binary
+srun -n 16 -c 16 --cpu_bind=cores VASP_BINARY    # CHANGE: vasp_std / vasp_ncl / vasp_gam
 ```
 
 ### GPU — `vasp/6.4.3-gpu`
@@ -154,29 +158,29 @@ srun -n 16 -c 16 --cpu_bind=cores corresponding_vasp_binary
 #SBATCH -G 4
 #SBATCH -q regular
 #SBATCH --exclusive
-#SBATCH -t corresponding_time
+#SBATCH -t HH:MM:SS              # CHANGE: wall-time, e.g. 02:00:00
 
 module load vasp/6.4.3-gpu
 
 export NCCL_IGNORE_CPU_AFFINITY=1
 
-#OpenMP settings:
+# OpenMP settings
 export OMP_NUM_THREADS=1
 export OMP_PLACES=threads
 export OMP_PROC_BIND=spread
 
-srun -n 4 -c 32 --cpu_bind=cores --gpu-bind=none -G 4 corresponding_binary
+srun -n 4 -c 32 --cpu_bind=cores --gpu-bind=none -G 4 VASP_BINARY    # CHANGE: vasp_std / vasp_ncl / vasp_gam
 ```
 
 ### Picking `KPAR` / `NCORE` for these layouts
 
 The [VASP wiki](https://www.vasp.at/wiki/index.php/NCORE) makes one critical point: **`NCORE` is auto-reset to 1 whenever OpenMP or GPU is enabled**. Both templates above use OpenMP/GPU, so the only knob is `KPAR`.
 
-| Run                                  | Ranks total | KPAR | Ranks per k-group | NCORE |
-|--------------------------------------|------------:|-----:|------------------:|------:|
-| CPU 1 node (Tutorials 3 & 4)         | 16          | 4    | 4                 | 1     |
-| CPU 2 nodes (HSE fallback)           | 32          | 8    | 4                 | 1     |
-| GPU 1 node, 4 GPUs (HSE Tutorial 5)  | 4           | 4    | 1                 | 1     |
+| Run                                       | Ranks total | KPAR | Ranks per k-group | NCORE |
+|-------------------------------------------|------------:|-----:|------------------:|------:|
+| CPU 1 node (Tutorials 3 & 4)              | 16          | 4    | 4                 | 1     |
+| CPU 4 nodes (HSE Tutorial 5)              | 64          | 16   | 4                 | 1     |
+| GPU 1 node, 4 GPUs (HSE alternative)      | 4           | 4    | 1                 | 1     |
 
 `KPAR` must divide both the rank count and the number of irreducible k-points. If you ever go back to a pure-MPI launch (no OpenMP), set `NCORE ≈ √(ranks per k-group)` instead — that is the only setting where `NCORE > 1` actually does work.
 
