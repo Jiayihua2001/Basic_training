@@ -42,6 +42,8 @@ NELM       = 500         # Maximum number of electronic SCF steps
 ENCUT      = {encut}     # Plane-wave cutoff (eV)
 LASPH      = .TRUE.      # Non-spherical contributions from gradient corrections
 GGA_COMPAT = .FALSE.     # Restore full lattice symmetry (recommended; required for MAE)
+BMIX       = 3           # Mixing parameter for convergence
+AMIN       = 0.01        # Mixing parameter for convergence
 SIGMA      = 0.05        # Smearing width (eV)
 
 # --- parallelisation (Perlmutter 1-node CPU defaults) ------------------------
@@ -55,7 +57,7 @@ ICHARG = 2               # Initial charge from atomic superposition
 ISMEAR = 0               # Gaussian smearing for SCF
 LCHARG = .TRUE.          # Write CHG/CHGCAR for downstream DOS/band
 LWAVE  = {lwave}         # Write WAVECAR (needed for HSE band/DOS)
-LREAL  = .FALSE.         # Reciprocal-space projectors (best for < ~30 atoms)
+LREAL  = Auto            # Automatically chooses real/reciprocal projections
 """
 
 DOS = """\
@@ -87,8 +89,6 @@ LCHARG = .FALSE.
 LWAVE  = .FALSE.
 IBRION = 2               # Conjugate-gradient ionic relaxation
 NSW    = 50              # Maximum ionic steps
-EDIFFG = -1E-2           # Force convergence (eV/A)
-ISIF   = 3               # Relax ions, cell shape and volume
 """
 
 SOC = """\

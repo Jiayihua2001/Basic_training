@@ -29,6 +29,8 @@ NELM       = 500         # Max electronic steps
 ENCUT      = 400         # Plane-wave cutoff (eV); ENMAX from POTCAR is the floor
 LASPH      = .TRUE.      # Non-spherical gradient corrections
 GGA_COMPAT = .FALSE.     # Restore full Bravais lattice symmetry; required for MAE
+BMIX       = 3           # Mixing parameter for convergence
+AMIN       = 0.01        # Mixing parameter for convergence
 SIGMA      = 0.05        # Smearing width (eV)
 
 # --- parallelisation (Perlmutter 1-node CPU defaults) -----------------------
@@ -69,7 +71,7 @@ ICHARG = 2
 ISMEAR = 0          # Gaussian smearing during self-consistency
 LCHARG = .TRUE.
 LWAVE  = .FALSE.    # set .TRUE. only when you need WAVECAR (HSE)
-LREAL  = .FALSE.    # reciprocal-space projectors; switch to Auto for > ~30 atoms
+LREAL  = Auto       # automatic real/reciprocal space switch for projections
 ```
 
 ### Density of States (`--dos`)
@@ -107,9 +109,9 @@ LCHARG = .FALSE.
 LWAVE  = .FALSE.
 IBRION = 2          # conjugate gradient
 NSW    = 50         # max ionic steps
-EDIFFG = -1E-2      # force convergence (eV/A); negative => force criterion
-ISIF   = 3          # relax positions, cell shape, volume
 ```
+
+For surface or interface optimisation Derek's setup keeps it minimal: ions only, cell fixed (`ISIF = 0` is the default). Add `ISIF = 3` (cell + ions) and a force criterion `EDIFFG = -1E-2` only when you actually want to relax the lattice constant.
 
 ---
 
@@ -146,13 +148,13 @@ TIME     = 0.4      # damping time-step
 ```text
 LDAU     = .TRUE.
 LDAUTYPE = 2
-LDAUL    =  2  -1   # one l-quantum number per species in POSCAR order; -1 disables
-LDAUU    =  4.5 0.0
-LDAUJ    =  0.0 0.0
-LMAXMIX  =  4       # 4 for d, 6 for f
+LDAUL    = 1  1     # l-quantum number per species (-1 disables); InAs example
+LDAUU    = -0.5 -7.5  # effective U (eV) per species
+LDAUJ    = 0.0 0.0
+LMAXMIX  = 4        # 4 for d, 6 for f
 ```
 
-The Marom group typically tunes `LDAUU` against an HSE reference using Bayesian optimisation; document the reference whenever you set a non-trivial U.
+The Marom group typically tunes `LDAUU` against an HSE reference using Bayesian optimisation; document the reference whenever you set a non-trivial U. The values shown above are the InAs example from the upstream docs.
 
 ---
 

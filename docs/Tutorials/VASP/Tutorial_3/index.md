@@ -62,6 +62,38 @@ grep TITEL POTCAR
 
 The species order on line 6 of `POSCAR` (`In As`) must match the `TITEL` order. Copy `POTCAR` into `scf/`, `dos/`, `band/`.
 
+### Shortcut — set up all three folders at once
+
+Run this Python helper once from `$SCRATCH/InAs/pbe/` after creating the top-level `POSCAR`. It mirrors the upstream `marom_group_docs` automation, adapted to our `incar.py` flags:
+
+```python
+from os.path import isdir, join
+import os, shutil
+
+dirs = ["scf", "dos", "band"]
+base_dir = os.getcwd()
+
+for d in dirs:
+    if not isdir(d):
+        os.mkdir(d)
+    shutil.copy("POSCAR", join(d, "POSCAR"))
+
+    os.chdir(d)
+    os.system(f"incar.py --{d} --kpar 4 --ncore 1")
+    os.system("potcar.sh In As")
+
+    if d == "scf":
+        os.system("kpoints.py -g -d 7 7 7")
+    elif d == "dos":
+        os.system("kpoints.py -g -d 15 15 15")
+    elif d == "band":
+        os.system("kpoints.py -b -c GXWLGK")
+
+    os.chdir(base_dir)
+```
+
+After it finishes, every folder has a complete `INCAR / POSCAR / POTCAR / KPOINTS` set. The remaining sub-sections (3.2–3.4) walk through the same three INCARs by hand if you prefer.
+
 ---
 
 ## 3.2 SCF step
@@ -81,7 +113,7 @@ ICHARG = 2
 ISMEAR = 0
 LCHARG = .TRUE.
 LWAVE  = .FALSE.
-LREAL  = .FALSE.
+LREAL  = Auto
 ```
 
 `scf/KPOINTS`:

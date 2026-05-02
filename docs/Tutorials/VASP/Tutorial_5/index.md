@@ -44,6 +44,34 @@ cp $SCRATCH/InAs/pbe/POTCAR  scf/ &&  cp scf/POTCAR dos/ &&  cp scf/POTCAR band/
 
 ## 5.3 Generate the INCARs
 
+The same Python helper as Tutorials 3 and 4, with `-c --hse` added so the SOC and HSE blocks are appended. Note that we *do not* generate the band-folder KPOINTS here — the HSE band path needs the IBZKPT from the SCF run, so it is built post-SCF inside the submission script.
+
+```python
+from os.path import isdir, join
+import os, shutil
+
+dirs = ["scf", "dos", "band"]
+base_dir = os.getcwd()
+
+for d in dirs:
+    if not isdir(d):
+        os.mkdir(d)
+    shutil.copy("POSCAR", join(d, "POSCAR"))
+
+    os.chdir(d)
+    os.system(f"incar.py --{d} -c -e --kpar 4 --ncore 1")
+    os.system("potcar.sh In As")
+
+    if d == "scf":
+        os.system("kpoints.py -g -d 7 7 7")
+    elif d == "dos":
+        os.system("kpoints.py -g -d 11 11 11")   # HSE DOS uses a smaller grid than PBE DOS
+
+    os.chdir(base_dir)
+```
+
+Or, by hand:
+
 ```bash
 cd scf
 python ~/bin/incar.py --scf  --soc --hse --encut 400
@@ -55,7 +83,7 @@ python ~/bin/kpoints.py --grid -d 11 11 11    # HSE-DOS uses a smaller grid than
 
 cd ../band
 python ~/bin/incar.py --band --soc --hse --encut 400
-# KPOINTS for HSE band — see 4.4
+# KPOINTS for HSE band — see 5.4
 ```
 
 `scf/INCAR` ends with the HSE block (and the `--scf` overrides set `LWAVE = .TRUE.`):

@@ -47,6 +47,36 @@ cp $SCRATCH/InAs/pbe/POTCAR  scf/  &&  cp scf/POTCAR dos/  &&  cp scf/POTCAR ban
 
 ## 4.3 Generate the INCARs
 
+The same Python helper as Tutorial 3, with `-c` added to every `incar.py` call so the SOC block is appended:
+
+```python
+from os.path import isdir, join
+import os, shutil
+
+dirs = ["scf", "dos", "band"]
+base_dir = os.getcwd()
+
+for d in dirs:
+    if not isdir(d):
+        os.mkdir(d)
+    shutil.copy("POSCAR", join(d, "POSCAR"))
+
+    os.chdir(d)
+    os.system(f"incar.py --{d} -c --kpar 4 --ncore 1")
+    os.system("potcar.sh In As")
+
+    if d == "scf":
+        os.system("kpoints.py -g -d 7 7 7")
+    elif d == "dos":
+        os.system("kpoints.py -g -d 15 15 15")
+    elif d == "band":
+        os.system("kpoints.py -b -c GXWLGK")
+
+    os.chdir(base_dir)
+```
+
+Or, by hand:
+
 ```bash
 cd scf
 python ~/bin/incar.py --scf  --soc --encut 400
