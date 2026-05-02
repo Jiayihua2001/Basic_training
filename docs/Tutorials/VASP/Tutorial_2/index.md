@@ -39,8 +39,9 @@ The POSCAR is the most user-dependent file in VASP and it defines the unit cell 
 The POTCAR is dependent on the elements used in the calculation and the order of the elements in the POSCAR. It is crucial that the order of the elements in the POTCAR match the order of the elements in the sixth line of the POSCAR. A POTCAR can be easily generated using the potcar.sh file. For example a common way to generate the POTCAR file is to use the head command to view the top lines of the POSCAR, and then use the potcar.sh file to generate the POTCAR file using the same elements shown in the 6th line of the POSCAR. To check the POTCAR you can use the grep command.
 
 Given a POSCAR you can create the correct POTCAR using the following commands:
-```
-(base) ddardzin(cori)$ head POSCAR
+
+```bash
+$ head POSCAR
 In1 As1
 1.0
 0.000000 3.029200 3.029200
@@ -51,9 +52,11 @@ In As
 direct
 0.000000 0.000000 0.000000 In
 0.750000 0.750000 0.750000 As
-(base) ddardzin(cori)$ potcar.sh In As
-(base) ddardzin(cori)$ grep 'TITEL' POTCAR
-	TITEL = PAW_PBE In 08Apr2002  
+
+$ potcar.sh In As
+
+$ grep 'TITEL' POTCAR
+	TITEL = PAW_PBE In 08Apr2002
 	TITEL = PAW_PBE As 22Sep2009
 ```
 
