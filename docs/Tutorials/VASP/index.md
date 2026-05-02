@@ -13,7 +13,7 @@ These tutorials introduce the VASP workflow used by the quantum-materials subgro
 ## Quick guide
 
 1. [VASP Basics](./Tutorial_1/) — input files (INCAR / POSCAR / KPOINTS / POTCAR) and the output files you actually look at.
-2. [Calculation Types](./Tutorial_2/) — SCF / DOS / band / OPT calculation blocks plus the SOC, HSE, and DFT+U modifiers, the shared general INCAR block, and Perlmutter parallelisation.
+2. [Calculation Descriptions](./Tutorial_2/) — SCF / DOS / band / OPT calculation blocks plus the SOC, HSE, and DFT+U modifiers, the shared general INCAR block, and Perlmutter parallelisation.
 3. [Bulk InAs (PBE)](./Tutorial_3/) — the SCF → DOS → band-structure workflow on a CPU node.
 4. [Bulk InAs (PBE+SOC)](./Tutorial_4/) — the same workflow with `vasp_ncl` and `LSORBIT = .TRUE.`.
 5. [Bulk InAs (HSE)](./Tutorial_5/) — hybrid-functional band structure with the zero-weight k-point scheme; GPU build recommended.

@@ -6,63 +6,82 @@ title: "Bulk InAs (PBE+SOC)"
 nav_order: 4
 ---
 
-# Tutorial 4 — Bulk InAs (PBE+SOC)
+# Bulk InAs (PBE+SOC)
+In this step we will run our second calculation on bulk InAs where we add in spin-orbit couple to make our calculation more accurate.
 
-## 📖 Learning objectives
+## Folder Layout
+- `basic_training`
+	- `InAs_bulk`
+		- `pbe-soc`
+			- `scf`
+			- `band`
+			- `dos`
 
-* Add spin-orbit coupling (SOC) to the InAs workflow.
-* Understand why SOC requires the **non-collinear** binary `vasp_ncl`.
-* See the SOC-induced splitting of the InAs valence band (the "split-off" Γ⁷ band).
+## Basic Steps
+1. Run the SCF Calculations in the `scf` folder.
+2. Copy the CHG and CHGCAR files to the `band` and `dos` folders.
+3. Run the Band and DOS calculations.
+4. Plot the data.
 
-> SOC is essential for any heavy-element semiconductor (In, Sb, Bi, Pb, …) and changes the band structure qualitatively, not just quantitatively. PBE+SOC is the minimum acceptable level of theory for InAs.
+## Global Files
+The POSCAR and POTCAR will be the same for the SCF, DOS, and Band calculations.
 
----
+### POSCAR
+The POSCAR for the bulk InAs is given below
 
-## 4.1 What changes vs. Tutorial_3
-
-| Aspect | PBE (Tutorial_3) | PBE+SOC (this tutorial) |
-|--------|-----------------|--------------------------|
-| Binary | `vasp_std` | **`vasp_ncl`** |
-| INCAR additions | — | `LSORBIT = .TRUE.`, `MAGMOM = 6*0` |
-| Wave-function size | 1 spin channel | 2 spinor components — VASP doubles `NBANDS` internally |
-| Cost | × 1 | ≈ × 4–8 (more bands, complex orbitals) |
-| Symmetry | full point group | reduced — set `ISYM = -1` only if the run aborts on symmetry |
-
-The folder layout, KPOINTS, and POTCAR are identical to Tutorial_3.
-
----
-
-## 4.2 Prepare the tree
-
-Reuse the InAs POSCAR and POTCAR from Tutorial_3:
-
-```bash
-mkdir -p $SCRATCH/InAs/pbe-soc/{scf,dos,band}
-cd       $SCRATCH/InAs/pbe-soc
-cp $SCRATCH/InAs/pbe/POSCAR  scf/  &&  cp scf/POSCAR dos/  &&  cp scf/POSCAR band/
-cp $SCRATCH/InAs/pbe/POTCAR  scf/  &&  cp scf/POTCAR dos/  &&  cp scf/POTCAR band/
+```txt
+In1 As1  
+1.0  
+0.000000 3.029200 3.029200  
+3.029200 0.000000 3.029200  
+3.029200 3.029200 0.000000  
+In As  
+1 1  
+direct  
+0.000000 0.000000 0.000000 In  
+0.250000 0.250000 0.250000 As
 ```
 
----
+### POTCAR
+The POTCAR can be easily generated using the potcar.sh script included in the basic training files.
 
-## 4.3 Generate the INCARs
+```bash
+potcar.sh In As
+```
 
-The same Python helper as Tutorial 3, with `-c` added to every `incar.py` call so the SOC block is appended:
+To double check the elements in the POTCAR you can run the following command
 
+```bash
+grep 'TITEL' POTCAR
+```
+
+The output will be the following
+
+```txt
+TITEL = PAW_PBE In 08Apr2002  
+TITEL = PAW_PBE As 22Sep2009
+```
+
+## Automation
+This entire calculation can be automated using a simple python script included below:
 ```python
 from os.path import isdir, join
-import os, shutil
+import os
+import shutil
 
 dirs = ["scf", "dos", "band"]
 base_dir = os.getcwd()
 
 for d in dirs:
+    print(d)
+
     if not isdir(d):
         os.mkdir(d)
+
     shutil.copy("POSCAR", join(d, "POSCAR"))
 
     os.chdir(d)
-    os.system(f"incar.py --{d} -c --kpar 4 --ncore 1")
+    os.system(f"incar.py --{d} -c --kpar 8 --ncore 8")
     os.system("potcar.sh In As")
 
     if d == "scf":
@@ -75,113 +94,227 @@ for d in dirs:
     os.chdir(base_dir)
 ```
 
-Or, by hand:
+And it can be submitted to the cluster using the following script.
 
 ```bash
-cd scf
-python ~/bin/incar.py --scf  --soc --encut 400
-python ~/bin/kpoints.py --grid -d 7 7 7
+#!/bin/bash -l
+#SBATCH -J pbe-soc # Job name
+#SBATCH -N 1  # Number of nodes
+#SBATCH -o stdout # File to which STDOUT will be written %j is the job #
+#SBATCH -t 30
+#SBATCH -q debug
+#SBATCH -A m3578
+#SBATCH --constraint=knl
+export OMP_NUM_THREADS=1
+module load vasp/5.4.4-knl
 
-cd ../dos
-python ~/bin/incar.py --dos  --soc --encut 400
-python ~/bin/kpoints.py --grid -d 15 15 15
+cd scf
+srun -n 64 -c 4 --cpu_bind=cores vasp_ncl > vasp.out
+
+fermi_str=$(grep 'E-fermi' OUTCAR)  
+fermi_array=($fermi_str)  
+efermi=${fermi_array[2]}  
+emin=`echo $efermi - 7 | bc -l`  
+emax=`echo $efermi + 7 | bc -l`  
+sed -i "s/EMIN = emin/EMIN = $emin/" ../dos/INCAR  
+sed -i "s/EMAX = emax/EMAX = $emax/" ../dos/INCAR
+
+cp CHG* ../band
+cp CHG* ../dos
 
 cd ../band
-python ~/bin/incar.py --band --soc --encut 400
-python ~/bin/kpoints.py --band -c GXWLGK -n 50
+srun -n 64 -c 4 --cpu_bind=cores vasp_ncl > vasp.out
+
+cd ../dos
+srun -n 64 -c 4 --cpu_bind=cores vasp_ncl > vasp.out
 ```
 
-Each `INCAR` ends with the SOC block:
+## SCF Calculation
+The first step in any calculation is to perform the SCF calculation. In this section, the process to set up the input files will be shown. For a more detailed breakdown of the SCF calculation see [Calculation Descriptions](../Tutorial_2/).
 
-```text
-LSORBIT = .TRUE.
-MAGMOM  = 6*0          # 3 components per atom; 2 atoms => 6 zeros
-```
-
-* `MAGMOM` for SOC is **3 numbers per atom** (m_x, m_y, m_z). Using `6*0` for non-magnetic InAs is the simplest choice.
-* For magnetic systems specify a non-zero starting moment (e.g. `0 0 2.5 0 0 -2.5` for an antiferromagnetic pair). `incar.py --soc --magmom "0 0 2.5 0 0 -2.5"` writes that for you.
-* Setting `ISYM = -1` disables symmetrisation — only do this if VASP aborts with a symmetry error. With clean InAs and `MAGMOM = 6*0` you should not need it.
-
----
-
-## 4.4 Submit
-
-📥 `submit.sh` — same Perlmutter CPU template as Tutorial_3 but the binary is **`vasp_ncl`** because `LSORBIT = .TRUE.`:
+### INCAR
+As shown in section [Calculation Descriptions](../Tutorial_2/) the INCAR for an SCF calculation can be generated using the incar.py file.
 
 ```bash
-#!/bin/bash
-#SBATCH -J InAs_pbe_soc
-#SBATCH -A m3578              # update to your repo if different
-#SBATCH -N 1
-#SBATCH -C cpu
-#SBATCH -q regular
-#SBATCH -t 00:30:00
-#SBATCH -o slurm-%j.out
-
-module load vasp/6.4.3-cpu
-
-# OpenMP settings:
-export OMP_NUM_THREADS=8
-export OMP_PLACES=threads
-export OMP_PROC_BIND=spread
-
-cd scf
-srun -n 16 -c 16 --cpu_bind=cores vasp_ncl > vasp.out
-
-efermi=$(awk '/E-fermi/ {print $3}' OUTCAR | tail -n 1)
-emin=$(echo "$efermi - 3.0" | bc -l)
-emax=$(echo "$efermi + 3.0" | bc -l)
-sed -i "s/EMIN   = emin/EMIN   = $emin/" ../dos/INCAR
-sed -i "s/EMAX   = emax/EMAX   = $emax/" ../dos/INCAR
-
-cp CHG CHGCAR ../band/
-cp CHG CHGCAR ../dos/
-
-cd ../band
-srun -n 16 -c 16 --cpu_bind=cores vasp_ncl > vasp.out
-
-cd ../dos
-srun -n 16 -c 16 --cpu_bind=cores vasp_ncl > vasp.out
+incar.py --scf --soc
+or
+incar.py -s -c
 ```
 
-SOC roughly quadruples the runtime relative to Tutorial_3 (more bands, complex spinor orbitals); 30 min on 1 node is still plenty for this 2-atom cell.
+This results in the following file.
 
----
+```txt
+# general
+ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
+PREC = N        # Normal precision
+GGA_COMPAT = .FALSE.   # Restore the full lattice symmetry of the GGA potential
+EDIFF = 1E-6    # Convergence criteria for electronic converge
+NELM = 500      # Max number of electronic steps
+ENCUT = 400     # Cut off energy
+LASPH = True    # Include non-spherical contributions from gradient corrections
+BMIX = 3        # Mixing parameter for convergence
+AMIN = 0.01     # Mixing parameter for convergence
+SIGMA = 0.05    # Width of smearing in eV
 
-## 4.5 Plot and analyse
+# parallelization
+KPAR = 8        # The number of k-points to be treated in parallel
+NCORE = 8        # The number of bands to be treated in parallel
 
-Use [`vaspvis`](https://github.com/caizefeng/vaspvis); it transparently handles `LSORBIT = .TRUE.`:
+# scf
+ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
+ISMEAR = 0      # Fermi smearing
+LCHARG = True   # Write the CHG* files
+LWAVE = False   # Does not write the WAVECAR
+LREAL = Auto    # Automatically chooses real/reciprocal space for projections
 
-```python
-from vaspvis import Band, Dos
-
-Band(folder="band/", projected=False).plot_plain(output="InAs_soc_band.png")
-Dos(folder="dos/").plot_plain(output="InAs_soc_dos.png")
+# soc 
+LSORBIT = True  # Turn on spin-orbit coupling
+MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
 ```
 
-> Fallback: `vaspkit -task 211` / `-task 111` exports raw band/DOS data if you cannot use `vaspvis`.
+## Density of States Calculation
+After the SCF calculation is finished, the CHG and CHGCAR files can be copied to the folder with the DOS calculation files. For a more detailed breakdown of the DOS calculation see section [Calculation Descriptions](../Tutorial_2/).
 
-For reference, here are the figures from a converged run:
+### INCAR
+The INCAR for a DOS calculation can be generated using the incar.py file.
 
-<img src="../../../images/vasp/pbe-soc_bands_plot.png" alt="InAs PBE+SOC band structure showing Γ⁷ split-off band" width="450">
+```bash
+incar.py --dos --soc
+or
+incar.py -d -c
+```
 
-<img src="../../../images/vasp/pbe-soc_dos_plot.png" alt="InAs PBE+SOC total density of states" width="450">
+Which results in the following file. The values of EMIN and EMAX were automatically  determined using the code shown in section [Calculation Descriptions](../Tutorial_2/).
 
-*(Figures reproduced from [marom_group_docs](https://github.com/DerekDardzinski/marom_group_docs), AGPLv3.)*
+```txt
+# general 
+ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
+PREC = N        # Normal precision
+GGA_COMPAT = .FALSE.   # Restore the full lattice symmetry of the GGA potential
+EDIFF = 1E-6    # Convergence criteria for electronic converge
+NELM = 500      # Max number of electronic steps
+ENCUT = 400     # Cut off energy
+LASPH = True    # Include non-spherical contributions from gradient corrections
+BMIX = 3        # Mixing parameter for convergence
+AMIN = 0.01     # Mixing parameter for convergence 
+SIGMA = 0.05    # Width of smearing in eV
 
-### What you should see
+# parallelization
+KPAR = 8        # The number of k-points to be treated in parallel
+NCORE = 8        # The number of bands to be treated in parallel
 
-* The valence band that was three-fold degenerate at Γ in pure PBE now **splits** into a four-fold heavy-/light-hole pair (Γ⁸) and a lower **split-off** band (Γ⁷). The InAs split-off energy is ≈ 0.39 eV experimentally.
-* The conduction-band minimum stays at Γ; the gap is still much smaller than experiment because PBE-level self-interaction error is not fixed by SOC alone.
-* Far from Γ, SOC is a small perturbation — the band shapes look very similar to Tutorial_3.
+# dos 
+ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
+ISMEAR = -5     # Tetrahedron method with Blochl corrections
+LCHARG = False  # Does not write the CHG* files
+LWAVE = False   # Does not write the WAVECAR files 
+LORBIT = 11     # Projected data (lm-decomposed PROCAR)
+NEDOS = 3001    # 3001 points are sampled for the DOS
+EMIN = -3.7174     # Minimum energy for the DOS plot
+EMAX = 10.2826     # Maximum energy for the DOS plot
 
----
+# soc 
+LSORBIT = True  # Turn on spin-orbit coupling
+MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
+```
 
-## 4.6 Assignment
+### KPOINTS
+For a DOS calculation we would like to have a denser kpoint mesh to get more accurate results. The code to generate the KPOINTS file is shown below.
 
-* **(5 points)** Run the PBE+SOC SCF/DOS/band workflow and submit the converged outputs.
-* **(10 points)** Overlay the PBE and PBE+SOC band structures in a single figure (use `vaspkit` or your favourite plotter). Identify the split-off band and report the Γ⁷–Γ⁸ splitting at Γ. Compare with the experimental value.
-* **(5 points)** Compare the DOS at and below the Fermi level between PBE and PBE+SOC. Where do you see the largest changes, and why?
-* **(5 points)** Quote the wall-time difference between Tutorial_3 and Tutorial_4. Where is the extra cost spent (use the `OUTCAR` "Total CPU time" breakdown).
+```bash
+kpoints.py --grid --density 15 15 15
+or
+kpoints.py -g -d 15 15 15
+```
 
-Once SOC is satisfying, move on to [Tutorial 5 — Bulk InAs (HSE)](../Tutorial_5/) to fix the band-gap problem.
+### Results
+Once the calculation is completed, VaspVis can be used to visualize the density of states plots. The following code shows how to easily generate two DOS plots which will be saved as `dos_plain.png` and `dos_spd.png` which are shown below
+
+![pbe_dos](../../../images/vasp/pbe-soc_dos_plot.png)
+
+## Band Structure Calculation
+After the SCF calculation is finished, the CHG and CHGCAR files can be copied to the folder with the Band calculation files. For a more detailed breakdown of the Band calculation see section [Calculation Descriptions](../Tutorial_2/).
+
+### INCAR
+The INCAR for a band structure calculation can be generated using the incar.py file.
+
+```bash
+incar.py --band --soc
+or
+incar.py -b -c
+```
+
+Which results in the following file:
+
+```txt
+# general 
+ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
+PREC = N        # Normal precision
+GGA_COMPAT = .FALSE.   # Restore the full lattice symmetry of the GGA potential
+EDIFF = 1E-6    # Convergence criteria for electronic converge
+NELM = 500      # Max number of electronic steps
+ENCUT = 400     # Cut off energy
+LASPH = True    # Include non-spherical contributions from gradient corrections
+BMIX = 3        # Mixing parameter for convergence
+AMIN = 0.01     # Mixing parameter for convergence 
+SIGMA = 0.05    # Width of smearing in eV
+
+# parallelization
+KPAR = 8        # The number of k-points to be treated in parallel
+NCORE = 8        # The number of bands to be treated in parallel
+
+# band 
+ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
+ISMEAR = 0      # Fermi smearing
+LCHARG = False  # Does not write the CHG* files
+LWAVE = False   # Does not write the WAVECAR files (True for unfolding)
+LORBIT = 11     # Projected data (lm-decomposed PROCAR)
+
+# soc 
+LSORBIT = True  # Turn on spin-orbit coupling
+MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
+```
+
+### KPOINTS
+For a band structure calculation, the KPOINTS file is the most important input because it determines the path of your band structure. Usually we find the path from literature or helpful tools such as <a href="https://www.materialscloud.org/work/tools/seekpath" target="_blank">SeeK-path</a>. For our zinc-blende structures such as InAs we choose the k-path $\Gamma-X-W-L-\Gamma-K$, which can be generated using the following code with `kpoints.py`.
+
+```bash
+kpoints.py --band --coords GXWLGK
+or
+kpoints.py -b -c GXWLGK
+```
+
+The resulting KPOINTS file will look like this:
+
+```txt
+Line_mode KPOINTS file
+50
+Line_mode
+Reciprocal
+0.0 0.0 0.0 ! G
+0.5 0.0 0.5 ! X
+
+0.5 0.0 0.5 ! X
+0.5 0.25 0.75 ! W
+
+0.5 0.25 0.75 ! W
+0.5 0.5 0.5 ! L
+
+0.5 0.5 0.5 ! L
+0.0 0.0 0.0 ! G
+
+0.0 0.0 0.0 ! G
+0.375 0.375 0.75 ! K
+```
+
+### Results
+Once the calculation is completed, VaspVis can be used to visualize the band structure plots. The following code shows how to easily generate two band structure plots which will be saved as `band_plain.png` and `band_spd.png` which are shown below:
+
+![pbe_band_structure](../../../images/vasp/pbe-soc_bands_plot.png)
+
+## Concluding Notes
+Some things to note about the results:
+- This calculation was a bit slower than the calculation without PBE. It took about 35 seconds for the SCF calculation, 30 seconds for the band calculation, and 30 seconds for the DOS calculation using 1 node on the NERSC Cori machine. 
+- PBE+SOC is still predicting InAs to be a metal (no band gap) even though we know from experiments that is it a small band gap semiconductor with a band gap of ~0.35 eV.
+	- This is a common error for DFT as it underestimates the band gap due to the self interaction error. We will look at ways to fix this this in future calculation.
+	- SOC can usually increase the size of the band gap, but for small band gap semiconductors, just adding SOC isn't enough.

@@ -6,43 +6,31 @@ title: "VASP Basics"
 nav_order: 1
 ---
 
-# Tutorial 1 — VASP Basics
+# VASP Basics
+Here we will learn about the basic input and output files for VASP.
 
-## 📖 Learning objectives
+## Input Files
+### INCAR
+The <a href="https://www.vasp.at/wiki/index.php/INCAR" target="_black">INCAR</a> file contains the set of instructions and user-defined parameters to determine the type of calculation that VASP performs. For our research, we will have six main INCAR files for the six main types of calculations that we perform (i.e. self-consistent field (SCF), density of states (DOS), band structure (Band), structural optimization (OPT), wave function visualization (WF), and scanning tunneling microscopy simulations (STM)). There are also five different variations that can be added onto each type of calculation (e.g. DFT+U, spin-orbit coupling (SOC), spin-polarized (SP), slab, hybrid (HSE)). In the next sections, each INCAR file will be shown, and the important parameters will be highlighted.
 
-* Understand the four core VASP input files and the most useful output files.
+### KPOINTS
+The <a href="https://www.vasp.at/wiki/index.php/KPOINTS" target="_black">KPOINTS</a> file determines how the Brillouin zone is sampled. For our purposes, we will have four different types of KPOINTS files for the following types of calculations: SCF/DOS/WF/STM, PBE Band, HSE Band, and unfolded Band calculations.
 
-> Throughout this section we link directly to the [VASP wiki](https://www.vasp.at/wiki/) — make a habit of looking up every tag you see.
+### POSCAR
+The <a href="https://www.vasp.at/wiki/index.php/POSCAR" target="_black">POSCAR</a> file contains the actual structure that we want to calculate. This can be generated in many different ways, which will be discussed in a later section
 
----
+### POTCAR
+The <a href="https://www.vasp.at/wiki/index.php/POTCAR" target="_black">POTCAR</a> file includes all the pseudopotential information for each element, and can be easily generated using a shell script
 
-## 1.1 Input files
+## Output Files
+### CHG and CHGCAR
+The <a href="https://www.vasp.at/wiki/index.php/CHG" target="_black">CHG</a> and <a href="https://www.vasp.at/wiki/index.php/CHG" target="_black">CHGCAR</a> file contain the structure and a 3D FFT grid of the charge density calculated during an SCF calculation. For Band, DOS, WF, and STM calculations, the CHG and CHGCAR files are read in as inputs are are used to calculate the eigenvalues.
 
-A VASP calculation is fully specified by **four files**.
+### WAVECAR
+The <a href="https://www.vasp.at/wiki/index.php/WAVECAR" target="_black">WAVECAR</a> is a binary file that contains the information about the wave function. The file can usually be quite large for structures with many atoms (on the order of 100’s of GBs) so we avoid writing it unless absolutely necessary (e.g. unfolded Band, WF, and STM calculations).
 
-| File | Purpose | How to generate |
-|------|---------|-----------------|
-| `INCAR`   | Tags that select the calculation type and numerical parameters | `incar.py` (or VASPKIT task 101) |
-| `POSCAR`  | Unit cell vectors and atom positions | Materials Project, `vaspvis`, `pymatgen`, ASE, or by hand |
-| `KPOINTS` | Brillouin-zone sampling: grid for SCF/DOS/OPT, line-mode path for band | `kpoints.py` (or VASPKIT 102/251/302/303) |
-| `POTCAR`  | PAW pseudopotentials, **one block per element** in the same order as line 6 of `POSCAR` | `potcar.sh` (or VASPKIT 103/104) |
+### OSZICAR
+The <a href="https://www.vasp.at/wiki/index.php/OSZICAR" target="_black">OSZICAR</a> file shows us the convergence of our calculations. We can use this to check on the status of our calculations while they are running
 
-> **POTCAR ordering is silent and dangerous.** If the species order in `POTCAR` does not match line 6 of `POSCAR`, VASP will run happily but give nonsense. Always sanity-check with `grep TITEL POTCAR` against your POSCAR.
-
----
-
-## 1.2 Output files you will look at
-
-| File | What is in it | Used by |
-|------|---------------|---------|
-| `OUTCAR` | Everything: forces, stresses, Fermi energy, timing, version, warnings | Anything; your first stop when something breaks |
-| `OSZICAR`| One line per electronic / ionic step (energy, ΔE, magnetisation) | Live-monitor convergence: `tail -f OSZICAR` |
-| `CHG` / `CHGCAR` | Self-consistent charge density (small / large precision). Written when `LCHARG = .TRUE.` | Read by non-self-consistent DOS and band runs (`ICHARG = 11`) |
-| `WAVECAR`| Plane-wave coefficients of the KS orbitals. Can be **huge**; written when `LWAVE = .TRUE.` | HSE band/DOS, STM, wave-function visualisation |
-| `IBZKPT` | List of irreducible k-points with their weights | Required input for HSE band-structure KPOINTS |
-| `EIGENVAL`/`PROCAR`/`DOSCAR` | Eigenvalues, lm-projected weights, total/projected DOS | Plotting (VASPKIT, pymatgen, sumo) |
-| `CONTCAR`| Final atomic positions after a relaxation | Restart relaxations: `cp CONTCAR POSCAR` |
-
----
-
-Continue with [Tutorial 2 — Calculation Types](../Tutorial_2/) to see the INCAR blocks for SCF / DOS / band / OPT and the modifiers (SOC, HSE, DFT+U).
+### OUTCAR
+The <a href="https://www.vasp.at/wiki/index.php/OUTCAR" target="_black">OUTCAR</a> file contains all the outputs from the calculation. We typically don’t look into this file too much, but you can get some useful parameters from it such as the Fermi energy.
