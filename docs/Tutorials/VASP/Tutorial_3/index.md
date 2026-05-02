@@ -226,7 +226,7 @@ kpoints.py -g -d 15 15 15
 ```
 
 ### Results
-Once the calculation is finished, generate the DOS plots with [vaspvis](https://github.com/caizefeng/vaspvis) — preinstalled in the **Ogre** conda env (`conda activate Ogre`):
+Once the calculation is finished, generate the DOS plots with [vaspvis](https://github.com/caizefeng/vaspvis):
 
 ```python
 from vaspvis.standard import dos_plain, dos_spd
