@@ -228,7 +228,14 @@ kpoints.py -g -d 15 15 15
 ```
 
 ### Results
-Once the calculation is completed, VaspVis can be used to visualize the density of states plots. The following code shows how to easily generate two DOS plots which will be saved as `dos_plain.png` and `dos_spd.png` which are shown below
+Same vaspvis calls as the PBE run — the SOC weights are picked up automatically from the noncollinear `PROCAR`:
+
+```python
+from vaspvis.standard import dos_plain, dos_spd
+
+dos_plain(folder='dos', output='dos_plain.png')
+dos_spd(folder='dos',   output='dos_spd.png',   orbitals='spd')
+```
 
 ![pbe_dos](../../../images/vasp/pbe-soc_dos_plot.png)
 
@@ -308,7 +315,14 @@ Reciprocal
 ```
 
 ### Results
-Once the calculation is completed, VaspVis can be used to visualize the band structure plots. The following code shows how to easily generate two band structure plots which will be saved as `band_plain.png` and `band_spd.png` which are shown below:
+And the band structure:
+
+```python
+from vaspvis.standard import band_plain, band_spd
+
+band_plain(folder='band', output='band_plain.png')
+band_spd(folder='band',   output='band_spd.png')
+```
 
 ![pbe_band_structure](../../../images/vasp/pbe-soc_bands_plot.png)
 

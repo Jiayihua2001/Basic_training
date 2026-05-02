@@ -220,7 +220,16 @@ kpoints.py -g -d 15 15 15
 ```
 
 ### Results
-Once the calculation is completed, VaspVis can be used to visualize the density of states plots. The following code shows how to easily generate two DOS plots which will be saved as `dos_plain.png` and `dos_spd.png` which are shown below
+Once the calculation is finished, generate the DOS plots with [vaspvis](https://github.com/caizefeng/vaspvis) — preinstalled in the **Ogre** conda env (`conda activate Ogre`):
+
+```python
+from vaspvis.standard import dos_plain, dos_spd
+
+dos_plain(folder='dos', output='dos_plain.png')
+dos_spd(folder='dos',   output='dos_spd.png',   orbitals='spd')
+```
+
+`dos_plain.png` (total DOS) and `dos_spd.png` (s/p/d-projected) land in the working directory:
 
 ![pbe_dos](../../../images/vasp/pbe_dos_plot.png)
 
@@ -296,7 +305,14 @@ Reciprocal
 ```
 
 ### Results
-Once the calculation is completed, VaspVis can be used to visualize the band structure plots. The following code shows how to easily generate two band structure plots which will be saved as `band_plain.png` and `band_spd.png` which are shown below:
+Plot the band structure the same way:
+
+```python
+from vaspvis.standard import band_plain, band_spd
+
+band_plain(folder='band', output='band_plain.png')
+band_spd(folder='band',   output='band_spd.png')
+```
 
 ![pbe_band_structure](../../../images/vasp/pbe_bands_plot.png)
 

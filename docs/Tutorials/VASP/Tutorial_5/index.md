@@ -234,7 +234,14 @@ kpoints.py -g -d 11 11 11
 ```
 
 ### Results
-Once the calculation is completed, VaspVis can be used to visualize the density of states plots. The following code shows how to easily generate two DOS plots which will be saved as `dos_plain.png` and `dos_spd.png` which are shown below
+vaspvis treats HSE the same as PBE — give it the `dos/` folder and let it parse `LHFCALC`:
+
+```python
+from vaspvis.standard import dos_plain, dos_spd
+
+dos_plain(folder='dos', output='dos_plain.png')
+dos_spd(folder='dos',   output='dos_spd.png',   orbitals='spd')
+```
 
 ![pbe_dos](../../../images/vasp/hse_dos_plot.png)
 
@@ -316,7 +323,14 @@ Reciprocal lattice
 ```
 
 ### Results
-Once the calculation is completed, VaspVis can be used to visualize the band structure plots. The following code shows how to easily generate two band structure plots which will be saved as `band_plain.png` and `band_spd.png` which are shown below:
+For the band structure, vaspvis automatically drops the zero-weight k-points used to seed the HSE band path, so the same call works:
+
+```python
+from vaspvis.standard import band_plain, band_spd
+
+band_plain(folder='band', output='band_plain.png')
+band_spd(folder='band',   output='band_spd.png')
+```
 
 ![pbe_band_structure](../../../images/vasp/hse_bands_plot.png)
 
