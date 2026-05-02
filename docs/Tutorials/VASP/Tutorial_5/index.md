@@ -82,7 +82,7 @@ for d in dirs:
     shutil.copy("POSCAR", join(d, "POSCAR"))
 
     os.chdir(d)
-    os.system(f"incar.py --{d} --hse -c --kpar 8 --ncore 8")
+    os.system(f"incar.py --{d} --hse -c --kpar 16 --ncore 1")
     os.system("potcar.sh In As")
 
     if d == "scf":
@@ -96,26 +96,32 @@ for d in dirs:
 And it can be submitted to the cluster using the following script.
 
 ```bash
-#!/bin/bash -l
-#SBATCH -J hse # Job name
-#SBATCH -N 8  # Number of nodes
-#SBATCH -o stdout # File to which STDOUT will be written %j is the job #
-#SBATCH -t 3:00:00
-#SBATCH -q regular
+#!/bin/bash
+#SBATCH -J hse
 #SBATCH -A m3578
-#SBATCH --constraint=knl
-export OMP_NUM_THREADS=1
-module load vasp/5.4.4-knl
+#SBATCH -N 4                  # HSE is expensive — scale up
+#SBATCH -C cpu
+#SBATCH -q regular
+#SBATCH -t 03:00:00
+#SBATCH -o stdout
+
+module load vasp/6.4.3-cpu
+
+# 16 MPI ranks * 8 OpenMP threads per node => 64 ranks * 8 threads on 4 nodes
+export OMP_NUM_THREADS=8
+export OMP_PLACES=threads
+export OMP_PROC_BIND=spread
 
 cd scf
-srun -n 512 -c 4 --cpu_bind=cores vasp_ncl > vasp.out
+srun -n 64 -c 16 --cpu_bind=cores vasp_ncl > vasp.out
 
-fermi_str=$(grep 'E-fermi' OUTCAR)  
-fermi_array=($fermi_str)  
-efermi=${fermi_array[2]}  
-emin=`echo $efermi - 7 | bc -l`  
-emax=`echo $efermi + 7 | bc -l`  
-sed -i "s/EMIN = emin/EMIN = $emin/" ../dos/INCAR  
+# Fill in EMIN/EMAX of the DOS INCAR from the SCF Fermi level
+fermi_str=$(grep 'E-fermi' OUTCAR)
+fermi_array=($fermi_str)
+efermi=${fermi_array[2]}
+emin=`echo $efermi - 7 | bc -l`
+emax=`echo $efermi + 7 | bc -l`
+sed -i "s/EMIN = emin/EMIN = $emin/" ../dos/INCAR
 sed -i "s/EMAX = emax/EMAX = $emax/" ../dos/INCAR
 
 cp WAVECAR ../band
@@ -123,10 +129,10 @@ cp WAVECAR ../dos
 
 cd ../band
 kpoints.py -b -c GXWLGK -e --ibzkpt ../scf/IBZKPT -n 40
-srun -n 512 -c 4 --cpu_bind=cores vasp_ncl > vasp.out
+srun -n 64 -c 16 --cpu_bind=cores vasp_ncl > vasp.out
 
 cd ../dos
-srun -n 512 -c 4 --cpu_bind=cores vasp_ncl > vasp.out
+srun -n 64 -c 16 --cpu_bind=cores vasp_ncl > vasp.out
 ```
 
 ## SCF Calculation
@@ -336,6 +342,6 @@ band_spd(folder='band',   output='band_spd.png')
 
 ## Concluding Notes
 Some things to note about the results:
-- This calculation was much more expensive than the PBE calculation. It took 25 minutes for the band calculation, and 1 hour for the DOS calculation using 8 nodes on the NERSC Cori machine. 
+- HSE is much more expensive than PBE. Plan for tens of minutes per stage on 4 Perlmutter CPU nodes — drop to the GPU build (`vasp/6.4.3-gpu`) on a single GPU node if you need it faster (the exact-exchange operator maps very well onto A100s).
 - HSE+SOC properly predicts InAs to have a band gap of 0.39 eV which is very close to the experimental value.
 	- HSE06 is a hybrid functional known to give good band gap values for materials, which is why we will use it as our reference in the next step to fit the U-parameter for PBE+U.

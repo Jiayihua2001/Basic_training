@@ -81,7 +81,7 @@ for d in dirs:
     shutil.copy("POSCAR", join(d, "POSCAR"))
 
     os.chdir(d)
-    os.system(f"incar.py --{d} --kpar 8 --ncore 8")
+    os.system(f"incar.py --{d} --kpar 4 --ncore 1")
     os.system("potcar.sh In As")
 
     if d == "scf":
@@ -97,36 +97,42 @@ for d in dirs:
 And it can be submitted to the cluster using the following script.
 
 ```bash
-#!/bin/bash -l
-#SBATCH -J pbe # Job name
-#SBATCH -N 1  # Number of nodes
-#SBATCH -o stdout # File to which STDOUT will be written %j is the job #
-#SBATCH -t 30
-#SBATCH -q debug
+#!/bin/bash
+#SBATCH -J pbe
 #SBATCH -A m3578
-#SBATCH --constraint=knl
-export OMP_NUM_THREADS=1
-module load vasp/5.4.4-knl
+#SBATCH -N 1
+#SBATCH -C cpu
+#SBATCH -q debug              # 30-min cap; use 'regular' for longer runs
+#SBATCH -t 00:30:00
+#SBATCH -o stdout
+
+module load vasp/6.4.3-cpu
+
+# 16 MPI ranks * 8 OpenMP threads = 128 physical cores per node
+export OMP_NUM_THREADS=8
+export OMP_PLACES=threads
+export OMP_PROC_BIND=spread
 
 cd scf
-srun -n 64 -c 4 --cpu_bind=cores vasp_ncl > vasp.out
+srun -n 16 -c 16 --cpu_bind=cores vasp_std > vasp.out
 
-fermi_str=$(grep 'E-fermi' OUTCAR)  
-fermi_array=($fermi_str)  
-efermi=${fermi_array[2]}  
-emin=`echo $efermi - 7 | bc -l`  
-emax=`echo $efermi + 7 | bc -l`  
-sed -i "s/EMIN = emin/EMIN = $emin/" ../dos/INCAR  
+# Fill in EMIN/EMAX of the DOS INCAR from the SCF Fermi level
+fermi_str=$(grep 'E-fermi' OUTCAR)
+fermi_array=($fermi_str)
+efermi=${fermi_array[2]}
+emin=`echo $efermi - 7 | bc -l`
+emax=`echo $efermi + 7 | bc -l`
+sed -i "s/EMIN = emin/EMIN = $emin/" ../dos/INCAR
 sed -i "s/EMAX = emax/EMAX = $emax/" ../dos/INCAR
 
 cp CHG* ../band
 cp CHG* ../dos
 
 cd ../band
-srun -n 64 -c 4 --cpu_bind=cores vasp_ncl > vasp.out
+srun -n 16 -c 16 --cpu_bind=cores vasp_std > vasp.out
 
 cd ../dos
-srun -n 64 -c 4 --cpu_bind=cores vasp_ncl > vasp.out
+srun -n 16 -c 16 --cpu_bind=cores vasp_std > vasp.out
 ```
 
 ## SCF Calculation
@@ -318,6 +324,6 @@ band_spd(folder='band',   output='band_spd.png')
 
 ## Concluding Notes
 Some things to note about the results:
-- This calculation was very fast, it only took about 11 seconds for the SCF calculation, 10 seconds for the band calculation, and 8 seconds for the DOS calculation using 1 node on the NERSC Cori machine.
+- The full SCF → DOS → band sweep finishes in well under a minute on one Perlmutter CPU node.
 - PBE is predicting InAs to be a metal (no band gap) even though we know from experiments that is it a small band gap semiconductor with a band gap of ~0.35 eV.
 	- This is a common error for DFT as it underestimates the band gap due to the self interaction error. We will look at ways to fix this this in future calculation.
