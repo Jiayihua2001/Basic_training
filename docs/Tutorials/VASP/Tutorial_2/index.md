@@ -409,7 +409,7 @@ SIGMA = 0.05    # Width of smearing in eV
 
 # parallelization
 KPAR = 8        # The number of k-points to be treated in parallel
-NCORE = 8        # The number of bands to be treated in parallel
+NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
 
 # scf 
 ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
