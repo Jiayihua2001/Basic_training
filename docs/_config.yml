@@ -3,7 +3,8 @@ description: Basic Training for new students
 
 theme: just-the-docs
 
-url: https://Jiayihua2001.github.io/Basic_training/
+url: https://Jiayihua2001.github.io
+baseurl: /Basic_training
 
 aux_links:
   Template Repository: https://github.com/Jiayihua2001/Basic_training.git
