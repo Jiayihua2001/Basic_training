@@ -131,6 +131,14 @@ Dos(folder="dos/").plot_plain(output="InAs_soc_dos.png")
 
 > Fallback: `vaspkit -task 211` / `-task 111` exports raw band/DOS data if you cannot use `vaspvis`.
 
+For reference, here are the figures from a converged run:
+
+<img src="../../../images/vasp/pbe-soc_bands_plot.png" alt="InAs PBE+SOC band structure showing Γ⁷ split-off band" width="450">
+
+<img src="../../../images/vasp/pbe-soc_dos_plot.png" alt="InAs PBE+SOC total density of states" width="450">
+
+*(Figures reproduced from [marom_group_docs](https://github.com/DerekDardzinski/marom_group_docs), AGPLv3.)*
+
 ### What you should see
 
 * The valence band that was three-fold degenerate at Γ in pure PBE now **splits** into a four-fold heavy-/light-hole pair (Γ⁸) and a lower **split-off** band (Γ⁷). The InAs split-off energy is ≈ 0.39 eV experimentally.

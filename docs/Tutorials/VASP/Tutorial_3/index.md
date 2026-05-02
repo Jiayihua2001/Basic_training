@@ -235,6 +235,14 @@ Dos(folder="dos/").plot_plain(output="InAs_pbe_dos.png")
 
 > If you do not have `vaspvis` available, `vaspkit -task 211` (band) and `vaspkit -task 111` (DOS) will export the same data into ASCII tables you can plot manually.
 
+For reference, here are the figures from a converged run:
+
+<img src="../../../images/vasp/pbe_bands_plot.png" alt="InAs PBE band structure along Γ-X-W-L-Γ-K" width="450">
+
+<img src="../../../images/vasp/pbe_dos_plot.png" alt="InAs PBE total density of states" width="450">
+
+*(Figures reproduced from [marom_group_docs](https://github.com/DerekDardzinski/marom_group_docs), AGPLv3.)*
+
 ### What you should see
 
 * The valence-band maximum (VBM) and conduction-band minimum (CBM) both at Γ → InAs is a **direct-gap** semiconductor.

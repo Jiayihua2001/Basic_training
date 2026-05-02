@@ -200,6 +200,14 @@ Dos(folder="dos/").plot_plain(output="InAs_hse_dos.png")
 
 > Fallback: `vaspkit -task 213` performs the same zero-weight filtering and exports raw band data if you cannot use `vaspvis`.
 
+For reference, here are the figures from a converged HSE+SOC run:
+
+<img src="../../../images/vasp/hse_bands_plot.png" alt="InAs HSE+SOC band structure with ~0.39 eV gap" width="450">
+
+<img src="../../../images/vasp/hse_dos_plot.png" alt="InAs HSE+SOC total density of states" width="450">
+
+*(Figures reproduced from [marom_group_docs](https://github.com/DerekDardzinski/marom_group_docs), AGPLv3.)*
+
 ### What you should see
 
 * HSE06 + SOC opens the gap to ≈ **0.39 eV**, in good agreement with the 0.354 eV experimental value at room temperature.
