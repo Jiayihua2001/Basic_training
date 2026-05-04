@@ -18,8 +18,8 @@ Defaults (always written; based on VASP-wiki recommendations)
   EDIFF        = 1E-6        # tighter than the VASP default 1E-4. The wiki
                              # notes that 1E-6 is "the best compromise" between
                              # accuracy and cost for production calculations.
-  GGA_COMPAT   = .FALSE.     # restore full Bravais-lattice symmetry of the
-                             # gradient field; default of .TRUE. only exists
+  GGA_COMPAT   = .False.     # restore full Bravais-lattice symmetry of the
+                             # gradient field; default of .True. only exists
                              # for backward compatibility.
   NBANDS       --            # NOT written. VASP's default
                              # max( (NELECT+2)/2 + max(NIONS/2, 3), 0.6*NELECT )
@@ -40,8 +40,8 @@ PREC       = Normal      # Precision level
 EDIFF      = {ediff}     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
 NELM       = 500         # Maximum number of electronic SCF steps
 ENCUT      = {encut}     # Plane-wave cutoff (eV)
-LASPH      = .TRUE.      # Non-spherical contributions from gradient corrections
-GGA_COMPAT = .FALSE.     # Restore full lattice symmetry (recommended; required for MAE)
+LASPH      = .True.      # Non-spherical contributions from gradient corrections
+GGA_COMPAT = .False.     # Restore full lattice symmetry (recommended; required for MAE)
 BMIX       = 3           # Mixing parameter for convergence
 AMIN       = 0.01        # Mixing parameter for convergence
 SIGMA      = 0.05        # Smearing width (eV)
@@ -55,7 +55,7 @@ SCF = """\
 # --- SCF ---------------------------------------------------------------------
 ICHARG = 2               # Initial charge from atomic superposition
 ISMEAR = 0               # Gaussian smearing for SCF
-LCHARG = .TRUE.          # Write CHG/CHGCAR for downstream DOS/band
+LCHARG = .True.          # Write CHG/CHGCAR for downstream DOS/band
 LWAVE  = {lwave}         # Write WAVECAR (needed for HSE band/DOS)
 LREAL  = Auto            # Automatically chooses real/reciprocal projections
 """
@@ -64,8 +64,8 @@ DOS = """\
 # --- DOS ---------------------------------------------------------------------
 ICHARG = 11              # Read converged CHGCAR; non-SC eigenvalue calc
 ISMEAR = -5              # Tetrahedron with Bloechl correction
-LCHARG = .FALSE.
-LWAVE  = .FALSE.
+LCHARG = .False.
+LWAVE  = .False.
 LORBIT = 11              # lm-decomposed PROCAR / DOSCAR
 NEDOS  = 3001
 EMIN   = emin            # Filled in by sbatch script from SCF Fermi level
@@ -76,8 +76,8 @@ BAND = """\
 # --- band --------------------------------------------------------------------
 ICHARG = 11              # Read converged CHGCAR; non-SC band evaluation
 ISMEAR = 0               # Gaussian smearing
-LCHARG = .FALSE.
-LWAVE  = .FALSE.
+LCHARG = .False.
+LWAVE  = .False.
 LORBIT = 11              # lm-decomposed PROCAR
 """
 
@@ -85,21 +85,21 @@ OPT = """\
 # --- optimisation ------------------------------------------------------------
 ICHARG = 2
 ISMEAR = 0
-LCHARG = .FALSE.
-LWAVE  = .FALSE.
+LCHARG = .False.
+LWAVE  = .False.
 IBRION = 2               # Conjugate-gradient ionic relaxation
 NSW    = 50              # Maximum ionic steps
 """
 
 SOC = """\
 # --- spin-orbit coupling -----------------------------------------------------
-LSORBIT = .TRUE.         # Use vasp_ncl for this calculation
+LSORBIT = .True.         # Use vasp_ncl for this calculation
 MAGMOM  = {magmom}       # 3 components per atom
 """
 
 DFTU = """\
 # --- DFT+U (Dudarev simplified) ---------------------------------------------
-LDAU     = .TRUE.
+LDAU     = .True.
 LDAUTYPE = 2             # Dudarev formulation (only U_eff = U - J matters)
 LDAUL    = {ldaul}       # l-quantum number per species (-1 = off)
 LDAUU    = {ldauu}       # Effective U per species
@@ -109,7 +109,7 @@ LMAXMIX  = 4             # 4 for d, 6 for f
 
 HSE = """\
 # --- HSE06 hybrid functional -------------------------------------------------
-LHFCALC  = .TRUE.        # Turn on Hartree-Fock exchange
+LHFCALC  = .True.        # Turn on Hartree-Fock exchange
 HFSCREEN = 0.2           # HSE06 range-separation parameter (1/A)
 AEXX     = 0.25          # Fraction of exact exchange (HSE06 standard)
 PRECFOCK = Fast          # Reduced FFT mesh for the exchange routine
@@ -130,7 +130,7 @@ def build_incar(args):
     if main is None:
         raise SystemExit("Choose one of --scf / --dos / --band / --opt.")
 
-    lwave = ".TRUE." if (args.scf and args.hse) else ".FALSE."
+    lwave = ".True." if (args.scf and args.hse) else ".False."
 
     if args.scf:
         parts.append(SCF.format(lwave=lwave))

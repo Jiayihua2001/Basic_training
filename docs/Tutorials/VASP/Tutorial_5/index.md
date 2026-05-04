@@ -152,12 +152,12 @@ This results in the following file.
 ```txt
 # general
 ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = N        # Normal precision
-GGA_COMPAT = .FALSE.   # Restore the full lattice symmetry of the GGA potential
+PREC = Normal        # Normal precision
+GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
 EDIFF = 1E-6    # Convergence criteria for electronic converge
 NELM = 500      # Max number of electronic steps
 ENCUT = 400     # Cut off energy
-LASPH = True    # Include non-spherical contributions from gradient corrections
+LASPH = .True.    # Include non-spherical contributions from gradient corrections
 BMIX = 3        # Mixing parameter for convergence
 AMIN = 0.01     # Mixing parameter for convergence
 SIGMA = 0.05    # Width of smearing in eV
@@ -169,12 +169,12 @@ NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
 # scf
 ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
 ISMEAR = 0      # Fermi smearing
-LCHARG = True   # Write the CHG* files
-LWAVE = True   # Does not write the WAVECAR
+LCHARG = .True.   # Write the CHG* files
+LWAVE = .True.   # Does not write the WAVECAR
 LREAL = Auto    # Automatically chooses real/reciprocal space for projections
 
 # soc 
-LSORBIT = True  # Turn on spin-orbit coupling
+LSORBIT = .True.  # Turn on spin-orbit coupling
 MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
 ```
 
@@ -195,12 +195,12 @@ Which results in the following file. The values of EMIN and EMAX were automatica
 ```txt
 # general 
 ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = N        # Normal precision
-GGA_COMPAT = .FALSE.   # Restore the full lattice symmetry of the GGA potential
+PREC = Normal        # Normal precision
+GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
 EDIFF = 1E-6    # Convergence criteria for electronic converge
 NELM = 500      # Max number of electronic steps
 ENCUT = 400     # Cut off energy
-LASPH = True    # Include non-spherical contributions from gradient corrections
+LASPH = .True.    # Include non-spherical contributions from gradient corrections
 BMIX = 3        # Mixing parameter for convergence
 AMIN = 0.01     # Mixing parameter for convergence 
 SIGMA = 0.05    # Width of smearing in eV
@@ -212,19 +212,19 @@ NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
 # dos 
 ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
 ISMEAR = -5     # Tetrahedron method with Blochl corrections
-LCHARG = False  # Does not write the CHG* files
-LWAVE = False   # Does not write the WAVECAR files 
+LCHARG = .False.  # Does not write the CHG* files
+LWAVE = .False.   # Does not write the WAVECAR files 
 LORBIT = 11     # Projected data (lm-decomposed PROCAR)
 NEDOS = 3001    # 3001 points are sampled for the DOS
 EMIN = -3.7174     # Minimum energy for the DOS plot
 EMAX = 10.2826     # Maximum energy for the DOS plot
 
 # soc 
-LSORBIT = True  # Turn on spin-orbit coupling
+LSORBIT = .True.  # Turn on spin-orbit coupling
 MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
 
 # hse 
-LHFCALC = True  # Determines if a hybrid functional is used
+LHFCALC = .True.  # Determines if a hybrid functional is used
 HFSCREEN = 0.2  # Range-separation parameter
 AEXX = 0.25     # Fraction of exact exchange to be used
 PRECFOCK = Fast # Increases the speed of HSE Calculations
@@ -268,12 +268,12 @@ Which results in the following file:
 ```txt
 # general 
 ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = N        # Normal precision
-GGA_COMPAT = .FALSE.   # Restore the full lattice symmetry of the GGA potential
+PREC = Normal        # Normal precision
+GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
 EDIFF = 1E-6    # Convergence criteria for electronic converge
 NELM = 500      # Max number of electronic steps
 ENCUT = 400     # Cut off energy
-LASPH = True    # Include non-spherical contributions from gradient corrections
+LASPH = .True.    # Include non-spherical contributions from gradient corrections
 BMIX = 3        # Mixing parameter for convergence
 AMIN = 0.01     # Mixing parameter for convergence 
 SIGMA = 0.05    # Width of smearing in eV
@@ -285,16 +285,16 @@ NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
 # band 
 ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
 ISMEAR = 0      # Fermi smearing
-LCHARG = False  # Does not write the CHG* files
-LWAVE = False   # Does not write the WAVECAR files (True for unfolding)
+LCHARG = .False.  # Does not write the CHG* files
+LWAVE = .False.   # Does not write the WAVECAR files (.True. for unfolding)
 LORBIT = 11     # Projected data (lm-decomposed PROCAR)
 
 # soc 
-LSORBIT = True  # Turn on spin-orbit coupling
+LSORBIT = .True.  # Turn on spin-orbit coupling
 MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
 
 # hse 
-LHFCALC = True  # Determines if a hybrid functional is used
+LHFCALC = .True.  # Determines if a hybrid functional is used
 HFSCREEN = 0.2  # Range-separation parameter
 AEXX = 0.25     # Fraction of exact exchange to be used
 PRECFOCK = Fast # Increases the speed of HSE Calculations

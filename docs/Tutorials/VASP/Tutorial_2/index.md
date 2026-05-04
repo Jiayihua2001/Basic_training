@@ -15,12 +15,12 @@ As stated in [VASP Basics](../Tutorial_1/), the INCAR contains the set of instru
 
 ```txt
 ALGO = Fast      # Mixture of Davidson and RMM-DIIS algos
-PREC = N         # Normal precision
-GGA_COMPAT = .FALSE.    # Restore the full lattice symmetry of the GGA potential
+PREC = Normal         # Normal precision
+GGA_COMPAT = .False.    # Restore the full lattice symmetry of the GGA potential
 EDIFF = 1E-6     # Convergence criteria for electronic converge
 NELM = 500       # Max number of electronic steps
 ENCUT = 350      # Cut off energy
-LASPH = True     # Include non-spherical contributions from gradient corrections
+LASPH = .True.     # Include non-spherical contributions from gradient corrections
 BMIX = 3         # Mixing parameter for convergence
 AMIN = 0.01      # Mixing parameter for convergence
 SIGMA = 0.05     # Width of smearing in eV
@@ -69,8 +69,8 @@ In the INCAR there are four important parameters beyond the general parameters. 
 ```txt
 ICHARG = 2 # Generate CHG* from a superposition of atomic charge densities
 ISMEAR = 0 # Fermi smearing
-LCHARG = True # Write the CHG* files
-LWAVE = False # Does not write the WAVECAR
+LCHARG = .True. # Write the CHG* files
+LWAVE = .False. # Does not write the WAVECAR
 ```
 
 The following code can be used to generate the INCAR
@@ -105,8 +105,8 @@ In the INCAR there are eight important parameters beyond the general parameters.
 ```txt
 ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
 ISMEAR = -5     # Tetrahedron method with Blochl corrections
-LCHARG = False  # Does not write the CHG* files
-LWAVE = False   # Does not write the WAVECAR files 
+LCHARG = .False.  # Does not write the CHG* files
+LWAVE = .False.   # Does not write the WAVECAR files 
 LORBIT = 11     # Projected data (lm-decomposed PROCAR)
 NEDOS = 3001    # 3001 points are sampled for the DOS
 EMIN = emin     # Minimum energy for the DOS plot
@@ -144,13 +144,13 @@ kpoints.py -g -d 15 15 15
 ```
 
 ## Band Structure Calculation (Band) Calculation
-In the INCAR there are five important parameters beyond the general parameters. The only parameters that can be changed are LWAVE and LORBIT. In the case of a calculation where it is desired to perform band unfolding the WAVECAR must be written (LWAVE=True). In the case where it is not important view the projected band structure (e.g. convergence tests) then the LORBIT tag can be removed.
+In the INCAR there are five important parameters beyond the general parameters. The only parameters that can be changed are LWAVE and LORBIT. In the case of a calculation where it is desired to perform band unfolding the WAVECAR must be written (`LWAVE = .True.`). In the case where it is not important view the projected band structure (e.g. convergence tests) then the LORBIT tag can be removed.
 
 ```txt
 ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
 ISMEAR = 0      # Fermi smearing
-LCHARG = False  # Does not write the CHG* files
-LWAVE = False   # Does not write the WAVECAR file (True for unfolding)
+LCHARG = .False.  # Does not write the CHG* files
+LWAVE = .False.   # Does not write the WAVECAR file (.True. for unfolding)
 LORBIT = 11     # Projected data (lm-decomposed PROCAR)
 ```
 
@@ -308,8 +308,8 @@ In the INCAR there are six important parameters beyond the general parameters. T
 ```txt
 ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
 ISMEAR = 0      # Fermi smearing
-LCHARG = False  # Does not write the CHG* files
-LWAVE = False   # Does not write the WAVECAR
+LCHARG = .False.  # Does not write the CHG* files
+LWAVE = .False.   # Does not write the WAVECAR
 IBRION = 2      # Ionic relaxation
 NSW = 50        # Maximum of 50 ionic steps
 ```
@@ -357,7 +357,7 @@ Adding DFT+U is necessary for most calculations involving semiconductors because
 In the INCAR there are six important parameters beyond the general parameters. The only parameters that need to be changed are the ones for LDAUL, which determine the orbitals that the U value is applied, and LDAUU, which is where the actual effective U values are entered.
 
 ```txt
-LDAU = True       # Determines if DFT+U is used
+LDAU = .True.       # Determines if DFT+U is used
 LDAUTYPE = 2      # Dudarev formulation
 LDAUL = 1 1       # l-quantum number to apply the U-value on (-1 turns it off)
 LDAUU = -0.5 -7.5 # Effective U-value for each species
@@ -380,7 +380,7 @@ Adding spin orbit coupling is very important for most of the materials that we s
 In the INCAR there are two important parameters beyond the general parameters. The only parameter that needs to change is the `MAGMOM` parameter which defines the magnetic moment for each atom in the x, y, and z directions. The example shown below is for a bulk InAs calculation where there are only two atoms in the unit cell. Since both In and As have no magnetic moment, $m_x$, $m_y$, and $m_z$ are all 0.
 
 ```txt
-LSORBIT = True                    # Turn on spin-orbit coupling
+LSORBIT = .True.                    # Turn on spin-orbit coupling
 MAGMOM = 0 0 0 0 0 0  # Set the magnetic moment for each atom (3 for each atom)
 or
 MAGMOM = 6*0
@@ -397,12 +397,12 @@ incar.py -s -c
 ```txt
 # general 
 ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = N        # Normal precision
-GGA_COMPAT = .FALSE.   # Restore the full lattice symmetry of the GGA potential
+PREC = Normal        # Normal precision
+GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
 EDIFF = 1E-6    # Convergence criteria for electronic converge
 NELM = 500      # Max number of electronic steps
 ENCUT = 400     # Cut off energy
-LASPH = True    # Include non-spherical contributions from gradient corrections
+LASPH = .True.    # Include non-spherical contributions from gradient corrections
 BMIX = 3        # Mixing parameter for convergence
 AMIN = 0.01     # Mixing parameter for convergence 
 SIGMA = 0.05    # Width of smearing in eV
@@ -414,7 +414,7 @@ NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
 # scf 
 ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
 ISMEAR = 0      # Fermi smearing
-LCHARG = True   # Write the CHG* files
-LWAVE = False   # Does not write the WAVECAR
+LCHARG = .True.   # Write the CHG* files
+LWAVE = .False.   # Does not write the WAVECAR
 LREAL = Auto    # Automatically chooses rea/reciprocal space for projections
 ```

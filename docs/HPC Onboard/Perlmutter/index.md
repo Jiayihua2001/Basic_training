@@ -116,7 +116,7 @@ Remaining node-hours used to be available via `iris balance` on the command line
 Two canonical Marom-group templates, based on this [performance guide for running VASP efficiently on Perlmutter](https://drive.google.com/file/d/1hRArOePMcIXI044wm1Hl-p6BK569_vaT/view?usp=sharing). Both leave **two values for you to fill in** before submitting:
 
 - `-t HH:MM:SS` — wall-time. Pick one that fits your calculation; the VASP tutorials suggest concrete values per stage.
-- `VASP_BINARY` — `vasp_std` (most calculations), `vasp_ncl` (anything with `LNONCOLLINEAR = .TRUE.`), or `vasp_gam` (Γ-only supercells).
+- `VASP_BINARY` — `vasp_std` (most calculations), `vasp_ncl` (anything with `LNONCOLLINEAR = .True.`), or `vasp_gam` (Γ-only supercells).
 
 ### CPU — `vasp/6.4.3-cpu`
 
