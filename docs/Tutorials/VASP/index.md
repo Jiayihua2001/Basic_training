@@ -28,7 +28,7 @@ These tutorials introduce the VASP workflow used by the quantum-materials subgro
      cp -r /global/cfs/cdirs/m3578/shared_folder/vasp_tools/vaspkit.1.6.0 $HOME/opt/   # pick any install root you like
      echo 'export PATH="$HOME/opt/vaspkit.1.6.0/bin:$PATH"' >> ~/.bashrc
      source ~/.bashrc
-     vaspkit -version    # confirm
+     which vaspkit       # confirm it's on your PATH
      ```
    - [vaspvis](https://github.com/caizefeng/vaspvis) — publication-quality band/DOS figures from the Python side.
 4. Install a structure viewer — [VESTA](https://jp-minerals.org/vesta/en/) is the easiest for VASP `POSCAR`/`CHGCAR`, [OVITO](https://www.ovito.org/) is good for trajectories.
