@@ -9,7 +9,7 @@ nav_order: 4
 # Bulk InAs (PBE+SOC)
 In this step we will run our second calculation on bulk InAs where we add in spin-orbit couple to make our calculation more accurate.
 
-## Folder Layout
+## Recommended Folder Layout
 - `basic_training`
 	- `InAs_bulk`
 		- `pbe-soc`

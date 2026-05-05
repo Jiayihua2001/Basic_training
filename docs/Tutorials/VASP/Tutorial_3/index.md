@@ -9,7 +9,7 @@ nav_order: 3
 # Bulk InAs (PBE)
 In this step we will run our first calculation on bulk InAs
 
-## Folder Layout
+## Recommended Folder Layout
 - `basic_training`
 	- `InAs_bulk`
 		- `pbe`

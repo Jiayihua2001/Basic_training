@@ -9,7 +9,7 @@ nav_order: 5
 # Bulk InAs (HSE)
 In this step we will run our third calculation on bulk InAs where we use a hybrid functional (HSE06) to predict an accurate band gap.
 
-## Folder Layout
+## Recommended Folder Layout
 - `basic_training`
 	- `InAs_bulk`
 		- `hse`
