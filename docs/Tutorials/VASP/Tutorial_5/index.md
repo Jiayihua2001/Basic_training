@@ -64,7 +64,11 @@ TITEL = PAW_PBE As 22Sep2009
 ```
 
 ## Automation
-This entire calculation can be automated using a simple python script included below. You might notice that we don't produce a KPOINTS file for the band structure calculation in this script. That is because the HSE calculation requires a special type of KPOINTS file which is dependent on the results from the SCF calculation, so we will generate it in the submission script. We also reduced the k-point grid density for the DOS calculation because HSE calculations are very expensive.
+This entire calculation can be automated using a simple python script included below. Two notes on KPOINTS:
+
+- The **band** step's KPOINTS is HSE-flavoured (SCF `IBZKPT` + line k-points with weight 0) and depends on the SCF run, so we generate it in the submission script.
+- The **DOS** step uses `ALGO = None`, which only re-reads orbitals and eigenvalues already in `WAVECAR` (no diagonalisation). The DOS k-mesh is therefore fixed by the SCF mesh — densifying past the SCF grid would have no effect — so we just copy SCF's KPOINTS into `dos/`. Pick an SCF mesh dense enough for the DOS up front (here 11×11×11).
+
 ```python
 from os.path import isdir, join
 import os
@@ -86,9 +90,11 @@ for d in dirs:
     os.system("potcar.sh In As")
 
     if d == "scf":
-        os.system("kpoints.py -g -d 7 7 7")
-    elif d == "dos":
         os.system("kpoints.py -g -d 11 11 11")
+    elif d == "dos":
+        # ALGO = None reads only what's in WAVECAR — DOS k-mesh = SCF k-mesh
+        shutil.copy("../scf/KPOINTS", "KPOINTS")
+    # band's KPOINTS is generated in the submission script
 
     os.chdir(base_dir)
 ```
@@ -170,12 +176,18 @@ NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
 ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
 ISMEAR = 0      # Fermi smearing
 LCHARG = .True.   # Write the CHG* files
-LWAVE = .True.   # Does not write the WAVECAR
+LWAVE = .True.   # Write the WAVECAR (HSE post-SCF DOS reads it via ALGO = None)
 LREAL = Auto    # Automatically chooses real/reciprocal space for projections
 
 # soc 
 LSORBIT = .True.  # Turn on spin-orbit coupling
 MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
+
+# hse 
+LHFCALC = .True.  # Determines if a hybrid functional is used
+HFSCREEN = 0.2  # Range-separation parameter
+AEXX = 0.25     # Fraction of exact exchange to be used
+PRECFOCK = Fast # Increases the speed of HSE Calculations
 ```
 
 ## Density of States Calculation
@@ -209,11 +221,14 @@ SIGMA = 0.05    # Width of smearing in eV
 KPAR = 8        # The number of k-points to be treated in parallel
 NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
 
-# dos 
-ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
+# dos (post-process WAVECAR; HSE — no Fock exchange evaluated)
+ALGO = None     # Postprocess only: read orbitals + eigenvalues from WAVECAR
+NELM = 1        # No iteration (paired with ALGO = None)
+ISTART = 1      # Read WAVECAR
+ICHARG = 0      # Required for hybrids (never use ICHARG = 11 with HSE)
 ISMEAR = -5     # Tetrahedron method with Blochl corrections
 LCHARG = .False.  # Does not write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR files 
+LWAVE = .False.   # Does not write the WAVECAR
 LORBIT = 11     # Projected data (lm-decomposed PROCAR)
 NEDOS = 3001    # 3001 points are sampled for the DOS
 EMIN = -3.7174     # Minimum energy for the DOS plot
@@ -223,20 +238,15 @@ EMAX = 10.2826     # Maximum energy for the DOS plot
 LSORBIT = .True.  # Turn on spin-orbit coupling
 MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
 
-# hse 
-LHFCALC = .True.  # Determines if a hybrid functional is used
-HFSCREEN = 0.2  # Range-separation parameter
-AEXX = 0.25     # Fraction of exact exchange to be used
-PRECFOCK = Fast # Increases the speed of HSE Calculations
+# (no `# hse` block: ALGO = None doesn't evaluate the Fock operator,
+#  so LHFCALC / HFSCREEN / AEXX / PRECFOCK are unnecessary here)
 ```
 
 ### KPOINTS
-For a DOS calculation we would like to have a denser kpoint mesh to get more accurate results. The code to generate the KPOINTS file is shown below. We will reduce the grid density for HSE due to its computationally expensive nature.
+The DOS step reuses the SCF `KPOINTS` file verbatim. `ALGO = None` only reads the orbitals and eigenvalues already in `WAVECAR`, so the DOS k-mesh is fixed by the SCF mesh — generating a denser one would have no effect. The Python automation above does the copy:
 
 ```bash
-kpoints.py --grid --density 11 11 11
-or
-kpoints.py -g -d 11 11 11
+cp ../scf/KPOINTS .
 ```
 
 ### Results
@@ -282,8 +292,9 @@ SIGMA = 0.05    # Width of smearing in eV
 KPAR = 8        # The number of k-points to be treated in parallel
 NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
 
-# band 
-ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
+# band (HSE; restart from WAVECAR with zero-weight line k-points)
+ISTART = 1      # Read WAVECAR
+ICHARG = 0      # Required for hybrids; charge derived from orbitals
 ISMEAR = 0      # Fermi smearing
 LCHARG = .False.  # Does not write the CHG* files
 LWAVE = .False.   # Does not write the WAVECAR files (.True. for unfolding)

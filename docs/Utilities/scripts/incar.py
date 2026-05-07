@@ -55,8 +55,8 @@ SCF = """\
 # --- SCF ---------------------------------------------------------------------
 ICHARG = 2               # Initial charge from atomic superposition
 ISMEAR = 0               # Gaussian smearing for SCF
-LCHARG = .True.          # Write CHG/CHGCAR for downstream DOS/band
-LWAVE  = {lwave}         # Write WAVECAR (needed for HSE band/DOS)
+LCHARG = .True.          # Write CHG/CHGCAR for downstream PBE post-SCF (ICHARG = 11)
+LWAVE  = {lwave}         # {lwave_comment}
 LREAL  = Auto            # Automatically chooses real/reciprocal projections
 """
 
@@ -72,9 +72,41 @@ EMIN   = emin            # Filled in by sbatch script from SCF Fermi level
 EMAX   = emax
 """
 
+# HSE DOS: ALGO = None just reads orbitals/eigenvalues from WAVECAR (VASP wiki:
+# IALGO = 2). No Hamiltonian is evaluated, so no LHFCALC/HFSCREEN/AEXX needed.
+# The DOS k-mesh therefore equals the SCF k-mesh (whatever WAVECAR holds).
+DOS_HSE = """\
+# --- DOS (post-process WAVECAR; HSE) ----------------------------------------
+ALGO   = None            # Postprocess only: read orbitals + eigenvalues from WAVECAR
+NELM   = 1               # No iteration (paired with ALGO = None)
+ISTART = 1               # Read WAVECAR
+ICHARG = 0               # Required for hybrids (never use ICHARG = 11 with HSE)
+ISMEAR = -5              # Tetrahedron with Bloechl correction
+LCHARG = .False.
+LWAVE  = .False.
+LORBIT = 11              # lm-decomposed PROCAR / DOSCAR
+NEDOS  = 3001
+EMIN   = emin            # Filled in by sbatch script from SCF Fermi level
+EMAX   = emax
+"""
+
 BAND = """\
 # --- band --------------------------------------------------------------------
 ICHARG = 11              # Read converged CHGCAR; non-SC band evaluation
+ISMEAR = 0               # Gaussian smearing
+LCHARG = .False.
+LWAVE  = .False.
+LORBIT = 11              # lm-decomposed PROCAR
+"""
+
+# HSE band: KPOINTS file is SCF IBZKPT + line k-points with weight 0.
+# ALGO = Fast iterates over the new line k-points using the converged orbitals
+# at the SCF k-points (read via ISTART = 1) as starting guess. ICHARG = 11
+# is forbidden for hybrids.
+BAND_HSE = """\
+# --- band (HSE; restart from WAVECAR with zero-weight line k-points) ---------
+ISTART = 1               # Read WAVECAR
+ICHARG = 0               # Required for hybrids; charge derived from orbitals
 ISMEAR = 0               # Gaussian smearing
 LCHARG = .False.
 LWAVE  = .False.
@@ -130,14 +162,18 @@ def build_incar(args):
     if main is None:
         raise SystemExit("Choose one of --scf / --dos / --band / --opt.")
 
-    lwave = ".True." if (args.scf and args.hse) else ".False."
-
     if args.scf:
-        parts.append(SCF.format(lwave=lwave))
+        if args.hse:
+            lwave = ".True."
+            lwave_comment = "Write WAVECAR (HSE post-SCF DOS reads it via ALGO = None)"
+        else:
+            lwave = ".False."
+            lwave_comment = "Skip WAVECAR (PBE post-SCF reads CHGCAR via ICHARG = 11)"
+        parts.append(SCF.format(lwave=lwave, lwave_comment=lwave_comment))
     elif args.dos:
-        parts.append(DOS)
+        parts.append(DOS_HSE if args.hse else DOS)
     elif args.band:
-        parts.append(BAND)
+        parts.append(BAND_HSE if args.hse else BAND)
     elif args.opt:
         parts.append(OPT)
 
@@ -154,12 +190,12 @@ def build_incar(args):
         parts.append(SOC.format(magmom=magmom))
 
     if args.hse:
-        hse = HSE
-        if not args.scf:
-            # for non-self-consistent HSE band/DOS, override ALGO + use ICHARG=0
-            hse = "# --- override for non-SCF HSE -------------------------------\n" \
-                  "ALGO = Damped\n" + hse
-        parts.append(hse)
+        # SCF and band evaluate the HF exchange operator and need the HSE block.
+        # DOS uses ALGO = None (no Hamiltonian eval), so HSE tags are unnecessary.
+        if args.dos:
+            pass
+        else:
+            parts.append(HSE)
     elif main in ("scf", "opt"):
         parts.append("# (Pure PBE; add --hse for HSE06 or --dftu for DFT+U)\n")
 
