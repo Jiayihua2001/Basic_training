@@ -67,7 +67,7 @@ TITEL = PAW_PBE As 22Sep2009
 This entire calculation can be automated using a simple python script included below. Two notes on KPOINTS:
 
 - The **band** step's KPOINTS is HSE-flavoured (SCF `IBZKPT` + line k-points with weight 0) and depends on the SCF run, so we generate it in the submission script.
-- The **DOS** step uses `ALGO = None`, which only re-reads orbitals and eigenvalues already in `WAVECAR` (no diagonalisation). The DOS k-mesh is therefore fixed by the SCF mesh — densifying past the SCF grid would have no effect — so we just copy SCF's KPOINTS into `dos/`. Pick an SCF mesh dense enough for the DOS up front (here 11×11×11).
+- The **DOS** step uses `ALGO = None`, which only re-reads orbitals and eigenvalues already in `WAVECAR` (no diagonalisation). Pick an SCF mesh dense enough for the DOS up front (here 11×11×11).
 
 ```python
 from os.path import isdir, join
@@ -243,7 +243,7 @@ MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
 ```
 
 ### KPOINTS
-The DOS step reuses the SCF `KPOINTS` file verbatim. `ALGO = None` only reads the orbitals and eigenvalues already in `WAVECAR`, so the DOS k-mesh is fixed by the SCF mesh — generating a denser one would have no effect. The Python automation above does the copy:
+The DOS step reuses the SCF `KPOINTS` file verbatim. The Python automation above does the copy:
 
 ```bash
 cp ../scf/KPOINTS .
