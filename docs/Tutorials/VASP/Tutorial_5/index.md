@@ -202,15 +202,13 @@ or
 incar.py -d -c -e
 ```
 
-Which results in the following file. The values of EMIN and EMAX were automatically  determined using the code shown in section [Calculation Descriptions](../Tutorial_2/).
+Which results in the following file. The values of EMIN and EMAX were automatically  determined using the code shown in section [Calculation Descriptions](../Tutorial_2/). Note that `ALGO` and `NELM` are deliberately **not** in the general block here — `incar.py` deduplicates tags so the dos-block overrides (`ALGO = None`, `NELM = 1`) are the only ones written.
 
 ```txt
 # general 
-ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
 PREC = Normal        # Normal precision
 GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
 EDIFF = 1E-6    # Convergence criteria for electronic converge
-NELM = 500      # Max number of electronic steps
 ENCUT = 400     # Cut off energy
 LASPH = .True.    # Include non-spherical contributions from gradient corrections
 BMIX = 3        # Mixing parameter for convergence

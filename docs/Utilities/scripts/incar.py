@@ -29,7 +29,26 @@ Defaults (always written; based on VASP-wiki recommendations)
 
 import argparse
 import os
+import re
 import textwrap
+
+
+# Drop any tag that gets set more than once, keeping only the last occurrence.
+# VASP uses last-wins semantics, but echoing the override on top of the
+# original value clutters the INCAR (e.g. ALGO = Fast in the general block
+# followed by ALGO = None in a HSE-DOS block).
+_TAG_RE = re.compile(r"^\s*([A-Za-z][A-Za-z0-9_]*)\s*=")
+
+
+def _deduplicate_tags(text):
+    lines = text.splitlines()
+    occurrences = {}
+    for i, line in enumerate(lines):
+        m = _TAG_RE.match(line)
+        if m:
+            occurrences.setdefault(m.group(1).upper(), []).append(i)
+    drop = {i for idxs in occurrences.values() if len(idxs) > 1 for i in idxs[:-1]}
+    return "\n".join(line for i, line in enumerate(lines) if i not in drop)
 
 
 # --- INCAR fragments ---------------------------------------------------------
@@ -199,7 +218,7 @@ def build_incar(args):
     elif main in ("scf", "opt"):
         parts.append("# (Pure PBE; add --hse for HSE06 or --dftu for DFT+U)\n")
 
-    return "\n".join(parts)
+    return _deduplicate_tags("\n".join(parts))
 
 
 def _default_magmom(poscar_path):
