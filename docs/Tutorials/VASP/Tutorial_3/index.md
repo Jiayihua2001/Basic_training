@@ -122,8 +122,8 @@ fermi_array=($fermi_str)
 efermi=${fermi_array[2]}
 emin=`echo $efermi - 7 | bc -l`
 emax=`echo $efermi + 7 | bc -l`
-sed -i "s/EMIN = emin/EMIN = $emin/" ../dos/INCAR
-sed -i "s/EMAX = emax/EMAX = $emax/" ../dos/INCAR
+sed -i "s/EMIN[[:space:]]*=[[:space:]]*emin/EMIN = $emin/" ../dos/INCAR
+sed -i "s/EMAX[[:space:]]*=[[:space:]]*emax/EMAX = $emax/" ../dos/INCAR
 
 cp CHG* ../band
 cp CHG* ../dos

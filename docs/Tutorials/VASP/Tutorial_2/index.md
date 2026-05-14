@@ -121,8 +121,8 @@ fermi_array=($fermi_str)
 efermi=${fermi_array[2]}  
 emin=`echo $efermi - 3 | bc -l`  
 emax=`echo $efermi + 3 | bc -l`  
-sed -i "s/EMIN = EMIN/EMIN = $emin/" ../dos/INCAR  
-sed -i "s/EMAX = EMAX/EMAX = $emax/" ../dos/INCAR
+sed -i "s/EMIN[[:space:]]*=[[:space:]]*emin/EMIN = $emin/" ../dos/INCAR  
+sed -i "s/EMAX[[:space:]]*=[[:space:]]*emax/EMAX = $emax/" ../dos/INCAR
 ```
 
 ### KPOINTS
