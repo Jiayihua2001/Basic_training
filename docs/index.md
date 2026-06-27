@@ -15,7 +15,7 @@ Pick the track that matches your project:
 
 ## 🧪 Organic / molecular materials
 
-*(CSP, GATOR, Organic Interface, singlet-fission (SF) subgroups.)* These projects use the all-electron code **FHI-aims** on **Trace** or **Arjuna**.
+*(CSP, GAtor, Organic Interface, singlet-fission (SF) subgroups.)* These projects use the all-electron code **FHI-aims** on **Trace** or **Arjuna**.
 
 1. **Download** the tutorial files:
    👉 <a href="Tutorials_files.zip" download>📥 Download Tutorial Files</a>

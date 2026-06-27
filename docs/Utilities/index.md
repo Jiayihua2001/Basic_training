@@ -11,8 +11,8 @@ This section collects the tools and helper scripts that the tutorials reference.
 
 - **Automation platforms** — GIMS for FHI-aims, VASPKIT for VASP.
 - **Visualisation tools** — Jmol, OVITO, VESTA.
-- **Python libraries** — ASE and pymatgen for structure manipulation, DFT setup, and post-processing; `vaspvis` for VASP band/DOS figures.
-- **Marom-group QM packages** — OgreInterface (epitaxial interfaces) and BayesianOpt4dftu (DFT+U *U*-fitting).
+- **Python libraries** — ASE and pymatgen for structure manipulation, DFT setup, and post-processing.
+- **Marom-group QM packages** — OgreInterface (epitaxial interfaces), BayesianOpt4dftu (DFT+U *U*-fitting), and vaspvis (band/DOS figures).
 - **VASP helper scripts** — `incar.py`, `kpoints.py`, `potcar.sh` (used in the VASP tutorials).
 - **AI coding assistants** — Claude Code and OpenAI Codex for writing and extending workflow code.
 
@@ -75,9 +75,7 @@ vaspkit -task 102 -kpr 0.04     # Γ-centred grid at 0.04 (2π/Å) spacing → 7
 | 911  | Band-gap finder                                                                       |
 | 912  | Effective-mass calculator                                                             |
 
-In the [VASP tutorials](../Tutorials/VASP/) we use VASPKIT mainly for tasks **102**, **103**, **303**, **251**, **211**, and **252**. (Task IDs verified against VASPKIT 1.6.0 — note 252, not 213, is the hybrid-band task.)
-
-> Please cite VASPKIT if you use it: V. Wang *et al.*, *Comput. Phys. Commun.* **267**, 108033 (2021); W.T. Geng *et al.*, *Nat. Protoc.* **20**, 3143 (2025).
+In the [VASP tutorials](../Tutorials/VASP/) we use VASPKIT mainly for tasks **102**, **103**, **303**, **251**, **211**, and **252**.
 
 ---
 
@@ -122,6 +120,32 @@ pip install ase
 pip install pymatgen
 ```
 
+---
+
+## Marom-group QM packages
+
+Three Python packages maintained in the group are central to inorganic (quantum-materials) work and appear in the workflow around the [VASP tutorials](../Tutorials/VASP/).
+
+### 🔸 [OgreInterface](https://github.com/caizefeng/OgreInterface)
+{: #ogreinterface }
+- Python package for creating and optimising **lattice- and domain-matched epitaxial interfaces**.
+- Scans substrate/film Miller-index combinations for the lowest-mismatch interfaces, then uses Bayesian *surface matching* to find the optimal interfacial distance and in-plane registry.
+- Use it to generate the slabs/interfaces you then feed to VASP.
+
+```bash
+pip install git+https://github.com/caizefeng/OgreInterface
+```
+
+### 🔸 [BayesianOpt4dftu](https://github.com/caizefeng/BayesianOpt4dftu)
+{: #bayesianopt4dftu }
+- Determines the Hubbard **U** for DFT+U by **Bayesian optimisation**, tuning U so the PBE+U band structure matches an HSE06 (or experimental) reference — the exact method described in the [DFT+U section of Tutorial 2](../Tutorials/VASP/Tutorial_2/#adding-dftu-to-a-calculation).
+- Drives VASP automatically and reports the optimal U together with the Gaussian-process mean and acquisition surface.
+- Method reference: M. Yu, S. Yang, C. Wu & N. Marom, *npj Comput. Mater.* **6**, 180 (2020).
+
+```bash
+pip install git+https://github.com/caizefeng/BayesianOpt4dftu.git
+```
+
 ### 🔸 [vaspvis](https://github.com/caizefeng/vaspvis)
 {: #vaspvis }
 - Python plotting toolkit for VASP band structures, DOS, and band-unfolding.
@@ -142,32 +166,6 @@ bs.plot_plain(output="InAs_band.png")
 ```
 
 For HSE bands (Tutorial 5) the same call works because `vaspvis` reads the IBZKPT-augmented KPOINTS from the run folder and drops the weighted points automatically.
-
----
-
-## Marom-group QM packages
-
-Two Python packages from the group are central to inorganic (quantum-materials) work and appear in the workflow around the [VASP tutorials](../Tutorials/VASP/).
-
-### 🔸 [OgreInterface](https://github.com/DerekDardzinski/OgreInterface)
-{: #ogreinterface }
-- Builds and optimises **lattice- and domain-matched epitaxial interfaces** between inorganic crystals (Marom group, Derek Dardzinski).
-- Scans substrate/film Miller-index combinations for the lowest-mismatch interfaces, then uses Bayesian *surface matching* to find the optimal interfacial distance and in-plane registry.
-- The inorganic counterpart to Ogre (organic molecular-crystal surfaces); also ships a desktop GUI. Use it to generate the slabs/interfaces you then feed to VASP.
-
-```bash
-pip install OgreInterface
-```
-
-### 🔸 [BayesianOpt4dftu](https://github.com/caizefeng/BayesianOpt4dftu)
-{: #bayesianopt4dftu }
-- Determines the Hubbard **U** for DFT+U by **Bayesian optimisation**, tuning U so the PBE+U band structure matches an HSE06 (or experimental) reference — the exact method described in the [DFT+U section of Tutorial 2](../Tutorials/VASP/Tutorial_2/#adding-dftu-to-a-calculation).
-- Drives VASP automatically and reports the optimal U together with the Gaussian-process mean and acquisition surface.
-- Active, refactored version maintained in the group; original at [maituoy/BayesianOpt4dftu](https://github.com/maituoy/BayesianOpt4dftu). Method: M. Yu, S. Yang, C. Wu & N. Marom, *npj Comput. Mater.* **6**, 180 (2020).
-
-```bash
-pip install BayesOpt4dftu
-```
 
 ---
 
