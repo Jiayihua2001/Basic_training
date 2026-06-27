@@ -15,9 +15,10 @@ Usage examples
 
 Defaults (always written; based on VASP-wiki recommendations)
 -------------------------------------------------------------
-  EDIFF        = 1E-8        # tighter than the VASP default 1E-4. The wiki
-                             # notes 1E-6 as "the best compromise"; we go tighter, to
-                             # 1E-8 for well-converged energies, forces, and restarts.
+  EDIFF        = auto        # 1E-8 per atom, snapped to the nearest 1/5 value
+                             # (1E-8 / 5E-8 / 1E-7 / 5E-7 / 1E-6) and capped at 1E-6 --
+                             # tighter than the wiki's 1E-6 "compromise" for small
+                             # cells, auto-loosened for large ones. Override: --ediff.
   GGA_COMPAT   = .False.     # restore full Bravais-lattice symmetry of the
                              # gradient field; default of .True. only exists
                              # for backward compatibility.
@@ -34,6 +35,7 @@ lines up, so the generated INCAR matches the blocks shown in the tutorials.
 """
 
 import argparse
+import math
 import os
 import re
 import textwrap
@@ -102,7 +104,7 @@ GENERAL = """\
 # --- general ---
 ALGO = {algo}  # {algo_comment}
 PREC = Normal  # Precision level
-EDIFF = {ediff}  # Electronic SC-loop break condition (eV); tight
+EDIFF = {ediff}  # Electronic SC-loop break condition (eV); ~1E-8 per atom, capped at 1E-6
 NELM = 500  # Maximum number of electronic SCF steps
 ENCUT = {encut}  # Plane-wave cutoff (eV)
 LASPH = .True.  # Non-spherical contributions from gradient corrections
@@ -224,9 +226,12 @@ def build_incar(args):
     else:
         algo, algo_comment = "Fast", "Mixture of Davidson + RMM-DIIS"
 
+    # EDIFF: explicit override, else auto = 1E-8 per atom (snapped to 1/5, <= 1E-6).
+    ediff = args.ediff or _auto_ediff(args.poscar)
+
     parts = [GENERAL.format(
         algo=algo, algo_comment=algo_comment,
-        ediff=args.ediff, encut=args.encut,
+        ediff=ediff, encut=args.encut,
         kpar=args.kpar, ncore=args.ncore,
     )]
 
@@ -274,19 +279,42 @@ def build_incar(args):
     return _format_incar(_deduplicate_tags("\n".join(parts)))
 
 
-def _default_magmom(poscar_path):
-    """Build MAGMOM = 'N*0' from a POSCAR (3 components per atom)."""
+def _count_atoms(poscar_path):
+    """Number of atoms from a POSCAR: the sum of the per-species counts, which
+    sit on line 6 (or line 7 if line 6 holds the element symbols). Returns 0 if
+    the POSCAR is missing or unparseable."""
     if not os.path.isfile(poscar_path):
-        return "0 0 0"
+        return 0
     with open(poscar_path) as fh:
         lines = fh.readlines()
-    try:
-        counts = [int(x) for x in lines[6].split()]
-    except (IndexError, ValueError):
-        # POSCAR has element labels on line 6 -> counts on line 7
-        counts = [int(x) for x in lines[7].split()]
-    n_atoms = sum(counts)
-    return f"{3 * n_atoms}*0"
+    for idx in (6, 7):
+        try:
+            return sum(int(x) for x in lines[idx].split())
+        except (IndexError, ValueError):
+            continue
+    return 0
+
+
+def _default_magmom(poscar_path):
+    """Build MAGMOM = 'N*0' from a POSCAR (3 components per atom)."""
+    n = _count_atoms(poscar_path)
+    return f"{3 * n}*0" if n else "0 0 0"
+
+
+# EDIFF ladder: 1E-8 per atom, snapped to the nearest 1- or 5-style value in log
+# space, and never looser than the 1E-6 upper limit.
+_EDIFF_LADDER = [(1e-8, "1E-8"), (5e-8, "5E-8"), (1e-7, "1E-7"),
+                 (5e-7, "5E-7"), (1e-6, "1E-6")]
+
+
+def _auto_ediff(poscar_path):
+    """EDIFF = round(N_atoms x 1E-8) to the nearest 1/5 value, capped at 1E-6.
+    Falls back to a single atom (1E-8) when the POSCAR can't be read."""
+    n = _count_atoms(poscar_path) or 1
+    target = min(n * 1e-8, 1e-6)                 # upper limit (loosest) = 1E-6
+    _, label = min(_EDIFF_LADDER,
+                   key=lambda p: abs(math.log10(p[0]) - math.log10(target)))
+    return label
 
 
 def parse_args():
@@ -308,8 +336,9 @@ def parse_args():
     m.add_argument("-u", "--dftu", action="store_true",
                    help="Add Dudarev DFT+U block.")
 
-    p.add_argument("--ediff", default="1E-8",
-                   help="EDIFF (default 1E-8; tight electronic convergence).")
+    p.add_argument("--ediff", default=None,
+                   help="EDIFF override (default: auto = 1E-8 per atom, "
+                        "snapped to 1/5 and capped at 1E-6).")
     p.add_argument("--encut", type=int, default=400,
                    help="ENCUT in eV (default 400).")
     p.add_argument("--kpar",  type=int, default=4,

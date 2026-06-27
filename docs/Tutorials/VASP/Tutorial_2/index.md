@@ -28,7 +28,7 @@ SIGMA      = 0.05     # Width of smearing in eV
 
 > **About `EDIFF`.** From the [VASP wiki](https://www.vasp.at/wiki/index.php/EDIFF):
 > "EDIFF specifies the global break condition for the electronic SC-loop." "The relaxation of the electronic degrees of freedom stops if the total (free) energy change and the band-structure-energy change ('change of eigenvalues') between two steps are both smaller than EDIFF (in eV)."
-> The VASP default is `1E-4`; we tighten it to `1E-8` so that DOS, band, and especially HSE/SOC restarts inherit a well-converged charge density.
+> The VASP default is `1E-4`. `incar.py` instead sets EDIFF automatically to **1E-8 per atom**, snapped to the nearest 1/5 value (1E-8, 5E-8, 1E-7, 5E-7, 1E-6) and capped at 1E-6 — so this 2-atom InAs cell gets `1E-8`, while large supercells auto-loosen. This keeps DOS, band, and especially HSE/SOC restarts well-converged; override with `--ediff`.
 
 > **About `NBANDS`.** We no longer set `NBANDS` and let VASP pick its default — `max( NELECT/2 + NIONS/2 , 0.6·NELECT )` (rounded up, with magnetism / non-collinear corrections applied automatically). Override it only when you need extra empty states (e.g. unfolded bands, GW, or to silence the "too few bands" warning at high SIGMA).
 
@@ -398,7 +398,7 @@ incar.py -s -c
 # --- general ---
 ALGO       = Fast     # Mixture of Davidson + RMM-DIIS
 PREC       = Normal   # Precision level
-EDIFF      = 1E-8     # Electronic SC-loop break condition (eV); tight
+EDIFF      = 1E-8     # Electronic SC-loop break condition (eV); ~1E-8 per atom, capped at 1E-6
 NELM       = 500      # Maximum number of electronic SCF steps
 ENCUT      = 400      # Plane-wave cutoff (eV)
 LASPH      = .True.   # Non-spherical contributions from gradient corrections
