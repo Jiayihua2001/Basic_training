@@ -7,12 +7,14 @@ has_children: true
 
 # Utilities
 
-This section collects the tools and helper scripts that the tutorials reference. They fall into four buckets:
+This section collects the tools and helper scripts that the tutorials reference. They fall into these buckets:
 
 - **Automation platforms** — GIMS for FHI-aims, VASPKIT for VASP.
 - **Visualisation tools** — Jmol, OVITO, VESTA.
-- **Python libraries** — ASE and pymatgen for structure manipulation, DFT setup, and post-processing.
+- **Python libraries** — ASE and pymatgen for structure manipulation, DFT setup, and post-processing; `vaspvis` for VASP band/DOS figures.
+- **Marom-group QM packages** — OgreInterface (epitaxial interfaces) and BayesianOpt4dftu (DFT+U *U*-fitting).
 - **VASP helper scripts** — `incar.py`, `kpoints.py`, `potcar.sh` (used in the VASP tutorials).
+- **AI coding assistants** — Claude Code and OpenAI Codex for writing and extending workflow code.
 
 ---
 
@@ -34,35 +36,48 @@ GIMS is great for new users who want to skip manual setup, and for experienced u
 
 ### Installation
 
-1. Download the latest binary from [SourceForge](https://sourceforge.net/projects/vaspkit/files/).
-2. Add the binary to your `PATH`.
-3. Copy the bundled `how_to_set_environment_variable` to `~/.vaspkit` and edit the POTCAR paths inside.
+**General (non-Perlmutter):** download the latest binary from [SourceForge](https://sourceforge.net/projects/vaspkit/files/), add its `bin/` to your `PATH`, and copy the bundled `how_to_set_environment_variable` to `~/.vaspkit`, editing the POTCAR paths inside so tasks like 103/303 can find your PAW library.
 
 ```bash
 # typical .bashrc additions
 export PATH="$HOME/vaspkit/bin:$PATH"
 ```
 
+> ⚠️ **On Perlmutter, do _not_ use the SourceForge binary.** The version published on the website is linked against an older glibc and is incompatible with Perlmutter, so it fails to run. The **only** working build is the **1.6.0** copy staged on CFS under `shared_folder`. Install it once and edit `~/.vaspkit` for the POTCAR paths:
+
+```bash
+cp -r /global/cfs/cdirs/m3578/shared_folder/vasp_tools/vaspkit.1.6.0 $HOME/opt/   # pick any install root
+echo 'export PATH="$HOME/opt/vaspkit.1.6.0/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+which vaspkit       # confirm it's on your PATH
+```
+
 ### Most-used menus
 
-Run `vaspkit` and pick a numbered task — they all also accept the `-task <id>` flag for batch use.
+Run `vaspkit` and pick a numbered task interactively, or call it non-interactively for scripting — every task accepts the `-task <id>` flag:
+
+```bash
+vaspkit -task 102 -kpr 0.04     # Γ-centred grid at 0.04 (2π/Å) spacing → 7×7×7 for InAs
+```
 
 | Task | Purpose                                                                               |
 |------|---------------------------------------------------------------------------------------|
 | 101  | INCAR templates (static / relax / HSE / DFT+U / phonon …)                             |
-| 102  | KPOINTS — Monkhorst-Pack / Γ-centred grids                                            |
+| 102  | KPOINTS grid — Monkhorst-Pack / Γ-centred; set density with `-kpr <spacing>` (0.04 → 7×7×7, 0.019 → 15×15×15 for InAs) |
 | 103  | POTCAR (default recommended PAW)                                                      |
 | 104  | POTCAR (user-specified PAW per element)                                               |
-| 251  | **HSE band-structure KPOINTS** — auto-builds the IBZKPT + zero-weight path scheme     |
-| 303  | High-symmetry k-path along the Setyawan-Curtarolo convention (3D PBE band)            |
+| 303  | High-symmetry k-path, Setyawan-Curtarolo convention (3D PBE band) → writes `KPATH.in` |
 | 302  | High-symmetry k-path for 2D materials                                                 |
-| 211  | Plot PBE band structure from `EIGENVAL` / `vasprun.xml`                               |
-| 213  | Plot HSE band structure (handles the zero-weight points automatically)                |
-| 111  | Total / projected DOS                                                                 |
+| 251  | **HSE band-structure KPOINTS** — IBZKPT mesh + zero-weight path (reads `KPATH.in`)    |
+| 211  | Extract/plot PBE band structure from `EIGENVAL` / `vasprun.xml`                       |
+| 252  | Extract/plot **HSE** (hybrid) band structure — drops the zero-weight points automatically |
+| 111  | Total density of states (112–115 for projected DOS)                                  |
 | 911  | Band-gap finder                                                                       |
 | 912  | Effective-mass calculator                                                             |
 
-In the [VASP tutorials](../Tutorials/VASP/) we use VASPKIT mainly for tasks **102**, **251**, **303**, **211**, and **213**.
+In the [VASP tutorials](../Tutorials/VASP/) we use VASPKIT mainly for tasks **102**, **103**, **303**, **251**, **211**, and **252**. (Task IDs verified against VASPKIT 1.6.0 — note 252, not 213, is the hybrid-band task.)
+
+> Please cite VASPKIT if you use it: V. Wang *et al.*, *Comput. Phys. Commun.* **267**, 108033 (2021); W.T. Geng *et al.*, *Nat. Protoc.* **20**, 3143 (2025).
 
 ---
 
@@ -108,6 +123,7 @@ pip install pymatgen
 ```
 
 ### 🔸 [vaspvis](https://github.com/caizefeng/vaspvis)
+{: #vaspvis }
 - Python plotting toolkit for VASP band structures, DOS, and band-unfolding.
 - Wraps a clean object-oriented API around `vasprun.xml` / `EIGENVAL` / `PROCAR`, including correct handling of HSE zero-weight k-points and slab/supercell unfolding.
 - Used in the [VASP tutorials](../Tutorials/VASP/) for the publication-quality figures.
@@ -126,6 +142,32 @@ bs.plot_plain(output="InAs_band.png")
 ```
 
 For HSE bands (Tutorial 5) the same call works because `vaspvis` reads the IBZKPT-augmented KPOINTS from the run folder and drops the weighted points automatically.
+
+---
+
+## Marom-group QM packages
+
+Two Python packages from the group are central to inorganic (quantum-materials) work and appear in the workflow around the [VASP tutorials](../Tutorials/VASP/).
+
+### 🔸 [OgreInterface](https://github.com/DerekDardzinski/OgreInterface)
+{: #ogreinterface }
+- Builds and optimises **lattice- and domain-matched epitaxial interfaces** between inorganic crystals (Marom group, Derek Dardzinski).
+- Scans substrate/film Miller-index combinations for the lowest-mismatch interfaces, then uses Bayesian *surface matching* to find the optimal interfacial distance and in-plane registry.
+- The inorganic counterpart to Ogre (organic molecular-crystal surfaces); also ships a desktop GUI. Use it to generate the slabs/interfaces you then feed to VASP.
+
+```bash
+pip install OgreInterface
+```
+
+### 🔸 [BayesianOpt4dftu](https://github.com/caizefeng/BayesianOpt4dftu)
+{: #bayesianopt4dftu }
+- Determines the Hubbard **U** for DFT+U by **Bayesian optimisation**, tuning U so the PBE+U band structure matches an HSE06 (or experimental) reference — the exact method described in the [DFT+U section of Tutorial 2](../Tutorials/VASP/Tutorial_2/#adding-dftu-to-a-calculation).
+- Drives VASP automatically and reports the optimal U together with the Gaussian-process mean and acquisition surface.
+- Active, refactored version maintained in the group; original at [maituoy/BayesianOpt4dftu](https://github.com/maituoy/BayesianOpt4dftu). Method: M. Yu, S. Yang, C. Wu & N. Marom, *npj Comput. Mater.* **6**, 180 (2020).
+
+```bash
+pip install BayesOpt4dftu
+```
 
 ---
 
@@ -153,3 +195,14 @@ echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
 > Both `incar.py --help` and `kpoints.py --help` list every flag. Edit `potcar.sh` once to point at your `potpaw_PBE` directory; on Perlmutter the group typically keeps it under `/global/common/software/<repo>/`.
 
 > The Marom-group VASP scripts and the FHI-aims tutorial helpers (`write_control.py`, `Automation.py`, `Surfaces.py`, `aimsplot.py`) are conceptually similar — they wrap argparse around the parts of the workflow that don't change. Use VASPKIT when you want a richer interactive menu.
+
+---
+
+## AI coding assistants
+
+Research involves a lot of glue code — generating inputs, parsing `OUTCAR` / `vasprun.xml`, batching jobs, plotting. Terminal-based AI coding assistants speed this up and run fine on the Perlmutter **login node**:
+
+- **[Claude Code](https://claude.com/claude-code)** — Anthropic's agentic CLI (`claude`). Good for writing and debugging analysis scripts, extending the helper scripts (`incar.py`, `kpoints.py`), wrangling Slurm submit scripts, and explaining VASP errors. Also available in VS Code / JetBrains and on the web.
+- **[OpenAI Codex CLI](https://github.com/openai/codex)** — a comparable terminal agent (`codex`).
+
+Use them to *understand and extend* the workflow, not to skip learning it — the [goal of these tutorials](../) is for you to own the logic, the physics, and the pipeline yourself. Treat generated code like a colleague's: read it, test it, and sanity-check the physics before trusting a number.
