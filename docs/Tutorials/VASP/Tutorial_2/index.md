@@ -17,7 +17,7 @@ As stated in [VASP Basics](../Tutorial_1/), the INCAR contains the set of instru
 ALGO       = Fast     # Mixture of Davidson and RMM-DIIS algos
 PREC       = Normal   # Normal precision
 GGA_COMPAT = .False.  # Restore the full lattice symmetry of the GGA potential
-EDIFF      = 1E-6     # Convergence criteria for electronic converge
+EDIFF      = 1E-8     # Convergence criteria for electronic converge
 NELM       = 500      # Max number of electronic steps
 ENCUT      = 400      # Cut off energy
 LASPH      = .True.   # Include non-spherical contributions from gradient corrections
@@ -28,7 +28,7 @@ SIGMA      = 0.05     # Width of smearing in eV
 
 > **About `EDIFF`.** From the [VASP wiki](https://www.vasp.at/wiki/index.php/EDIFF):
 > "EDIFF specifies the global break condition for the electronic SC-loop." "The relaxation of the electronic degrees of freedom stops if the total (free) energy change and the band-structure-energy change ('change of eigenvalues') between two steps are both smaller than EDIFF (in eV)."
-> The VASP default is `1E-4`; we tighten it to `1E-6` so that DOS, band, and especially HSE/SOC restarts inherit a well-converged charge density.
+> The VASP default is `1E-4`; we tighten it to `1E-8` so that DOS, band, and especially HSE/SOC restarts inherit a well-converged charge density.
 
 > **About `NBANDS`.** We no longer set `NBANDS` and let VASP pick its default — `max( NELECT/2 + NIONS/2 , 0.6·NELECT )` (rounded up, with magnetism / non-collinear corrections applied automatically). Override it only when you need extra empty states (e.g. unfolded bands, GW, or to silence the "too few bands" warning at high SIGMA).
 
@@ -398,7 +398,7 @@ incar.py -s -c
 # --- general ---
 ALGO       = Fast     # Mixture of Davidson + RMM-DIIS
 PREC       = Normal   # Precision level
-EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+EDIFF      = 1E-8     # Electronic SC-loop break condition (eV); tight
 NELM       = 500      # Maximum number of electronic SCF steps
 ENCUT      = 400      # Plane-wave cutoff (eV)
 LASPH      = .True.   # Non-spherical contributions from gradient corrections

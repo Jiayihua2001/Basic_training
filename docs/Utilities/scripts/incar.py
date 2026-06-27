@@ -15,9 +15,9 @@ Usage examples
 
 Defaults (always written; based on VASP-wiki recommendations)
 -------------------------------------------------------------
-  EDIFF        = 1E-6        # tighter than the VASP default 1E-4. The wiki
-                             # notes that 1E-6 is "the best compromise" between
-                             # accuracy and cost for production calculations.
+  EDIFF        = 1E-8        # tighter than the VASP default 1E-4. The wiki
+                             # notes 1E-6 as "the best compromise"; we go tighter, to
+                             # 1E-8 for well-converged energies, forces, and restarts.
   GGA_COMPAT   = .False.     # restore full Bravais-lattice symmetry of the
                              # gradient field; default of .True. only exists
                              # for backward compatibility.
@@ -102,7 +102,7 @@ GENERAL = """\
 # --- general ---
 ALGO = {algo}  # {algo_comment}
 PREC = Normal  # Precision level
-EDIFF = {ediff}  # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+EDIFF = {ediff}  # Electronic SC-loop break condition (eV); tight
 NELM = 500  # Maximum number of electronic SCF steps
 ENCUT = {encut}  # Plane-wave cutoff (eV)
 LASPH = .True.  # Non-spherical contributions from gradient corrections
@@ -308,8 +308,8 @@ def parse_args():
     m.add_argument("-u", "--dftu", action="store_true",
                    help="Add Dudarev DFT+U block.")
 
-    p.add_argument("--ediff", default="1E-6",
-                   help="EDIFF (default 1E-6, see VASP wiki).")
+    p.add_argument("--ediff", default="1E-8",
+                   help="EDIFF (default 1E-8; tight electronic convergence).")
     p.add_argument("--encut", type=int, default=400,
                    help="ENCUT in eV (default 400).")
     p.add_argument("--kpar",  type=int, default=4,

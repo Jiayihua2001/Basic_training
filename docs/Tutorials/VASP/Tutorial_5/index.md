@@ -163,7 +163,7 @@ This results in the following file.
 # --- general ---
 ALGO       = All      # All-bands simultaneous update; robust for hybrids
 PREC       = Normal   # Precision level
-EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+EDIFF      = 1E-8     # Electronic SC-loop break condition (eV); tight
 NELM       = 500      # Maximum number of electronic SCF steps
 ENCUT      = 400      # Plane-wave cutoff (eV)
 LASPH      = .True.   # Non-spherical contributions from gradient corrections
@@ -212,7 +212,7 @@ Which results in the following file. The values of EMIN and EMAX were automatica
 ```txt
 # --- general ---
 PREC       = Normal   # Precision level
-EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+EDIFF      = 1E-8     # Electronic SC-loop break condition (eV); tight
 ENCUT      = 400      # Plane-wave cutoff (eV)
 LASPH      = .True.   # Non-spherical contributions from gradient corrections
 GGA_COMPAT = .False.  # Restore full lattice symmetry (recommended; required for MAE)
@@ -279,7 +279,7 @@ Which results in the following file:
 # --- general ---
 ALGO       = All      # All-bands simultaneous update; robust for hybrids
 PREC       = Normal   # Precision level
-EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+EDIFF      = 1E-8     # Electronic SC-loop break condition (eV); tight
 NELM       = 500      # Maximum number of electronic SCF steps
 ENCUT      = 400      # Plane-wave cutoff (eV)
 LASPH      = .True.   # Non-spherical contributions from gradient corrections

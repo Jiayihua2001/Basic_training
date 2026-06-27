@@ -176,7 +176,7 @@ These three small utilities are used throughout the [VASP tutorials](../Tutorial
 
 | Script | Purpose | Download |
 |--------|---------|----------|
-| `incar.py`  | Build an INCAR for SCF / DOS / band / OPT, optionally combined with SOC, HSE, or DFT+U. Defaults set: `EDIFF = 1E-6`, `GGA_COMPAT = .FALSE.`, no `NBANDS` (let VASP decide). | [📥 incar.py](scripts/incar.py)  |
+| `incar.py`  | Build an INCAR for SCF / DOS / band / OPT, optionally combined with SOC, HSE, or DFT+U. Defaults set: `EDIFF = 1E-8`, `GGA_COMPAT = .FALSE.`, no `NBANDS` (let VASP decide). | [📥 incar.py](scripts/incar.py)  |
 | `kpoints.py` | Write Γ-centred grids, line-mode band paths, or HSE zero-weight KPOINTS using pymatgen's `HighSymmKpath`. | [📥 kpoints.py](scripts/kpoints.py) |
 | `potcar.sh` | Concatenate a POTCAR from a local `potpaw_PBE` repository (handles `.gz`/`.Z`). | [📥 potcar.sh](scripts/potcar.sh)  |
 
