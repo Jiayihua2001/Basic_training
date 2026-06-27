@@ -33,7 +33,7 @@ SIGMA      = 0.05     # Width of smearing in eV
 > **About `NBANDS`.** We no longer set `NBANDS` and let VASP pick its default — `max( NELECT/2 + NIONS/2 , 0.6·NELECT )` (rounded up, with magnetism / non-collinear corrections applied automatically). Override it only when you need extra empty states (e.g. unfolded bands, GW, or to silence the "too few bands" warning at high SIGMA).
 
 ### POSCAR
-The POSCAR is the most user-dependent file in VASP and it defines the unit cell and exact location and element of each atom in the structure. For bulk structures, we typically get the initial structure file from <a href="https://materialsproject.org/" target="_blank">The Materials Project</a>. My preferred method is to just Google for my desired material (e.g. “InAs Materials Project”). Once you have the bulk structure, slabs or interfaces can be generated using either [vaspvis](../../../Utilities/#vaspvis) or [OgreInterface](../../../Utilities/#ogreinterface) (our group's Python packages — see the [Utilities page](../../../Utilities/)). More details about this with code examples will come later. The only calculations that require additional alterations to the POSCAR file are for an unfolded Band calculation and an OPT calculation
+The POSCAR is the most user-dependent file in VASP and it defines the unit cell and exact location and element of each atom in the structure. For bulk structures, we typically get the initial structure file from <a href="https://materialsproject.org/" target="_blank">The Materials Project</a>. My preferred method is to just Google for my desired material (e.g. “InAs Materials Project”). Once you have the bulk structure, slabs and interfaces can be generated with [OgreInterface](../../../Utilities/#ogreinterface) (see the [Utilities page](../../../Utilities/) for our group's Python packages). More details about this with code examples will come later. The only calculations that require additional alterations to the POSCAR file are for an unfolded Band calculation and an OPT calculation
 
 ### POTCAR
 The POTCAR is dependent on the elements used in the calculation and the order of the elements in the POSCAR. It is crucial that the order of the elements in the POTCAR match the order of the elements in the sixth line of the POSCAR. A POTCAR can be easily generated using the potcar.sh file. For example a common way to generate the POTCAR file is to use the head command to view the top lines of the POSCAR, and then use the potcar.sh file to generate the POTCAR file using the same elements shown in the 6th line of the POSCAR. To check the POTCAR you can use the grep command.
@@ -174,23 +174,23 @@ kpoints.py -b -c GXWLGK -n 50
 The ouput of the above for a Zinc-Blende structure such as InAs will be:
 
 ```txt
-band  
-50  
-Line-mode  
-reciprocal  
-0 0 0 ! G  
+Line_mode KPOINTS file
+50
+Line_mode
+Reciprocal
+0.0 0.0 0.0 ! G
 0.5 0.0 0.5 ! X
 
-0.5 0.0 0.5 ! X  
-0.5 0.25 0.75 ! W 
+0.5 0.0 0.5 ! X
+0.5 0.25 0.75 ! W
 
-0.5 0.25 0.75 ! W  
-0.5 0.5 0.5 ! L  
+0.5 0.25 0.75 ! W
+0.5 0.5 0.5 ! L
 
-0.5 0.5 0.5 ! L  
-0 0 0 ! G  
+0.5 0.5 0.5 ! L
+0.0 0.0 0.0 ! G
 
-0 0 0 ! G  
+0.0 0.0 0.0 ! G
 0.375 0.375 0.75 ! K
 ```
 

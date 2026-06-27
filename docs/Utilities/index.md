@@ -128,8 +128,9 @@ Three Python packages maintained in the group are central to inorganic (quantum-
 
 ### 🔸 [OgreInterface](https://github.com/caizefeng/OgreInterface)
 {: #ogreinterface }
-- Python package for creating and optimising **lattice- and domain-matched epitaxial interfaces**.
-- Scans substrate/film Miller-index combinations for the lowest-mismatch interfaces, then uses Bayesian *surface matching* to find the optimal interfacial distance and in-plane registry.
+- Python package for creating and optimising **lattice-matched and domain-matched epitaxial interfaces**.
+- Workflow: lattice/domain matching → interface generation → **surface matching and ranking** → geometry relaxation; it also generates surfaces, computes surface energies, and plots Wulff shapes.
+- Surface matching searches the in-plane registry and interfacial distance with **Particle Swarm Optimization (default) or Bayesian Optimization**, scoring candidates with a choice of energy calculator — a machine-learning interatomic potential, an ionic model, or Lennard-Jones.
 - Use it to generate the slabs/interfaces you then feed to VASP.
 
 ```bash
@@ -138,8 +139,8 @@ pip install git+https://github.com/caizefeng/OgreInterface
 
 ### 🔸 [BayesianOpt4dftu](https://github.com/caizefeng/BayesianOpt4dftu)
 {: #bayesianopt4dftu }
-- Determines the Hubbard **U** for DFT+U by **Bayesian optimisation**, tuning U so the PBE+U band structure matches an HSE06 (or experimental) reference — the exact method described in the [DFT+U section of Tutorial 2](../Tutorials/VASP/Tutorial_2/#adding-dftu-to-a-calculation).
-- Drives VASP automatically and reports the optimal U together with the Gaussian-process mean and acquisition surface.
+- Determines the Hubbard **U** for DFT+U by **Bayesian optimisation** (via the `bayesian-optimization` library), tuning U so the PBE+U band structure and gap match an HSE06 (or experimental) reference — the method behind the [DFT+U section of Tutorial 2](../Tutorials/VASP/Tutorial_2/#adding-dftu-to-a-calculation).
+- Driven by a single `bo_dftu` command reading an `input.json`: it runs VASP across iterations, optimises a Δgap / Δband (and optional Δmagnetisation) objective, and writes the optimal U with Gaussian-process mean and acquisition plots.
 - Method reference: M. Yu, S. Yang, C. Wu & N. Marom, *npj Comput. Mater.* **6**, 180 (2020).
 
 ```bash
@@ -148,9 +149,9 @@ pip install git+https://github.com/caizefeng/BayesianOpt4dftu.git
 
 ### 🔸 [vaspvis](https://github.com/caizefeng/vaspvis)
 {: #vaspvis }
-- Python plotting toolkit for VASP band structures, DOS, and band-unfolding.
-- Wraps a clean object-oriented API around `vasprun.xml` / `EIGENVAL` / `PROCAR`, including correct handling of HSE zero-weight k-points and slab/supercell unfolding.
-- Used in the [VASP tutorials](../Tutorials/VASP/) for the publication-quality figures.
+- Library for visualising VASP electronic structure: low-level `Band` / `Dos` classes (you supply the matplotlib axis) plus a high-level `standard` module with ~48 ready-made band/DOS styles, and a `utils` module for band-unfolding setup.
+- Auto-detects HSE runs and drops the zero-weight seed k-points, so one call plots PBE, PBE+SOC, and HSE bands from `vasprun.xml` / `EIGENVAL` / `PROCAR`.
+- Used in the [VASP tutorials](../Tutorials/VASP/) for the figures. Cite: *Phys. Rev. Materials* **5**, 064606 (2021).
 
 ```bash
 pip install vaspvis
