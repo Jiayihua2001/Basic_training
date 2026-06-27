@@ -56,8 +56,8 @@ direct
 $ potcar.sh In As
 
 $ grep 'TITEL' POTCAR
-	TITEL = PAW_PBE In 08Apr2002
-	TITEL = PAW_PBE As 22Sep2009
+   TITEL  = PAW_PBE In 08Apr2002
+   TITEL  = PAW_PBE As 22Sep2009
 ```
 
 ## Self-Consistent Field (SCF) Calculation

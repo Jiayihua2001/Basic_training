@@ -59,8 +59,8 @@ grep 'TITEL' POTCAR
 The output will be the following
 
 ```txt
-TITEL = PAW_PBE In 08Apr2002  
-TITEL = PAW_PBE As 22Sep2009
+   TITEL  = PAW_PBE In 08Apr2002
+   TITEL  = PAW_PBE As 22Sep2009
 ```
 
 ## Generating these inputs with VASPKIT
