@@ -62,6 +62,20 @@ TITEL = PAW_PBE In 08Apr2002
 TITEL = PAW_PBE As 22Sep2009
 ```
 
+## Generating these inputs with VASPKIT
+
+Every helper-script step in this tutorial has a [VASPKIT](../../../Utilities/#vaspkit) equivalent — run it interactively (`vaspkit`, then type the number) or with the `-task` flag for scripting:
+
+| Step | Helper script | VASPKIT equivalent |
+|------|---------------|--------------------|
+| POTCAR | `potcar.sh In As` | `vaspkit -task 103` (recommended PAW — note it selects `In_d`) |
+| INCAR | `incar.py --scf` | `vaspkit -task 101` (choose the calculation type, then edit) |
+| SCF grid (7×7×7) | `kpoints.py -g -d 7 7 7` | `vaspkit -task 102 -kpr 0.04` |
+| DOS grid (15×15×15) | `kpoints.py -g -d 15 15 15` | `vaspkit -task 102 -kpr 0.019` |
+| Band k-path | `kpoints.py -b -c GXWLGK` | `vaspkit -task 303` → writes `KPATH.in`; rename to `KPOINTS` |
+
+Task 303 writes the full Setyawan-Curtarolo path `Γ–X–U | K–Γ–L–W–X`; keep the `Γ–X–W–L–Γ–K` segments this tutorial uses. The complete task list is on the [Utilities page](../../../Utilities/#vaspkit).
+
 ## Automation
 This entire calculation can be automated using a simple python script included below:
 ```python
@@ -150,28 +164,30 @@ incar.py -s
 This results in the following file.
 
 ```txt
-# general
-ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = Normal        # Normal precision
-GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
-EDIFF = 1E-6    # Convergence criteria for electronic converge
-NELM = 500      # Max number of electronic steps
-ENCUT = 400     # Cut off energy
-LASPH = .True.    # Include non-spherical contributions from gradient corrections
-BMIX = 3        # Mixing parameter for convergence
-AMIN = 0.01     # Mixing parameter for convergence
-SIGMA = 0.05    # Width of smearing in eV
+# --- general ---
+ALGO       = Fast     # Mixture of Davidson + RMM-DIIS
+PREC       = Normal   # Precision level
+EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+NELM       = 500      # Maximum number of electronic SCF steps
+ENCUT      = 400      # Plane-wave cutoff (eV)
+LASPH      = .True.   # Non-spherical contributions from gradient corrections
+GGA_COMPAT = .False.  # Restore full lattice symmetry (recommended; required for MAE)
+BMIX       = 3        # Mixing parameter for convergence
+AMIN       = 0.01     # Mixing parameter for convergence
+SIGMA      = 0.05     # Smearing width (eV)
 
-# parallelization
-KPAR = 8        # The number of k-points to be treated in parallel
-NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
+# --- parallelisation (Perlmutter CPU defaults) ---
+KPAR       = 4        # k-points treated in parallel
+NCORE      = 1        # Auto-reset to 1 by VASP under OpenMP/GPU
 
-# scf
-ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
-ISMEAR = 0      # Fermi smearing
-LCHARG = .True.   # Write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR
-LREAL = Auto    # Automatically chooses real/reciprocal space for projections
+# --- SCF ---
+ICHARG     = 2        # Initial charge from atomic superposition
+ISMEAR     = 0        # Gaussian smearing for SCF
+LCHARG     = .True.   # Write CHG/CHGCAR for downstream PBE post-SCF (ICHARG = 11)
+LWAVE      = .False.  # Skip WAVECAR (PBE post-SCF reads CHGCAR via ICHARG = 11)
+LREAL      = .False.  # Reciprocal-space projectors (most accurate; fine for small cells)
+
+# (Pure PBE; add --hse for HSE06 or --dftu for DFT+U)
 ```
 
 ## Density of States Calculation
@@ -189,31 +205,31 @@ incar.py -d
 Which results in the following file. The values of EMIN and EMAX were automatically  determined using the code shown in section [Calculation Descriptions](../Tutorial_2/).
 
 ```txt
-# general 
-ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = Normal        # Normal precision
-GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
-EDIFF = 1E-6    # Convergence criteria for electronic converge
-NELM = 500      # Max number of electronic steps
-ENCUT = 400     # Cut off energy
-LASPH = .True.    # Include non-spherical contributions from gradient corrections
-BMIX = 3        # Mixing parameter for convergence
-AMIN = 0.01     # Mixing parameter for convergence 
-SIGMA = 0.05    # Width of smearing in eV
+# --- general ---
+ALGO       = Fast     # Mixture of Davidson + RMM-DIIS
+PREC       = Normal   # Precision level
+EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+NELM       = 500      # Maximum number of electronic SCF steps
+ENCUT      = 400      # Plane-wave cutoff (eV)
+LASPH      = .True.   # Non-spherical contributions from gradient corrections
+GGA_COMPAT = .False.  # Restore full lattice symmetry (recommended; required for MAE)
+BMIX       = 3        # Mixing parameter for convergence
+AMIN       = 0.01     # Mixing parameter for convergence
+SIGMA      = 0.05     # Smearing width (eV)
 
-# parallelization
-KPAR = 8        # The number of k-points to be treated in parallel
-NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
+# --- parallelisation (Perlmutter CPU defaults) ---
+KPAR       = 4        # k-points treated in parallel
+NCORE      = 1        # Auto-reset to 1 by VASP under OpenMP/GPU
 
-# dos 
-ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
-ISMEAR = -5     # Tetrahedron method with Blochl corrections
-LCHARG = .False.  # Does not write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR files 
-LORBIT = 11     # Projected data (lm-decomposed PROCAR)
-NEDOS = 3001    # 3001 points are sampled for the DOS
-EMIN = -3.7174     # Minimum energy for the DOS plot
-EMAX = 10.2826     # Maximum energy for the DOS plot
+# --- DOS ---
+ICHARG     = 11       # Read converged CHGCAR; non-SC eigenvalue calc
+ISMEAR     = -5       # Tetrahedron with Bloechl correction
+LCHARG     = .False.  # Do not write CHG/CHGCAR
+LWAVE      = .False.  # Do not write WAVECAR
+LORBIT     = 11       # lm-decomposed PROCAR / DOSCAR
+NEDOS      = 3001     # DOS sampling points
+EMIN       = -3.7174  # Filled in by sbatch script from SCF Fermi level
+EMAX       = 10.2826  # Filled in by sbatch script from SCF Fermi level
 ```
 
 ### KPOINTS
@@ -226,7 +242,7 @@ kpoints.py -g -d 15 15 15
 ```
 
 ### Results
-Once the calculation is finished, generate the DOS plots with [vaspvis](https://github.com/caizefeng/vaspvis):
+Once the calculation is finished, generate the DOS plots with [vaspvis](../../../Utilities/#vaspvis):
 
 ```python
 from vaspvis.standard import dos_plain, dos_spd
@@ -254,28 +270,28 @@ incar.py -b
 Which results in the following file:
 
 ```txt
-# general 
-ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = Normal        # Normal precision
-GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
-EDIFF = 1E-6    # Convergence criteria for electronic converge
-NELM = 500      # Max number of electronic steps
-ENCUT = 400     # Cut off energy
-LASPH = .True.    # Include non-spherical contributions from gradient corrections
-BMIX = 3        # Mixing parameter for convergence
-AMIN = 0.01     # Mixing parameter for convergence 
-SIGMA = 0.05    # Width of smearing in eV
+# --- general ---
+ALGO       = Fast     # Mixture of Davidson + RMM-DIIS
+PREC       = Normal   # Precision level
+EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+NELM       = 500      # Maximum number of electronic SCF steps
+ENCUT      = 400      # Plane-wave cutoff (eV)
+LASPH      = .True.   # Non-spherical contributions from gradient corrections
+GGA_COMPAT = .False.  # Restore full lattice symmetry (recommended; required for MAE)
+BMIX       = 3        # Mixing parameter for convergence
+AMIN       = 0.01     # Mixing parameter for convergence
+SIGMA      = 0.05     # Smearing width (eV)
 
-# parallelization
-KPAR = 8        # The number of k-points to be treated in parallel
-NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
+# --- parallelisation (Perlmutter CPU defaults) ---
+KPAR       = 4        # k-points treated in parallel
+NCORE      = 1        # Auto-reset to 1 by VASP under OpenMP/GPU
 
-# band 
-ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
-ISMEAR = 0      # Fermi smearing
-LCHARG = .False.  # Does not write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR files (.True. for unfolding)
-LORBIT = 11     # Projected data (lm-decomposed PROCAR)
+# --- band ---
+ICHARG     = 11       # Read converged CHGCAR; non-SC band evaluation
+ISMEAR     = 0        # Gaussian smearing
+LCHARG     = .False.  # Do not write CHG/CHGCAR
+LWAVE      = .False.  # Do not write WAVECAR (.True. for unfolding)
+LORBIT     = 11       # lm-decomposed PROCAR
 ```
 
 ### KPOINTS

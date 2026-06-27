@@ -14,16 +14,16 @@ In this section we will discus the inputs you need in order to run all the diffe
 As stated in [VASP Basics](../Tutorial_1/), the INCAR contains the set of instructions that tells VASP what type of  calculation to perform. Although we perform many different types of calculations, there are some standard parameters that we always use. Sometimes, we may choose to alter   the following parameters slightly, but for the vast majority of our calculations, these will remain constant.
 
 ```txt
-ALGO = Fast      # Mixture of Davidson and RMM-DIIS algos
-PREC = Normal         # Normal precision
-GGA_COMPAT = .False.    # Restore the full lattice symmetry of the GGA potential
-EDIFF = 1E-6     # Convergence criteria for electronic converge
-NELM = 500       # Max number of electronic steps
-ENCUT = 350      # Cut off energy
-LASPH = .True.     # Include non-spherical contributions from gradient corrections
-BMIX = 3         # Mixing parameter for convergence
-AMIN = 0.01      # Mixing parameter for convergence
-SIGMA = 0.05     # Width of smearing in eV
+ALGO       = Fast     # Mixture of Davidson and RMM-DIIS algos
+PREC       = Normal   # Normal precision
+GGA_COMPAT = .False.  # Restore the full lattice symmetry of the GGA potential
+EDIFF      = 1E-6     # Convergence criteria for electronic converge
+NELM       = 500      # Max number of electronic steps
+ENCUT      = 400      # Cut off energy
+LASPH      = .True.   # Include non-spherical contributions from gradient corrections
+BMIX       = 3        # Mixing parameter for convergence
+AMIN       = 0.01     # Mixing parameter for convergence
+SIGMA      = 0.05     # Width of smearing in eV
 ```
 
 > **About `EDIFF`.** From the [VASP wiki](https://www.vasp.at/wiki/index.php/EDIFF):
@@ -33,7 +33,7 @@ SIGMA = 0.05     # Width of smearing in eV
 > **About `NBANDS`.** We no longer set `NBANDS` and let VASP pick its default — `max( NELECT/2 + NIONS/2 , 0.6·NELECT )` (rounded up, with magnetism / non-collinear corrections applied automatically). Override it only when you need extra empty states (e.g. unfolded bands, GW, or to silence the "too few bands" warning at high SIGMA).
 
 ### POSCAR
-The POSCAR is the most user-dependent file in VASP and it defines the unit cell and exact location and element of each atom in the structure. For bulk structures, we typically get the initial structure file from <a href="https://materialsproject.org/" target="_blank">The Materials Project</a>. My preferred method is to just Google for my desired material (e.g. “InAs Materials Project”). Once you have the bulk structure, slabs or interfaces can be generated using either VaspVis or Ogre (our groups Python packages). More details about this with code examples will come later. The only calculations that require additional alterations to the POSCAR file are for an unfolded Band calculation and an OPT calculation
+The POSCAR is the most user-dependent file in VASP and it defines the unit cell and exact location and element of each atom in the structure. For bulk structures, we typically get the initial structure file from <a href="https://materialsproject.org/" target="_blank">The Materials Project</a>. My preferred method is to just Google for my desired material (e.g. “InAs Materials Project”). Once you have the bulk structure, slabs or interfaces can be generated using either [vaspvis](../../../Utilities/#vaspvis) or [OgreInterface](../../../Utilities/#ogreinterface) (our group's Python packages — see the [Utilities page](../../../Utilities/)). More details about this with code examples will come later. The only calculations that require additional alterations to the POSCAR file are for an unfolded Band calculation and an OPT calculation
 
 ### POTCAR
 The POTCAR is dependent on the elements used in the calculation and the order of the elements in the POSCAR. It is crucial that the order of the elements in the POTCAR match the order of the elements in the sixth line of the POSCAR. A POTCAR can be easily generated using the potcar.sh file. For example a common way to generate the POTCAR file is to use the head command to view the top lines of the POSCAR, and then use the potcar.sh file to generate the POTCAR file using the same elements shown in the 6th line of the POSCAR. To check the POTCAR you can use the grep command.
@@ -67,10 +67,10 @@ The SCF calculation will be used to generate converged CHG and CHGCAR files so t
 In the INCAR there are four important parameters beyond the general parameters. The one parameter that never changes is ICHARG=2 because the SCF calculation must calculate the charge density of the system. The other three parameters can change based on your needs. Sometimes we don’t need to write the CHG* files since we only need to do the SCF calculation, or sometimes we need the WAVECAR for STM simulations or wave function visualizations. Additionally, ISMEAR=0 is the standard parameter we used, but for certain materials a different smearing method might be necessary for convergence.
 
 ```txt
-ICHARG = 2 # Generate CHG* from a superposition of atomic charge densities
-ISMEAR = 0 # Fermi smearing
-LCHARG = .True. # Write the CHG* files
-LWAVE = .False. # Does not write the WAVECAR
+ICHARG = 2        # Generate CHG* from a superposition of atomic charge densities
+ISMEAR = 0        # Fermi smearing
+LCHARG = .True.   # Write the CHG* files
+LWAVE  = .False.  # Does not write the WAVECAR
 ```
 
 The following code can be used to generate the INCAR
@@ -103,14 +103,14 @@ kpoints.py -g -d 7 7 7
 In the INCAR there are eight important parameters beyond the general parameters. The only parameters that can be changed are NEDOS, EMIN, and EMAX. These values are used to determine the energy range to be calculated and how many points are included within the given energy range. By default, only 301 points are sampled for the density of states, and the energy range is unconstrained, so it includes the states with the lowest and highest energies. For the most part, we only care about a small range of energies around the Fermi energy, so we like to constrain the values between emin and emax.
 
 ```txt
-ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
-ISMEAR = -5     # Tetrahedron method with Blochl corrections
+ICHARG = 11       # Calculate eigenvalues from preconverged CHGCAR
+ISMEAR = -5       # Tetrahedron method with Blochl corrections
 LCHARG = .False.  # Does not write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR files 
-LORBIT = 11     # Projected data (lm-decomposed PROCAR)
-NEDOS = 3001    # 3001 points are sampled for the DOS
-EMIN = emin     # Minimum energy for the DOS plot
-EMAX = emax     # Maximum energy for the DOS plot
+LWAVE  = .False.  # Does not write the WAVECAR files
+LORBIT = 11       # Projected data (lm-decomposed PROCAR)
+NEDOS  = 3001     # 3001 points are sampled for the DOS
+EMIN   = emin     # Minimum energy for the DOS plot
+EMAX   = emax     # Maximum energy for the DOS plot
 ```
 
 The actual values of emin and emax can be calculated manually by finding the Fermi energy from the OUTCAR of the SCF calculation and manually determining a range based on that value. For example, if it was only necessary to observe 3 eV above and below the Fermi energy, and the Fermi energy was -1 eV, then emin=-4 and emax=2 (Note that these are absolute energy values and not relative to the Fermi energy like how it is typically plotted). There is also a way to automate the determination of these values by adding the following lines of code to your submission script in your `scf` calculation.
@@ -147,11 +147,11 @@ kpoints.py -g -d 15 15 15
 In the INCAR there are five important parameters beyond the general parameters. The only parameters that can be changed are LWAVE and LORBIT. In the case of a calculation where it is desired to perform band unfolding the WAVECAR must be written (`LWAVE = .True.`). In the case where it is not important view the projected band structure (e.g. convergence tests) then the LORBIT tag can be removed.
 
 ```txt
-ICHARG = 11     # Calculate eigenvalues from preconverged CHGCAR
-ISMEAR = 0      # Fermi smearing
+ICHARG = 11       # Calculate eigenvalues from preconverged CHGCAR
+ISMEAR = 0        # Fermi smearing
 LCHARG = .False.  # Does not write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR file (.True. for unfolding)
-LORBIT = 11     # Projected data (lm-decomposed PROCAR)
+LWAVE  = .False.  # Does not write the WAVECAR file (.True. for unfolding)
+LORBIT = 11       # Projected data (lm-decomposed PROCAR)
 ```
 
 To generate the INCAR for a Band calculation the `incar.py` file can be used.
@@ -306,12 +306,12 @@ Structural optimization calculations are mostly used to relax atoms at a surface
 In the INCAR there are six important parameters beyond the general parameters. The first four parameters are essentially the same as an SCF calculation except for the fact that we typically do not write the CHG or CHGCAR files because we do not use them for anything after the OPT calculation in finished. The only parameter that can be changed is NSW which is the total number of ionic steps to be taken. Typically 50 ionic steps is more than enough, but is some cases this might need to be increased.
 
 ```txt
-ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
-ISMEAR = 0      # Fermi smearing
+ICHARG = 2        # Generate CHG* from a superposition of atomic charge densities
+ISMEAR = 0        # Fermi smearing
 LCHARG = .False.  # Does not write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR
-IBRION = 2      # Ionic relaxation
-NSW = 50        # Maximum of 50 ionic steps
+LWAVE  = .False.  # Does not write the WAVECAR
+IBRION = 2        # Ionic relaxation
+NSW    = 50       # Maximum of 50 ionic steps
 ```
 
 To generate the INCAR for a OPT calculation the incar.py file can be used.
@@ -351,18 +351,18 @@ direct
 ```
 
 ## Adding DFT+U to a Calculation
-Adding DFT+U is necessary for most calculations involving semiconductors because it corrects for the massive underestimate of the band gap with GGA. Our group has developed a method to predict the effective U value using Bayesian optimization by tuning the effective U parameters to best match the PBE+U band structure to the band structure calculated with HSE. A full example of how to run the Bayesian optimization code will be included in a following section for InAs.
+Adding DFT+U is necessary for most calculations involving semiconductors because it corrects for the massive underestimate of the band gap with GGA. Our group has developed a method to predict the effective U value using [Bayesian optimization](../../../Utilities/#bayesianopt4dftu) by tuning the effective U parameters to best match the PBE+U band structure to the band structure calculated with HSE. A full example of how to run the [BayesianOpt4dftu](../../../Utilities/#bayesianopt4dftu) code will be included in a following section for InAs.
 
 ### INCAR
 In the INCAR there are six important parameters beyond the general parameters. The only parameters that need to be changed are the ones for LDAUL, which determine the orbitals that the U value is applied, and LDAUU, which is where the actual effective U values are entered.
 
 ```txt
-LDAU = .True.       # Determines if DFT+U is used
-LDAUTYPE = 2      # Dudarev formulation
-LDAUL = 1 1       # l-quantum number to apply the U-value on (-1 turns it off)
-LDAUU = -0.5 -7.5 # Effective U-value for each species
-LDAUJ = 0.0 0.0   # J-value (Always zero for Dudarev method)
-LMAXMIX = 4       # Max l-quantum number for charge density mixing
+LDAU     = .True.     # Determines if DFT+U is used
+LDAUTYPE = 2          # Dudarev formulation
+LDAUL    = 1 1        # l-quantum number to apply the U-value on (-1 turns it off)
+LDAUU    = -0.5 -7.5  # Effective U-value for each species
+LDAUJ    = 0.0 0.0    # J-value (Always zero for Dudarev method)
+LMAXMIX  = 4          # Max l-quantum number for charge density mixing
 ```
 
 To generate the INCAR for a DFT+U calculation, the incar.py file can be used. Below is an example for generating an INCAR for an SCF calculation with DFT+U.
@@ -380,10 +380,10 @@ Adding spin orbit coupling is very important for most of the materials that we s
 In the INCAR there are two important parameters beyond the general parameters. The only parameter that needs to change is the `MAGMOM` parameter which defines the magnetic moment for each atom in the x, y, and z directions. The example shown below is for a bulk InAs calculation where there are only two atoms in the unit cell. Since both In and As have no magnetic moment, $m_x$, $m_y$, and $m_z$ are all 0.
 
 ```txt
-LSORBIT = .True.                    # Turn on spin-orbit coupling
-MAGMOM = 0 0 0 0 0 0  # Set the magnetic moment for each atom (3 for each atom)
+LSORBIT = .True.       # Turn on spin-orbit coupling
+MAGMOM  = 0 0 0 0 0 0  # Set the magnetic moment for each atom (3 for each atom)
 or
-MAGMOM = 6*0
+MAGMOM  = 6*0
 ```
 
 To generate the INCAR for an SOC calculation, the incar.py file can be used. Below is an example for generating an INCAR for an SCF calculation with SOC
@@ -395,26 +395,30 @@ incar.py -s -c
 ```
 
 ```txt
-# general 
-ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = Normal        # Normal precision
-GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
-EDIFF = 1E-6    # Convergence criteria for electronic converge
-NELM = 500      # Max number of electronic steps
-ENCUT = 400     # Cut off energy
-LASPH = .True.    # Include non-spherical contributions from gradient corrections
-BMIX = 3        # Mixing parameter for convergence
-AMIN = 0.01     # Mixing parameter for convergence 
-SIGMA = 0.05    # Width of smearing in eV
+# --- general ---
+ALGO       = Fast     # Mixture of Davidson + RMM-DIIS
+PREC       = Normal   # Precision level
+EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+NELM       = 500      # Maximum number of electronic SCF steps
+ENCUT      = 400      # Plane-wave cutoff (eV)
+LASPH      = .True.   # Non-spherical contributions from gradient corrections
+GGA_COMPAT = .False.  # Restore full lattice symmetry (recommended; required for MAE)
+BMIX       = 3        # Mixing parameter for convergence
+AMIN       = 0.01     # Mixing parameter for convergence
+SIGMA      = 0.05     # Smearing width (eV)
 
-# parallelization
-KPAR = 8        # The number of k-points to be treated in parallel
-NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
+# --- parallelisation (Perlmutter CPU defaults) ---
+KPAR       = 4        # k-points treated in parallel
+NCORE      = 1        # Auto-reset to 1 by VASP under OpenMP/GPU
 
-# scf 
-ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
-ISMEAR = 0      # Fermi smearing
-LCHARG = .True.   # Write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR
-LREAL = Auto    # Automatically chooses rea/reciprocal space for projections
+# --- SCF ---
+ICHARG     = 2        # Initial charge from atomic superposition
+ISMEAR     = 0        # Gaussian smearing for SCF
+LCHARG     = .True.   # Write CHG/CHGCAR for downstream PBE post-SCF (ICHARG = 11)
+LWAVE      = .False.  # Skip WAVECAR (PBE post-SCF reads CHGCAR via ICHARG = 11)
+LREAL      = .False.  # Reciprocal-space projectors (most accurate; fine for small cells)
+
+# --- spin-orbit coupling (use vasp_ncl) ---
+LSORBIT    = .True.   # Turn on spin-orbit coupling
+MAGMOM     = 6*0      # 3 components (mx my mz) per atom
 ```

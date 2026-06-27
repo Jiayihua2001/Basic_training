@@ -63,6 +63,10 @@ TITEL = PAW_PBE In 08Apr2002
 TITEL = PAW_PBE As 22Sep2009
 ```
 
+## Generating these inputs with VASPKIT
+
+INCAR, POTCAR and the SCF grid are as in the [PBE run](../Tutorial_3/#generating-these-inputs-with-vaspkit) (add the HSE + SOC tags to the task-101 INCAR by hand). The HSE **band** KPOINTS is the special case: run `vaspkit -task 303` to write `KPATH.in`, then `vaspkit -task 251` to combine the SCF IBZKPT mesh with the zero-weight path — the same file `kpoints.py -b -c GXWLGK -e` produces. Extract/plot the hybrid band with `vaspkit -task 252` (the hybrid task — **not** 211). See the [Utilities page](../../../Utilities/#vaspkit) for the full task list.
+
 ## Automation
 This entire calculation can be automated using a simple python script included below. Two notes on KPOINTS:
 
@@ -156,38 +160,39 @@ incar.py -s -c -e
 This results in the following file.
 
 ```txt
-# general
-ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = Normal        # Normal precision
-GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
-EDIFF = 1E-6    # Convergence criteria for electronic converge
-NELM = 500      # Max number of electronic steps
-ENCUT = 400     # Cut off energy
-LASPH = .True.    # Include non-spherical contributions from gradient corrections
-BMIX = 3        # Mixing parameter for convergence
-AMIN = 0.01     # Mixing parameter for convergence
-SIGMA = 0.05    # Width of smearing in eV
+# --- general ---
+ALGO       = All      # All-bands simultaneous update; robust for hybrids
+PREC       = Normal   # Precision level
+EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+NELM       = 500      # Maximum number of electronic SCF steps
+ENCUT      = 400      # Plane-wave cutoff (eV)
+LASPH      = .True.   # Non-spherical contributions from gradient corrections
+GGA_COMPAT = .False.  # Restore full lattice symmetry (recommended; required for MAE)
+BMIX       = 3        # Mixing parameter for convergence
+AMIN       = 0.01     # Mixing parameter for convergence
+SIGMA      = 0.05     # Smearing width (eV)
 
-# parallelization
-KPAR = 8        # The number of k-points to be treated in parallel
-NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
+# --- parallelisation (Perlmutter CPU defaults) ---
+KPAR       = 16       # k-points treated in parallel
+NCORE      = 1        # Auto-reset to 1 by VASP under OpenMP/GPU
 
-# scf
-ICHARG = 2      # Generate CHG* from a superposition of atomic charge densities
-ISMEAR = 0      # Fermi smearing
-LCHARG = .True.   # Write the CHG* files
-LWAVE = .True.   # Write the WAVECAR (HSE post-SCF DOS reads it via ALGO = None)
-LREAL = Auto    # Automatically chooses real/reciprocal space for projections
+# --- SCF ---
+ICHARG     = 2        # Initial charge from atomic superposition
+ISMEAR     = 0        # Gaussian smearing for SCF
+LCHARG     = .True.   # Write CHG/CHGCAR for downstream PBE post-SCF (ICHARG = 11)
+LWAVE      = .True.   # Write WAVECAR (HSE post-SCF DOS reads it via ALGO = None)
+LREAL      = .False.  # Reciprocal-space projectors (most accurate; fine for small cells)
 
-# soc 
-LSORBIT = .True.  # Turn on spin-orbit coupling
-MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
+# --- spin-orbit coupling (use vasp_ncl) ---
+LSORBIT    = .True.   # Turn on spin-orbit coupling
+MAGMOM     = 6*0      # 3 components (mx my mz) per atom
 
-# hse 
-LHFCALC = .True.  # Determines if a hybrid functional is used
-HFSCREEN = 0.2  # Range-separation parameter
-AEXX = 0.25     # Fraction of exact exchange to be used
-PRECFOCK = Fast # Increases the speed of HSE Calculations
+# --- HSE06 hybrid functional ---
+LHFCALC    = .True.   # Turn on Hartree-Fock exchange
+HFSCREEN   = 0.2      # HSE06 range-separation parameter (1/Angstrom)
+AEXX       = 0.25     # Fraction of exact exchange (HSE06 standard)
+PRECFOCK   = Fast     # Reduced FFT mesh for the exchange routine
+TIME       = 0.4      # Trial time step for the ALGO = All band optimiser
 ```
 
 ## Density of States Calculation
@@ -205,39 +210,36 @@ incar.py -d -c -e
 Which results in the following file. The values of EMIN and EMAX were automatically  determined using the code shown in section [Calculation Descriptions](../Tutorial_2/). Note that `ALGO` and `NELM` are deliberately **not** in the general block here — `incar.py` deduplicates tags so the dos-block overrides (`ALGO = None`, `NELM = 1`) are the only ones written.
 
 ```txt
-# general 
-PREC = Normal        # Normal precision
-GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
-EDIFF = 1E-6    # Convergence criteria for electronic converge
-ENCUT = 400     # Cut off energy
-LASPH = .True.    # Include non-spherical contributions from gradient corrections
-BMIX = 3        # Mixing parameter for convergence
-AMIN = 0.01     # Mixing parameter for convergence 
-SIGMA = 0.05    # Width of smearing in eV
+# --- general ---
+PREC       = Normal   # Precision level
+EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+ENCUT      = 400      # Plane-wave cutoff (eV)
+LASPH      = .True.   # Non-spherical contributions from gradient corrections
+GGA_COMPAT = .False.  # Restore full lattice symmetry (recommended; required for MAE)
+BMIX       = 3        # Mixing parameter for convergence
+AMIN       = 0.01     # Mixing parameter for convergence
+SIGMA      = 0.05     # Smearing width (eV)
 
-# parallelization
-KPAR = 8        # The number of k-points to be treated in parallel
-NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
+# --- parallelisation (Perlmutter CPU defaults) ---
+KPAR       = 16       # k-points treated in parallel
+NCORE      = 1        # Auto-reset to 1 by VASP under OpenMP/GPU
 
-# dos (post-process WAVECAR; HSE — no Fock exchange evaluated)
-ALGO = None     # Postprocess only: read orbitals + eigenvalues from WAVECAR
-NELM = 1        # No iteration (paired with ALGO = None)
-ISTART = 1      # Read WAVECAR
-ICHARG = 0      # Required for hybrids (never use ICHARG = 11 with HSE)
-ISMEAR = -5     # Tetrahedron method with Blochl corrections
-LCHARG = .False.  # Does not write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR
-LORBIT = 11     # Projected data (lm-decomposed PROCAR)
-NEDOS = 3001    # 3001 points are sampled for the DOS
-EMIN = -3.7174     # Minimum energy for the DOS plot
-EMAX = 10.2826     # Maximum energy for the DOS plot
+# --- DOS (post-process WAVECAR; HSE -- no Fock exchange evaluated) ---
+ALGO       = None     # Postprocess only: read orbitals + eigenvalues from WAVECAR
+NELM       = 1        # No iteration (paired with ALGO = None)
+ISTART     = 1        # Read WAVECAR
+ICHARG     = 0        # Required for hybrids (never use ICHARG = 11 with HSE)
+ISMEAR     = -5       # Tetrahedron with Bloechl correction
+LCHARG     = .False.  # Do not write CHG/CHGCAR
+LWAVE      = .False.  # Do not write WAVECAR
+LORBIT     = 11       # lm-decomposed PROCAR / DOSCAR
+NEDOS      = 3001     # DOS sampling points
+EMIN       = -3.7174  # Filled in by sbatch script from SCF Fermi level
+EMAX       = 10.2826  # Filled in by sbatch script from SCF Fermi level
 
-# soc 
-LSORBIT = .True.  # Turn on spin-orbit coupling
-MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
-
-# (no `# hse` block: ALGO = None doesn't evaluate the Fock operator,
-#  so LHFCALC / HFSCREEN / AEXX / PRECFOCK are unnecessary here)
+# --- spin-orbit coupling (use vasp_ncl) ---
+LSORBIT    = .True.   # Turn on spin-orbit coupling
+MAGMOM     = 6*0      # 3 components (mx my mz) per atom
 ```
 
 ### KPOINTS
@@ -248,7 +250,7 @@ cp ../scf/KPOINTS .
 ```
 
 ### Results
-vaspvis treats HSE the same as PBE — give it the `dos/` folder and let it parse `LHFCALC`:
+[vaspvis](../../../Utilities/#vaspvis) treats HSE the same as PBE — give it the `dos/` folder and let it parse `LHFCALC`:
 
 ```python
 from vaspvis.standard import dos_plain, dos_spd
@@ -274,39 +276,40 @@ incar.py -b -c -e
 Which results in the following file:
 
 ```txt
-# general 
-ALGO = Fast     # Mixture of Davidson and RMM-DIIS algos
-PREC = Normal        # Normal precision
-GGA_COMPAT = .False.   # Restore the full lattice symmetry of the GGA potential
-EDIFF = 1E-6    # Convergence criteria for electronic converge
-NELM = 500      # Max number of electronic steps
-ENCUT = 400     # Cut off energy
-LASPH = .True.    # Include non-spherical contributions from gradient corrections
-BMIX = 3        # Mixing parameter for convergence
-AMIN = 0.01     # Mixing parameter for convergence 
-SIGMA = 0.05    # Width of smearing in eV
+# --- general ---
+ALGO       = All      # All-bands simultaneous update; robust for hybrids
+PREC       = Normal   # Precision level
+EDIFF      = 1E-6     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+NELM       = 500      # Maximum number of electronic SCF steps
+ENCUT      = 400      # Plane-wave cutoff (eV)
+LASPH      = .True.   # Non-spherical contributions from gradient corrections
+GGA_COMPAT = .False.  # Restore full lattice symmetry (recommended; required for MAE)
+BMIX       = 3        # Mixing parameter for convergence
+AMIN       = 0.01     # Mixing parameter for convergence
+SIGMA      = 0.05     # Smearing width (eV)
 
-# parallelization
-KPAR = 8        # The number of k-points to be treated in parallel
-NCORE = 1        # Auto-reset to 1 by VASP when OpenMP is enabled
+# --- parallelisation (Perlmutter CPU defaults) ---
+KPAR       = 16       # k-points treated in parallel
+NCORE      = 1        # Auto-reset to 1 by VASP under OpenMP/GPU
 
-# band (HSE; restart from WAVECAR with zero-weight line k-points)
-ISTART = 1      # Read WAVECAR
-ICHARG = 0      # Required for hybrids; charge derived from orbitals
-ISMEAR = 0      # Fermi smearing
-LCHARG = .False.  # Does not write the CHG* files
-LWAVE = .False.   # Does not write the WAVECAR files (.True. for unfolding)
-LORBIT = 11     # Projected data (lm-decomposed PROCAR)
+# --- band (HSE; restart from WAVECAR with zero-weight line k-points) ---
+ISTART     = 1        # Read WAVECAR
+ICHARG     = 0        # Required for hybrids; charge derived from orbitals
+ISMEAR     = 0        # Gaussian smearing
+LCHARG     = .False.  # Do not write CHG/CHGCAR
+LWAVE      = .False.  # Do not write WAVECAR (.True. for unfolding)
+LORBIT     = 11       # lm-decomposed PROCAR
 
-# soc 
-LSORBIT = .True.  # Turn on spin-orbit coupling
-MAGMOM = 6*0 # Set the magnetic moment for each atom (3 for each atom)
+# --- spin-orbit coupling (use vasp_ncl) ---
+LSORBIT    = .True.   # Turn on spin-orbit coupling
+MAGMOM     = 6*0      # 3 components (mx my mz) per atom
 
-# hse 
-LHFCALC = .True.  # Determines if a hybrid functional is used
-HFSCREEN = 0.2  # Range-separation parameter
-AEXX = 0.25     # Fraction of exact exchange to be used
-PRECFOCK = Fast # Increases the speed of HSE Calculations
+# --- HSE06 hybrid functional ---
+LHFCALC    = .True.   # Turn on Hartree-Fock exchange
+HFSCREEN   = 0.2      # HSE06 range-separation parameter (1/Angstrom)
+AEXX       = 0.25     # Fraction of exact exchange (HSE06 standard)
+PRECFOCK   = Fast     # Reduced FFT mesh for the exchange routine
+TIME       = 0.4      # Trial time step for the ALGO = All band optimiser
 ```
 
 ### KPOINTS

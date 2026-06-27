@@ -21,10 +21,16 @@ Defaults (always written; based on VASP-wiki recommendations)
   GGA_COMPAT   = .False.     # restore full Bravais-lattice symmetry of the
                              # gradient field; default of .True. only exists
                              # for backward compatibility.
+  ALGO         = Fast        # Davidson + RMM-DIIS for PBE; automatically
+                             # switched to ALGO = All for HSE (--hse), which is
+                             # the robust all-bands optimiser for hybrids.
   NBANDS       --            # NOT written. VASP's default
                              # max( (NELECT+2)/2 + max(NIONS/2, 3), 0.6*NELECT )
                              # is fine for the systems used in these tutorials;
                              # SOC doubles it internally.
+
+The output is column-aligned: every "=" lines up, and every inline "#" comment
+lines up, so the generated INCAR matches the blocks shown in the tutorials.
 """
 
 import argparse
@@ -35,7 +41,7 @@ import textwrap
 
 # Drop any tag that gets set more than once, keeping only the last occurrence.
 # VASP uses last-wins semantics, but echoing the override on top of the
-# original value clutters the INCAR (e.g. ALGO = Fast in the general block
+# original value clutters the INCAR (e.g. ALGO = All in the general block
 # followed by ALGO = None in a HSE-DOS block).
 _TAG_RE = re.compile(r"^\s*([A-Za-z][A-Za-z0-9_]*)\s*=")
 
@@ -44,6 +50,8 @@ def _deduplicate_tags(text):
     lines = text.splitlines()
     occurrences = {}
     for i, line in enumerate(lines):
+        if line.lstrip().startswith("#"):
+            continue
         m = _TAG_RE.match(line)
         if m:
             occurrences.setdefault(m.group(1).upper(), []).append(i)
@@ -51,126 +59,173 @@ def _deduplicate_tags(text):
     return "\n".join(line for i, line in enumerate(lines) if i not in drop)
 
 
-# --- INCAR fragments ---------------------------------------------------------
-GENERAL = """\
-# --- general -----------------------------------------------------------------
-ALGO       = Fast        # Mixture of Davidson + RMM-DIIS
-PREC       = Normal      # Precision level
-EDIFF      = {ediff}     # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
-NELM       = 500         # Maximum number of electronic SCF steps
-ENCUT      = {encut}     # Plane-wave cutoff (eV)
-LASPH      = .True.      # Non-spherical contributions from gradient corrections
-GGA_COMPAT = .False.     # Restore full lattice symmetry (recommended; required for MAE)
-BMIX       = 3           # Mixing parameter for convergence
-AMIN       = 0.01        # Mixing parameter for convergence
-SIGMA      = 0.05        # Smearing width (eV)
+# Align every "TAG = value  # comment" line: pad the tag so all "=" line up,
+# pad the value so all inline "#" line up. Comment text is therefore left-
+# aligned with respect to a single "#" column across the whole file.
+_TAGLINE_RE = re.compile(r"^\s*([A-Za-z][A-Za-z0-9_]*)\s*=(.*)$")
 
-# --- parallelisation (Perlmutter 1-node CPU defaults) ------------------------
-KPAR       = {kpar}      # k-point parallelism
-NCORE      = {ncore}     # MPI ranks collaborating on one band; ~sqrt(ranks per k-group)
+
+def _format_incar(text):
+    parsed, tag_w, val_w = [], 0, 0
+    for line in text.splitlines():
+        m = _TAGLINE_RE.match(line)
+        if m and not line.lstrip().startswith("#"):
+            tag, rest = m.group(1), m.group(2)
+            if "#" in rest:
+                value, comment = rest.split("#", 1)
+                value, comment = value.strip(), comment.strip()
+            else:
+                value, comment = rest.strip(), None
+            parsed.append(("tag", tag, value, comment))
+            tag_w = max(tag_w, len(tag))
+            if comment is not None:
+                val_w = max(val_w, len(value))
+        else:
+            parsed.append(("raw", line))
+
+    out = []
+    for item in parsed:
+        if item[0] == "raw":
+            out.append(item[1])
+            continue
+        _, tag, value, comment = item
+        if comment is None:
+            out.append(f"{tag:<{tag_w}} = {value}")
+        else:
+            out.append(f"{tag:<{tag_w}} = {value:<{val_w}}  # {comment}")
+    return "\n".join(out)
+
+
+# --- INCAR fragments ---------------------------------------------------------
+# Written with single-space padding; _format_incar aligns them on output.
+GENERAL = """\
+# --- general ---
+ALGO = {algo}  # {algo_comment}
+PREC = Normal  # Precision level
+EDIFF = {ediff}  # Electronic SC break condition (VASP-wiki: 1E-6 is the best compromise)
+NELM = 500  # Maximum number of electronic SCF steps
+ENCUT = {encut}  # Plane-wave cutoff (eV)
+LASPH = .True.  # Non-spherical contributions from gradient corrections
+GGA_COMPAT = .False.  # Restore full lattice symmetry (recommended; required for MAE)
+BMIX = 3  # Mixing parameter for convergence
+AMIN = 0.01  # Mixing parameter for convergence
+SIGMA = 0.05  # Smearing width (eV)
+
+# --- parallelisation (Perlmutter CPU defaults) ---
+KPAR = {kpar}  # k-points treated in parallel
+NCORE = {ncore}  # Auto-reset to 1 by VASP under OpenMP/GPU
 """
 
 SCF = """\
-# --- SCF ---------------------------------------------------------------------
-ICHARG = 2               # Initial charge from atomic superposition
-ISMEAR = 0               # Gaussian smearing for SCF
-LCHARG = .True.          # Write CHG/CHGCAR for downstream PBE post-SCF (ICHARG = 11)
-LWAVE  = {lwave}         # {lwave_comment}
-LREAL  = Auto            # Automatically chooses real/reciprocal projections
+# --- SCF ---
+ICHARG = 2  # Initial charge from atomic superposition
+ISMEAR = 0  # Gaussian smearing for SCF
+LCHARG = .True.  # Write CHG/CHGCAR for downstream PBE post-SCF (ICHARG = 11)
+LWAVE = {lwave}  # {lwave_comment}
+LREAL = .False.  # Reciprocal-space projectors (most accurate; fine for small cells)
 """
 
 DOS = """\
-# --- DOS ---------------------------------------------------------------------
-ICHARG = 11              # Read converged CHGCAR; non-SC eigenvalue calc
-ISMEAR = -5              # Tetrahedron with Bloechl correction
-LCHARG = .False.
-LWAVE  = .False.
-LORBIT = 11              # lm-decomposed PROCAR / DOSCAR
-NEDOS  = 3001
-EMIN   = emin            # Filled in by sbatch script from SCF Fermi level
-EMAX   = emax
+# --- DOS ---
+ICHARG = 11  # Read converged CHGCAR; non-SC eigenvalue calc
+ISMEAR = -5  # Tetrahedron with Bloechl correction
+LCHARG = .False.  # Do not write CHG/CHGCAR
+LWAVE = .False.  # Do not write WAVECAR
+LORBIT = 11  # lm-decomposed PROCAR / DOSCAR
+NEDOS = 3001  # DOS sampling points
+EMIN = emin  # Filled in by sbatch script from SCF Fermi level
+EMAX = emax  # Filled in by sbatch script from SCF Fermi level
 """
 
 # HSE DOS: ALGO = None just reads orbitals/eigenvalues from WAVECAR (VASP wiki:
 # IALGO = 2). No Hamiltonian is evaluated, so no LHFCALC/HFSCREEN/AEXX needed.
 # The DOS k-mesh therefore equals the SCF k-mesh (whatever WAVECAR holds).
 DOS_HSE = """\
-# --- DOS (post-process WAVECAR; HSE) ----------------------------------------
-ALGO   = None            # Postprocess only: read orbitals + eigenvalues from WAVECAR
-NELM   = 1               # No iteration (paired with ALGO = None)
-ISTART = 1               # Read WAVECAR
-ICHARG = 0               # Required for hybrids (never use ICHARG = 11 with HSE)
-ISMEAR = -5              # Tetrahedron with Bloechl correction
-LCHARG = .False.
-LWAVE  = .False.
-LORBIT = 11              # lm-decomposed PROCAR / DOSCAR
-NEDOS  = 3001
-EMIN   = emin            # Filled in by sbatch script from SCF Fermi level
-EMAX   = emax
+# --- DOS (post-process WAVECAR; HSE -- no Fock exchange evaluated) ---
+ALGO = None  # Postprocess only: read orbitals + eigenvalues from WAVECAR
+NELM = 1  # No iteration (paired with ALGO = None)
+ISTART = 1  # Read WAVECAR
+ICHARG = 0  # Required for hybrids (never use ICHARG = 11 with HSE)
+ISMEAR = -5  # Tetrahedron with Bloechl correction
+LCHARG = .False.  # Do not write CHG/CHGCAR
+LWAVE = .False.  # Do not write WAVECAR
+LORBIT = 11  # lm-decomposed PROCAR / DOSCAR
+NEDOS = 3001  # DOS sampling points
+EMIN = emin  # Filled in by sbatch script from SCF Fermi level
+EMAX = emax  # Filled in by sbatch script from SCF Fermi level
 """
 
 BAND = """\
-# --- band --------------------------------------------------------------------
-ICHARG = 11              # Read converged CHGCAR; non-SC band evaluation
-ISMEAR = 0               # Gaussian smearing
-LCHARG = .False.
-LWAVE  = .False.
-LORBIT = 11              # lm-decomposed PROCAR
+# --- band ---
+ICHARG = 11  # Read converged CHGCAR; non-SC band evaluation
+ISMEAR = 0  # Gaussian smearing
+LCHARG = .False.  # Do not write CHG/CHGCAR
+LWAVE = .False.  # Do not write WAVECAR (.True. for unfolding)
+LORBIT = 11  # lm-decomposed PROCAR
 """
 
 # HSE band: KPOINTS file is SCF IBZKPT + line k-points with weight 0.
-# ALGO = Fast iterates over the new line k-points using the converged orbitals
-# at the SCF k-points (read via ISTART = 1) as starting guess. ICHARG = 11
-# is forbidden for hybrids.
+# ALGO = All (set in the general block) iterates over the new line k-points
+# using the converged orbitals read from WAVECAR (ISTART = 1) as the starting
+# guess. ICHARG = 11 is forbidden for hybrids.
 BAND_HSE = """\
-# --- band (HSE; restart from WAVECAR with zero-weight line k-points) ---------
-ISTART = 1               # Read WAVECAR
-ICHARG = 0               # Required for hybrids; charge derived from orbitals
-ISMEAR = 0               # Gaussian smearing
-LCHARG = .False.
-LWAVE  = .False.
-LORBIT = 11              # lm-decomposed PROCAR
+# --- band (HSE; restart from WAVECAR with zero-weight line k-points) ---
+ISTART = 1  # Read WAVECAR
+ICHARG = 0  # Required for hybrids; charge derived from orbitals
+ISMEAR = 0  # Gaussian smearing
+LCHARG = .False.  # Do not write CHG/CHGCAR
+LWAVE = .False.  # Do not write WAVECAR (.True. for unfolding)
+LORBIT = 11  # lm-decomposed PROCAR
 """
 
 OPT = """\
-# --- optimisation ------------------------------------------------------------
-ICHARG = 2
-ISMEAR = 0
-LCHARG = .False.
-LWAVE  = .False.
-IBRION = 2               # Conjugate-gradient ionic relaxation
-NSW    = 50              # Maximum ionic steps
+# --- optimisation ---
+ICHARG = 2  # Initial charge from atomic superposition
+ISMEAR = 0  # Gaussian smearing
+LCHARG = .False.  # Do not write CHG/CHGCAR
+LWAVE = .False.  # Do not write WAVECAR
+IBRION = 2  # Conjugate-gradient ionic relaxation
+NSW = 50  # Maximum ionic steps
 """
 
 SOC = """\
-# --- spin-orbit coupling -----------------------------------------------------
-LSORBIT = .True.         # Use vasp_ncl for this calculation
-MAGMOM  = {magmom}       # 3 components per atom
+# --- spin-orbit coupling (use vasp_ncl) ---
+LSORBIT = .True.  # Turn on spin-orbit coupling
+MAGMOM = {magmom}  # 3 components (mx my mz) per atom
 """
 
 DFTU = """\
-# --- DFT+U (Dudarev simplified) ---------------------------------------------
-LDAU     = .True.
-LDAUTYPE = 2             # Dudarev formulation (only U_eff = U - J matters)
-LDAUL    = {ldaul}       # l-quantum number per species (-1 = off)
-LDAUU    = {ldauu}       # Effective U per species
-LDAUJ    = {ldauj}
-LMAXMIX  = 4             # 4 for d, 6 for f
+# --- DFT+U (Dudarev) ---
+LDAU = .True.  # Turn on DFT+U
+LDAUTYPE = 2  # Dudarev formulation (only U_eff = U - J matters)
+LDAUL = {ldaul}  # l-quantum number per species (-1 = off)
+LDAUU = {ldauu}  # Effective U per species
+LDAUJ = {ldauj}  # Always 0 for Dudarev
+LMAXMIX = 4  # 4 for d electrons, 6 for f
 """
 
+# HSE block: ALGO is set to All in the general block above, so it is NOT
+# repeated here. TIME is the trial step used by the ALGO = All optimiser.
 HSE = """\
-# --- HSE06 hybrid functional -------------------------------------------------
-LHFCALC  = .True.        # Turn on Hartree-Fock exchange
-HFSCREEN = 0.2           # HSE06 range-separation parameter (1/A)
-AEXX     = 0.25          # Fraction of exact exchange (HSE06 standard)
-PRECFOCK = Fast          # Reduced FFT mesh for the exchange routine
-TIME     = 0.4           # Damping time-step for ALGO = Damped
+# --- HSE06 hybrid functional ---
+LHFCALC = .True.  # Turn on Hartree-Fock exchange
+HFSCREEN = 0.2  # HSE06 range-separation parameter (1/Angstrom)
+AEXX = 0.25  # Fraction of exact exchange (HSE06 standard)
+PRECFOCK = Fast  # Reduced FFT mesh for the exchange routine
+TIME = 0.4  # Trial time step for the ALGO = All band optimiser
 """
 
 
 # --- driver ------------------------------------------------------------------
 def build_incar(args):
+    # HSE uses the robust all-bands optimiser; PBE uses Davidson + RMM-DIIS.
+    if args.hse:
+        algo, algo_comment = "All", "All-bands simultaneous update; robust for hybrids"
+    else:
+        algo, algo_comment = "Fast", "Mixture of Davidson + RMM-DIIS"
+
     parts = [GENERAL.format(
+        algo=algo, algo_comment=algo_comment,
         ediff=args.ediff, encut=args.encut,
         kpar=args.kpar, ncore=args.ncore,
     )]
@@ -211,14 +266,12 @@ def build_incar(args):
     if args.hse:
         # SCF and band evaluate the HF exchange operator and need the HSE block.
         # DOS uses ALGO = None (no Hamiltonian eval), so HSE tags are unnecessary.
-        if args.dos:
-            pass
-        else:
+        if not args.dos:
             parts.append(HSE)
-    elif main in ("scf", "opt"):
+    elif main in ("scf", "opt") and not (args.soc or args.dftu):
         parts.append("# (Pure PBE; add --hse for HSE06 or --dftu for DFT+U)\n")
 
-    return _deduplicate_tags("\n".join(parts))
+    return _format_incar(_deduplicate_tags("\n".join(parts)))
 
 
 def _default_magmom(poscar_path):
@@ -251,7 +304,7 @@ def parse_args():
     m.add_argument("-c", "--soc",  action="store_true",
                    help="Add spin-orbit (use vasp_ncl).")
     m.add_argument("-e", "--hse",  action="store_true",
-                   help="Add HSE06 hybrid block.")
+                   help="Add HSE06 hybrid block (also sets ALGO = All).")
     m.add_argument("-u", "--dftu", action="store_true",
                    help="Add Dudarev DFT+U block.")
 
@@ -280,5 +333,5 @@ if __name__ == "__main__":
     args = parse_args()
     text = build_incar(args)
     with open(args.output, "w") as fh:
-        fh.write(text)
+        fh.write(text + "\n")
     print(f"Wrote {args.output} ({len(text.splitlines())} lines).")
