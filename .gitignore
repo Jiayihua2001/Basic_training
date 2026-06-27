@@ -33,3 +33,7 @@ vendor/
 # might run them in-place and end up with a __pycache__ next to them)
 __pycache__/
 *.pyc
+
+# Local Claude Code dev notes (kept out of the shared repo; not published)
+/CLAUDE.md
+/MEMORY.md
