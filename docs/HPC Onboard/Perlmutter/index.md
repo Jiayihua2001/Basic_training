@@ -36,7 +36,7 @@ Two things are required before you can run: an **active NERSC account** on an al
 1. Ask your PI for the **project (repo) name** — for this group it is **`m3578`** (the `-A m3578` you see in every submit script). Project names are usually `m` followed by four digits.
 2. Go to **[iris.nersc.gov/add-user](https://iris.nersc.gov/add-user)** and choose *"I do not have a NERSC account and want to create one"*. Fill it in with your organization **Carnegie Mellon University**, your CMU email, and project **`m3578`**.
 3. NERSC vets your identity (can take up to about a week); then the **PI or a PI Proxy approves** your request in [Iris](https://iris.nersc.gov).
-4. You receive an email with a **24-hour link to set your password**. Then log into Iris, accept the Appropriate Use Policies, and set up **MFA** — see [NERSC MFA](https://docs.nersc.gov/connect/mfa/). Configure [`sshproxy`](#logging-in) so you don't re-authenticate on every connection.
+4. You receive an email with a **link to set your password**. Then log into Iris, accept the Appropriate Use Policies, and set up **MFA** — see [NERSC MFA](https://docs.nersc.gov/connect/mfa/). Configure [`sshproxy`](#logging-in) so you don't re-authenticate on every connection.
 
 ### 2. Get VASP binary access
 
