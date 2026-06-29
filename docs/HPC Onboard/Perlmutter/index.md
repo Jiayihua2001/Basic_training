@@ -34,7 +34,7 @@ Two things are required before you can run: an **active NERSC account** on an al
 ### 1. Get a NERSC account
 
 1. Ask your PI for the **project (repo) name** — for this group it is **`m3578`** (the `-A m3578` you see in every submit script). Project names are usually `m` followed by four digits.
-2. Go to **[iris.nersc.gov/add-user](https://iris.nersc.gov/add-user)** and choose *"I need a new NERSC account"* (or *"I have a current NERSC account"* to join `m3578` with an existing login). Enter a preferred username, the project name, and your contact / organization info.
+2. Go to **[iris.nersc.gov/add-user](https://iris.nersc.gov/add-user)** and choose *"I need a new NERSC account"* (or *"I have a current NERSC account"* to join with an existing login). Fill it in with your **CMU credentials** — organization **Carnegie Mellon University**, your CMU email — and project **`m3578`**.
 3. NERSC vets your identity (can take up to about a week); then the **PI or a PI Proxy approves** your request in [Iris](https://iris.nersc.gov).
 4. You receive an email with a **24-hour link to set your password**. Then log into Iris, accept the Appropriate Use Policies, and set up **MFA** (a one-time-password app) — see [NERSC MFA](https://docs.nersc.gov/connect/mfa/). Configure [`sshproxy`](#logging-in) so you don't type the OTP on every connection.
 
@@ -55,7 +55,12 @@ groups   # confirm vasp6 (or vasp5) is listed
 If the group is missing:
 
 1. **Get registered under the license first.** If your license was purchased from **VASP Software GmbH**, the **license owner (usually your PI) must add you as a licensee under their license at the [VASP Portal](https://www.vasp.at/)** *before* you submit anything. NERSC checks your name against that licensee list — if you are not on it, the request is denied.
-2. **Submit a VASP License Confirmation Request:** [NERSC Help portal](https://help.nersc.gov) → *Open a Request* → *"VASP License Confirmation Request"* (or the [direct form](https://nersc.servicenowservices.com/sp?id=sc_cat_item&sys_id=d2935b561b032c106c44ebdbac4bcbb6&sysparm_category=e15706fc0a0a0aa7007fc21e1ab70c2f)). The form is short — be ready to provide your **NERSC username**, the **VASP version** (5 / 6 / 6.5), and the **license owner's name and email** (the PI who registered you at the VASP Portal), plus the **license number** if asked.
+2. **Submit a VASP License Confirmation Request:** [NERSC Help portal](https://help.nersc.gov) → *Open a Request* → *"VASP License Confirmation Request"* (or the [direct form](https://nersc.servicenowservices.com/sp?id=sc_cat_item&sys_id=d2935b561b032c106c44ebdbac4bcbb6&sysparm_category=e15706fc0a0a0aa7007fc21e1ab70c2f)). For this group, fill it in as:
+   - **VASP vendor:** VASP Software GmbH
+   - **License owner's name:** Noa Marom
+   - **License owner's institution:** Carnegie Mellon University
+   - **VASP version(s):** VASP6
+   - **NERSC username:** your own
 3. Approval takes **several business days**; once granted, `groups` lists `vasp6` and `module load vasp/6.4.3-cpu` works.
 
 ---
