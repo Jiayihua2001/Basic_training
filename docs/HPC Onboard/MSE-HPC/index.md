@@ -18,7 +18,7 @@ Hardware / scheduler at a glance:
 | Scheduler | SLURM (default account — no `-A` flag needed) |
 | Modules | Lmod + Spack (`module avail`) |
 | Home | `/home/$USER` (BeeGFS parallel filesystem, shared across all nodes) |
-| Toolchain for FHI-aims | GCC 11.5 (`gfortran`) + Open MPI 5 + Intel MKL (ScaLAPACK) |
+| Toolchain for FHI-aims | Intel `ifort` (classic) + Intel MPI + Intel MKL (ScaLAPACK) |
 
 > ⚠️ The head node (`mse-hpc-head`) is for editing, compiling, and submitting only — **never run calculations on it**. Submit to the compute nodes with `sbatch`/`srun`.
 
@@ -83,15 +83,15 @@ module purge                 # unload everything
 
 ```text
 /mnt/beegfs/27-735/programs/fhi-aims.240507/
-├── build/aims.240507.scalapack.mpi.x   # the MPI executable
-├── aims_env.sh                          # sets up the Open MPI + MKL runtime
+├── build/aims.240507.ifort.scalapack.mpi.x   # the MPI executable
+├── aims_env.sh                          # sets up the Intel MPI + MKL runtime
 └── species_defaults/                    # basis sets (used by write_control.py)
 ```
 
 The tutorial's `submit.sh` and `write_control.py` already point at this location (they are installed for you by `setup_utils.sh` — see the [Quick Onboard](../../)), so there is nothing to install or build. Just make sure you can read it:
 
 ```bash
-ls /mnt/beegfs/27-735/programs/fhi-aims.240507/build/aims.240507.scalapack.mpi.x
+ls /mnt/beegfs/27-735/programs/fhi-aims.240507/build/aims.240507.ifort.scalapack.mpi.x
 ```
 
 If that path is ever missing or moved, only two files need updating — `AIMS_DIR` in `submit.sh` and `BASE_SPECIES_PATH` in `write_control.py`.

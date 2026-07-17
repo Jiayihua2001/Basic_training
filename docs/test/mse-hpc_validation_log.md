@@ -96,6 +96,20 @@ The tutorial's shared binary was switched to **240507** (the same version the gr
 
 The Ge exercise's meta-GGA is now **r²SCAN** via the bundled libxc (`override_warning_libxc .true.` + `xc libxc MGGA_X_R2SCAN+MGGA_C_R2SCAN`). Unlike SCAN, its **unit-cell relaxation works** in the exact tutorial workflow (bfgs or trm, 4 steps, ~70 s from a=5.5): **a = 5.689 Å** (+0.031 vs exp; SCAN-class), stress verified consistent with its E(a) surface, Ge gap **0.314 eV** (making the full ladder LDA/PBE ≈0 → r²SCAN 0.31 → HSE06 0.50 → exp 0.693 — a cleaner Jacob's-ladder story than SCAN's 0.09). Rejected candidates: native `rscan` (reproducible crash in 240507), TPSS (works but a=5.728, +0.070). Docs §3.2/§3.3 and `dir_tree.sh` updated; E(a)-scan workaround removed from the student path.
 
+## Classic-ifort experiment (per review request)
+
+Classic `ifort` (2021.13.1, the final release) does not exist anywhere on MSE-HPC but was installed via spack (`intel-oneapi-compilers-classic`, user tree `~/spack-user`). FHI-aims 240507 builds from **pristine source** with it (mpiifort `-O3 -ip -fp-model precise`, icx/icpx for C/C++, MKL, Intel MPI) — including rt-tddft, confirming ifx's rejection was purely a compiler-strictness matter. Binary: `~/software/fhi-aims.240507/build_ifort/`, submit variant `~/aims_utils/submit_ifort.sh`.
+
+**Full tutorial re-run on the ifort binary (507 leaf runs, `~/Tutorials_ifort`) vs the gfortran deployment:**
+- **Results: max |ΔE| = 1.1×10⁻⁸ eV, median 0** across all 507 matched runs; every lattice constant, gap, binding/adsorption minimum identical (r²SCAN relax: bit-identical 5.68912789 Å). Intel MPI works under sbatch (`I_MPI_FABRICS=shm`, unset the injected `I_MPI_OFI_PROVIDER=mlx`).
+- **SCAN differential:** ifort-compiled SCAN `relax_unit_cell` fails **bit-identically** (a → 5.49617268) — three toolchains now agree; definitively an FHI-aims meta-GGA stress implementation issue, not a compiler artifact. r²SCAN choice re-validated.
+- **Speed (same-node A/B benchmark, best-of-two):** parity. The dominant workload (118-atom TCNQ single points, 89% of tutorial compute) runs **6–10% faster with ifort** (290–298 s vs 308–319 s); sub-30 s jobs are noise-dominated (up to 3× run-to-run variance on the *same* binary); trivial jobs start much faster under Intel MPI (collective latency).
+- **Recommendation:** keep the deployed **gfortran + Open MPI** binary — science output is identical, the ≤10% edge on big jobs doesn't outweigh depending on a discontinued compiler (classic ifort is EOL) in the class toolchain. The ifort build is kept for reference.
+
+## Canonical binary switched to the classic-Intel build (per review)
+
+Following the ifort experiment's results, `build/aims.240507.ifort.scalapack.mpi.x` is now the **canonical tutorial binary** (the GNU build stays alongside as reference, env preserved as `aims_env_gnu.sh`). Accessibility for every student was the gating concern and is verified: the binary is linked `-static-intel` and its remaining shared-library deps all resolve from world-readable `/home/.spack-system` paths via the rewritten shared `aims_env.sh` (Intel runtime + Intel MPI with `I_MPI_FABRICS=shm`, site-injected `I_MPI_OFI_PROVIDER` unset) — clean-shell `ldd` shows zero private-home dependencies. `submit.sh` (bundle, `~/aims_utils`, docs download) and the MSE-HPC page repointed; fresh-unzip smoke test reproduces H₂ = −30.934556449 eV with the aims.out header confirming `mpiifort (Intel)`.
+
 ## Bottom line
 
 Every exercise and assignment of Tutorials 1–3 runs end-to-end on MSE-HPC with the shared binary. All issues a student would hit were found and fixed in the docs/bundle (see lists above). Two flaky-node incidents (c015, c017) and two mid-run job deaths during the 180-job wave were recovered by resubmission — worth mentioning to mse-it, and students should know: if `aims.out` stops growing for minutes, cancel and resubmit (check `squeue` first so you don't double-submit into the same folder).
