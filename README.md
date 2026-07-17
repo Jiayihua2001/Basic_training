@@ -6,7 +6,7 @@ Onboarding documentation for new group members. The content lives in `docs/`, is
 
 ## What's inside
 
-- **HPC Onboard** — getting started on the group's clusters (Trace, Arjuna, NERSC Perlmutter) plus Linux, Slurm, and Python-environment basics.
+- **HPC Onboard** — getting started on the group's clusters (Trace, MSE-HPC, NERSC Perlmutter) plus Linux, Slurm, and Python-environment basics.
 - **Tutorials**
   - **FHI-aims** (organic / molecular materials) — H₂ → periodic solids → 2D & surfaces.
   - **VASP** (inorganic / quantum materials, on Perlmutter) — bulk InAs at PBE → PBE+SOC → HSE06, with the SOC / HSE / DFT+U methodology and parallel-execution details.

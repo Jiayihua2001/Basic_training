@@ -9,8 +9,8 @@ Welcome! This onboarding session will help you get up and running with different
 
 ### **What we'll cover:**
 
-* **Arjuna:**
-  A quick intro to Arjuna HPC cluster.
+* **MSE-HPC:**
+  The CMU MSE department cluster — the group's home for the FHI-aims (organic / molecular) tutorials.
 
 * **Trace:**
   A quick intro to Trace HPC cluster.

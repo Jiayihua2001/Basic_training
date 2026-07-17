@@ -10,14 +10,14 @@ nav_order: 1            # 2,3,4 for the others
 
 ## 📖 Learning objectives:
 - FHI-aims basic
-- submitting jobs on Trace or Arjuna.
+- submitting jobs on Trace or MSE-HPC.
 - numerical convergence & scaling
 - structure optimization.
 
 > **Notation used**
 > - Distances are in Å
 > - Activate your virtual env if the python script needs ase. If you don't have one, go [create one](../../HPC%20Onboard/virtual_env) 
-> - Please find `submit.sh` and `write_control.py` in `utils/trace` or `utils/arjuna` folder.
+> - Please find `submit.sh` and `write_control.py` in `utils/trace` or `utils/mse-hpc` folder.
 > - Please find any other useful python scripts under Tutorial_1 and subfolders.
 
 ---
@@ -47,9 +47,9 @@ For detailed settings, please check [FHI-aims Manual](https://fhi-aims.org/uploa
 - **Generate `control.in` Files by `write_control.py` script:**
  
     ```bash
-    python ~/write_control.py --elements H --species_default light
+    python ~/aims_utils/write_control.py --elements H --species_default light
     ```
-    Run ``python ~/write_control.py --help`` for full flag descriptions.
+    Run ``python ~/aims_utils/write_control.py --help`` for full flag descriptions.
 
     The `control.in` will looks like:
     ```bash
@@ -73,7 +73,7 @@ For detailed settings, please check [FHI-aims Manual](https://fhi-aims.org/uploa
     * Put the first H at the origin: `(0.0 0.0 0.0)`
     * Put the second H on the z-axis: `(0.0 0.0 d)` where `d` = bond length (Å).
 
-    Create H₂ geometries with bond lengths from 0.5 Å to 1.0 Å at a step 0.1 Å:
+    Create H₂ geometries with bond lengths from 0.5 Å to 1.0 Å at a step 0.1 Å, plus one wide separation (6.0 Å) that serves as the dissociation-limit reference for the bond energy:
 
     You can optionally **visualize the structures** using:
 
@@ -83,15 +83,15 @@ For detailed settings, please check [FHI-aims Manual](https://fhi-aims.org/uploa
 - **Copy your submit.sh file to your current path**
 
 - **Run FHI-aims Calculations**
-    Before submitting jobs, please make sure you have activated your `aims_env`.
+    `submit.sh` loads the FHI-aims runtime environment automatically inside the job, so you don't need to load any modules or environments before submitting.
 
     The help script `distance_generator.py` can create folders for each distance, also help paste `control.in` and `submit.sh` in each folder. Then you can enter each folder, submit the job by :
 
     ```bash
-    sbatch ~/submit.sh
+    sbatch ~/aims_utils/submit.sh
     ```
 
-    > **Tip:** If your job runs out of time, you can edit `~/submit.sh` and increase the wall time limit (e.g. change `#SBATCH -t 1:00:00` to a longer duration).
+    > **Tip:** If your job runs out of time, you can edit `~/aims_utils/submit.sh` and increase the wall time limit (e.g. change `#SBATCH -t 1:00:00` to a longer duration).
 
     Submit each folder to your cluster, You'll know the run is finished when:
 
@@ -123,7 +123,7 @@ For detailed settings, please check [FHI-aims Manual](https://fhi-aims.org/uploa
   * The **energy minimum**
   * Two other **interatomic distances** of your choosing
 * From the plot, extract :
-  * **Bond energy**
+  * **Bond energy** (difference between the curve minimum and the 6.0 Å dissociation reference)
   * **Equilibrium bond length(estimate)**
 
 * (10 Points) (Come back to it when you finish the EX3) Relax the structure and get the bond length.
@@ -249,7 +249,7 @@ To evaluate the cost, grep the time of each runs:
 - Make a folder for each [serine conformers](https://aminoacidsguide.com/Ser.html) (named by different dihedral angle. `60.in`,`180.in`,`300.in`) and rename each `.in` files to `geometry.in`. Try to prepare `control.in` by reading from `geometry.in` this time by `write_control.py`:
 
   ```bash
-  python ~/write_control.py --input_geometry --species_default light 
+  python ~/aims_utils/write_control.py --input_geometry --species_default light 
   ```
   then add this line for non-periodic relaxation:
   ```text
@@ -303,7 +303,7 @@ Here is the structure of **fumaronitrile**:
 
 - **Relax neutral molecule, get E(0) and prepare geometry.in**
 
-    Rename `fumaronitrile.in` to `geometry.in`, try to relax it, you already know how to do that! Start from the relaxed neutral structure for the following calculation. Since the ionized species has an unpaired electron (doublet state), add the line `initial_moment 1` after the first atom line in `geometry.in.next_step` to provide an initial spin guess. Then copy it under the "vertical/adiabatic" dir by (for example) :
+    Rename `fumaronitrile.in` to `geometry.in`, try to relax it, you already know how to do that! Start from the relaxed neutral structure for the following calculation. Since the ionized species has an unpaired electron (doublet state), add the lines `initial_moment 1` and `initial_charge 1.` (for the EA calculations use `initial_charge -1.`) after the first atom line in `geometry.in.next_step` — the ionized species needs both an initial spin and an initial charge guess. Then copy it under the "vertical/adiabatic" dir by (for example) :
     ```bash
     cp geometry.in.next_step ./IP/adiabatic/geometry.in
     ```

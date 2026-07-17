@@ -37,3 +37,11 @@ __pycache__/
 # Local Claude Code dev notes (kept out of the shared repo; not published)
 /CLAUDE.md
 /MEMORY.md
+
+# FHI-aims run outputs produced by docs/test/run_tests.sh (regenerated on demand)
+docs/test/*/aims.out
+docs/test/*/job_*.out
+docs/test/*/submit.sh
+docs/test/*/band*.out
+docs/test/*/KS_DOS*
+docs/test/*/geometry.in.next_step

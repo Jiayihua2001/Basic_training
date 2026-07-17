@@ -123,7 +123,7 @@ Use the provided `Surfaces.py` utility to construct the bilayer graphene structu
 
 ```bash
 # Build AA stacking
-python ~/Surfaces.py --build_bilayer --stacking AA --interlayer_distance 3.3 --vacuum 20.0
+python ~/aims_utils/Surfaces.py --build_bilayer --stacking AA --interlayer_distance 3.3 --vacuum 20.0
 ```
 
 **Visual-check in OVITO:**
@@ -144,7 +144,7 @@ The k-point sampling directly affects the quality of Brillouin zone integration 
 **Create the `control.in`:**
 
 ```bash
-python ~/write_control.py --elements C
+python ~/aims_utils/write_control.py --elements C
 ```
 
 The control.in should contain:
@@ -178,12 +178,12 @@ Test k-grid densities from 4×4×1 to 16×16×1. For each k-grid:
 
 Use `Surfaces.py` for automatic setup and submission:
 ```bash
-python ~/Surfaces.py --make_k_grid_2d --k_grid_min 6 --k_grid_max 22 --k_grid_step 2
+python ~/aims_utils/Surfaces.py --make_k_grid_2d --k_grid_min 6 --k_grid_max 22 --k_grid_step 2
 ```
 
 After jobs finish, plot the convergence:
 ```bash
-python ~/Surfaces.py --plot_k_grid_2d
+python ~/aims_utils/Surfaces.py --plot_k_grid_2d
 ```
 
 **Expected behavior:**
@@ -207,7 +207,7 @@ cd ../vacuum
 
 **Prepare structures with different vacuum spacings:**
 
-For each vacuum thickness (e.g., 10, 15, 20, 25, 30 ....Å), you need to create a separate `geometry.in` with the same bilayer structure but different total z-lattice vector.
+For each vacuum thickness (e.g., 15, 20, 25, 30 ....Å), you need to create a separate `geometry.in` with the same bilayer structure but different total z-lattice vector.
 
 **Run convergence test:**
 
@@ -226,12 +226,12 @@ For each vacuum spacing:
 Copy the `submit.sh` and the `control.in` with converged k grid.  Use `Surfaces.py` to generate and submit structures with different vacuum spacings:
 
 ```bash
-python ~/Surfaces.py --vacuum_series --interlayer_distance 3.30 --stacking AA
+python ~/aims_utils/Surfaces.py --vacuum_series --interlayer_distance 3.30 --stacking AA
 ```
 
 After running calculations for all vacuum spacings:
 ```bash
-python ~/Surfaces.py --plot_vacuum
+python ~/aims_utils/Surfaces.py --plot_vacuum
 ```
 
 This will automatically collect energies from all `vac_*` directories and generate a convergence plot. Choose the smallest vacuum where energy changes become negligible.
@@ -244,7 +244,7 @@ This will automatically collect energies from all `vac_*` directories and genera
 
 * **(5 points)** Next, perform a k-point convergence test by varying the k-grid from 6×6×1 up to 22×22×1 (or until you reach convergence),with step 2. For each k-grid, keep the vacuum spacing fixed at 20 Å and use the PBE functional without vdW corrections. Record k-grid settings and corresponding total energies in a table, and plot both E(n) and |dE/dn| as a function of k-grid density n. Determine the converged k-grid.
 
-* **(3 points)** Using the converged k-grid, perform vacuum convergence tests by varying the vacuum spacing from 10 Å to 50 Å (suggested: 10, 15, 20, 25, 30... Å). For each vacuum size, maintain the same interlayer distance (3.30 Å) and only change the total z-component of the unit cell. Plot total energy E versus vacuum thickness. Choose the converged vacuum thickness.
+* **(3 points)** Using the converged k-grid, perform vacuum convergence tests by varying the vacuum spacing from 15 Å to 50 Å (suggested: 15, 20, 25, 30... Å). For each vacuum size, maintain the same interlayer distance (3.30 Å) and only change the total z-component of the unit cell. Plot total energy E versus vacuum thickness. Choose the converged vacuum thickness.
 
 ---
 
@@ -278,10 +278,10 @@ Use `Surfaces.py` to build different stacking configurations:
 
 ```bash
 # Build AA stacking
-python ~/Surfaces.py --build_bilayer --stacking AA --interlayer_distance 3.30 --vacuum <optimal>
+python ~/aims_utils/Surfaces.py --build_bilayer --stacking AA --interlayer_distance 3.30 --vacuum <optimal>
 
 # Build AB (Bernal) stacking  
-python ~/Surfaces.py --build_bilayer --stacking AB --interlayer_distance 3.30 --vacuum <optimal>
+python ~/aims_utils/Surfaces.py --build_bilayer --stacking AB --interlayer_distance 3.30 --vacuum <optimal>
 ```
 
 
@@ -352,7 +352,7 @@ layer.center(vacuum=<optimal>/2, axis=2)
 write("geometry.in", layer, format='aims')
 ```
 
-Copy `control.in` use your converged k-grid and `submit.sh`, then submit the job by `sbatch ~/submit.sh`.
+Copy `control.in` use your converged k-grid and `submit.sh`, then submit the job by `sbatch ~/aims_utils/submit.sh`.
 
 **Step 2: Scan interlayer distances for bilayer**
 
@@ -363,7 +363,7 @@ Suggested distances: **from 3.0 to 4.5 Å with a step 0.1 Å**
 ```bash
 cd ..
 cp monolayer/control.in .
-cp ~/submit.sh .
+cp ~/aims_utils/submit.sh .
 ```
 Remember to check `control.in` to use the correct functionals.
 
@@ -371,7 +371,7 @@ Generate all structures automatically:
 
 ```bash
 # Use Surfaces.py command line
-python ~/Surfaces.py --distance_scan --stacking AA --vacuum <optimal> 
+python ~/aims_utils/Surfaces.py --distance_scan --stacking AA --vacuum <optimal> 
 
 ```
 
@@ -381,13 +381,13 @@ After all calculations finish, use `Surfaces.py` to analyze:
 
 ```bash
 # Use Surfaces.py command line
-python ~/Surfaces.py --plot_binding_curve 
+python ~/aims_utils/Surfaces.py --plot_binding_curve 
 ```
 
 Once you have identified the optimal region, perform a high-resolution scan as follows:
 ```bash
 # Run Surfaces.py to refine the interlayer distance scan
-python ~/Surfaces.py --distance_scan --stacking AA --vacuum <optimal> --distance_min <min> --distance_max <max> --distance_step 0.01
+python ~/aims_utils/Surfaces.py --distance_scan --stacking AA --vacuum <optimal> --distance_min <min> --distance_max <max> --distance_step 0.01
 ```
 
 
@@ -439,14 +439,14 @@ output dos                        -20 10 3001 0.1
 | K     | 0.33333 | 0.33333 | 0.0 |
 
 Run the calculation:
-Copy `submit.sh` in current folder , submit the job by `sbatch ~/submit.sh`
+Copy `submit.sh` in current folder , submit the job by `sbatch ~/aims_utils/submit.sh`
 
 **Plotting Results:**
 
 To analyze your electronic structure, plot both the band structure **and** density of states:
 
 ```bash
-python ~/aimsplot.py
+python ~/aims_utils/aimsplot.py
 ```
 Or you could import the ./band folder to [GIMS](https://gims.ms1p.org/static/index.html#BandStructure-workflow#StructureBuilder)
 
@@ -526,7 +526,7 @@ cd tcnq_adsorption/convergence
 
 Create a single-layer graphene slab with vacuum:
 ```bash
-python ~/Surfaces.py --build_graphene_slab --layers 1 --size 7 7 --vacuum 20.0
+python ~/aims_utils/Surfaces.py --build_graphene_slab --layers 1 --size 7 7 --vacuum 20.0
 ```
 - `--layers 1`: single graphene sheet  
 - `--size 7 7`: 7×7 supercell (increase as needed)
@@ -539,7 +539,7 @@ python ~/Surfaces.py --build_graphene_slab --layers 1 --size 7 7 --vacuum 20.0
 Place the TCNQ molecule on graphene:
 ```bash
 # Example: Place TCNQ at hollow site, x-orientation, 3.5 Å above graphene
-python ~/Surfaces.py --place_tcnq_on_graphene --tcnq_site hollow --tcnq_orientation x --tcnq_height 3.5 --vacuum 20.0
+python ~/aims_utils/Surfaces.py --place_tcnq_on_graphene --tcnq_site hollow --tcnq_orientation x --tcnq_height 3.5 --vacuum 20.0
 ```
 - Use `--tcnq_site` (`top`, `bridge`, or `hollow`)
 - Use `--tcnq_orientation` (`x` or `y`)
@@ -552,7 +552,7 @@ Rememeber to rename the file generated to `geometry.in` file for DFT calculation
 Generate `control.in` after you have the final `geometry.in`:
 ```bash
 cp geometry_tcnq_hollow_x.in geometry.in
-python ~/write_control.py --input_geometry
+python ~/aims_utils/write_control.py --input_geometry
 ```
 Copy `submit.sh` in the current folder.
 Edit `control.in` to set the calculation parameters you require. Example minimal settings:
@@ -591,16 +591,16 @@ For TCNQ adsorption on single-layer graphene, we need to systematically converge
 - Use reasonable initial k-grid (4×4×1) for efficiency
 - Goal: Find the minimum vacuum where **adsorption energy** is converged
 
-**Test different vacuum spacings** (e.g., 10, 15, 20, 25, 30, 35, 40 Å):
+**Test different vacuum spacings** (e.g., 15, 20, 25, 30, 35, 40 Å):
 
   - Enter the `tcnq_adsorption/convergence/vacuum` folder, make subfolders for each vacuum spacing, copy `control.in` and `submit.sh` to run the calculation.
   ```bash
   cp ../geometry_graphene.in .
-  python ~/Surfaces.py --vacuum_series --EX_step 2
+  python ~/aims_utils/Surfaces.py --vacuum_series --EX_step 2
   ```
   - After running calculations for all vacuum spacings:
   ```bash
-  python ~/Surfaces.py --plot_vacuum
+  python ~/aims_utils/Surfaces.py --plot_vacuum
   ```
 
 
@@ -616,7 +616,7 @@ For TCNQ adsorption on single-layer graphene, we need to systematically converge
    Copy the `geometry.in` with the optimal vacuum to the `k_grid` folder, as well as `control.in` and `submit.sh`.
 2. **Test different k-point grids** (e.g., 2×2×1, 3×3×1, 4×4×1):
    ```bash
-   python ~/Surfaces.py --make_k_grid_2d --k_grid_min 2 --k_grid_max 8 --k_grid_step 1
+   python ~/aims_utils/Surfaces.py --make_k_grid_2d --k_grid_min 2 --k_grid_max 8 --k_grid_step 1
    ```
 
 3. **For each k-grid**, calculate E_ads using the same procedure
@@ -624,7 +624,7 @@ For TCNQ adsorption on single-layer graphene, we need to systematically converge
 converged k-grid
 
   ```bash
-  python ~/Surfaces.py --plot_k_grid_2d
+  python ~/aims_utils/Surfaces.py --plot_k_grid_2d
   ```
 
 Plot total energy E vs. k-grid density n. Look for where the energy curve flattens. Choose the smallest n where convergence is achieved.
@@ -639,8 +639,8 @@ Plot total energy E vs. k-grid density n. Look for where the energy curve flatte
 Please enter one of the three("PBE","PBE_TS","PBE_MBD") folders.
 
 ```bash
-python ~/Surfaces.py --build_molecule --molecule tcnq
-python ~/Surfaces.py --build_graphene_slab --layers 1 --size 7 7 --vacuum <optimal>
+python ~/aims_utils/Surfaces.py --build_molecule --molecule tcnq
+python ~/aims_utils/Surfaces.py --build_graphene_slab --layers 1 --size 7 7 --vacuum <optimal>
 
 ```
 
@@ -650,10 +650,10 @@ Use the new TCNQ-specific functions:
 
 ```bash
 # Place TCNQ at specific site and orientation 
-python ~/Surfaces.py --place_tcnq_on_graphene --tcnq_site hollow --tcnq_orientation x --tcnq_height 3.5 --vacuum <optimal>
+python ~/aims_utils/Surfaces.py --place_tcnq_on_graphene --tcnq_site hollow --tcnq_orientation x --tcnq_height 3.5 --vacuum <optimal>
 
 # Or you could automatically create all 6 adsorption configurations by this command:
-python ~/Surfaces.py --create_tcnq_adsorption_series --vacuum <optimal>
+python ~/aims_utils/Surfaces.py --create_tcnq_adsorption_series --vacuum <optimal>
 ```
 
 **Available configurations:**
@@ -716,7 +716,7 @@ You can use the automated functions in `Surfaces.py` to perform this scan and pl
 
 ```bash
 cp ../../geometry_graphene.in .
-python ~/Surfaces.py --create_height_scan --tcnq_site <site> --tcnq_orientation <x|y>  --height_min 2.8 --height_max 3.6 --height_step 0.1 --vacuum <optimal>
+python ~/aims_utils/Surfaces.py --create_height_scan --tcnq_site <site> --tcnq_orientation <x|y>  --height_min 2.8 --height_max 3.6 --height_step 0.1 --vacuum <optimal>
 ```
 
 This command will:
@@ -728,7 +728,7 @@ This command will:
 To plot the resulting adsorption energy curve after calculations, use:
 
 ```bash
-python ~/Surfaces.py --plot_height_scan --tcnq_site <site> --tcnq_orientation <x|y> --E_slab <e> --E_molecule <e>
+python ~/aims_utils/Surfaces.py --plot_height_scan --tcnq_site <site> --tcnq_orientation <x|y> --E_slab <e> --E_molecule <e>
 ```
 
 Replace `<site>` with one of `top`, `bridge`, or `hollow`; `<x|y>` with the desired orientation.

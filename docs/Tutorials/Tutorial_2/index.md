@@ -24,7 +24,7 @@ In this tutorial, we will explore:
 
 > **Please Note**
 > - Distances are in Å
-> - Always copy the Tutorials to your working directory first from `/home/27735A_group/shared/example`, where you can find the files needed for the assignments.
+> - The files needed for the assignments ship in the `Tutorials_files` bundle you downloaded in the [Quick Onboard](../../) — work inside your copy of `Tutorials_files/Tutorial_2` (or copy that folder to wherever you want to work).
 > - The arguments or discussion in all you assignments should be supported by **data**, **tables** or preferably **graphs**.
 > - Activate your virtual env if the python script needs ase.
 > - **All input/output files and scripts used for the performance of hands-on assignments and the final project should be placed in an organized directory and available for review. A README file explaining what all the files are should be placed in the directory.**
@@ -110,7 +110,7 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
 **Create the `control.in`**:
 
   ```bash
-  python ~/write_control.py --elements Si
+  python ~/aims_utils/write_control.py --elements Si
   ```
   The control.in setting should looks like:
 
@@ -129,12 +129,12 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
   For your convenience, you can always this command to create and submit jobs for all k_grid automatically:
 
   ```bash
-  python ~/Automation.py --make_k_grid
+  python ~/aims_utils/Automation.py --make_k_grid
   ```
   After the job finished, use this command to plot the convergence curve automatically:
 
   ```bash
-  python ~/Automation.py --plot_k_grid
+  python ~/aims_utils/Automation.py --plot_k_grid
   ```
 
 
@@ -145,9 +145,9 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
   ```bash
   cd ../relax
   cp ../kpts/geometry.in .
-  python ~/write_control.py --elements Si 
+  python ~/aims_utils/write_control.py --elements Si 
   ```
-**Copy submit.sh to current folder and `sbatch ~/submit.sh` to submit the job.**
+**Copy submit.sh to current folder and `sbatch ~/aims_utils/submit.sh` to submit the job.**
 
 Add the converged `k_grid` setting into `control.in`, also add these settings for periodic relaxation:
 
@@ -166,7 +166,7 @@ Add the converged `k_grid` setting into `control.in`, also add these settings fo
 
 Run this comand:
 ```bash
-python ~/Automation.py --get_lattice_constant
+python ~/aims_utils/Automation.py --get_lattice_constant
 ```
 You will extract structure information from `geometry.in.next_step` in your current folder automatically, if you want to extract from other files , add `--lattice_file_name <your_filename>` to this command.
 
@@ -194,7 +194,7 @@ By plotting the band structure along paths connecting these high-symmetry points
 **Enter band folder and Prepare `control.in`**
   ```bash
   cd ../band
-  python ~/write_control.py --elements Si
+  python ~/aims_utils/write_control.py --elements Si
   ```
 **Add Bandgap Settting manually**
   Add the converged `k_grid` and bandgap/dos setting into `control.in`:
@@ -205,7 +205,10 @@ By plotting the band structure along paths connecting these high-symmetry points
   exx_band_structure_version 1  
   output band   <kx1 ky1 kz1>   <kx2 ky2 kz2>   <Npts>   <start>   <end>
   # ------------ Density of States -------------------------------------
-  # Density-of-states: 2000 points from −18 eV up to the Fermi level
+  # 2000 points from −18 to 0 eV on FHI-aims' absolute energy scale (not
+  # E_F-relative — for Si this spans about −12…+6 eV around E_F, gap included;
+  # aimsplot.py plots the E_F-shifted DOS file that FHI-aims also writes).
+  # If you widen the window, keep the mesh ≤ 0.01 eV per point.
   output dos_tetrahedron   -18.0   0.0   2000
   ```
   The arguments after `output band` are defined here:
@@ -246,13 +249,13 @@ output band   0.0 0.5 0.5    0.25 0.75 0.5  21    X      W
 output band   0.25 0.75 0.5  0.375 0.75 0.375  21    W    K
 ```
 
-We will run the test with relaxed structure after step 1.3, by renaming the `geometry.in.next_step` to `geometry.in`, add it and the `submit.sh` to current `./band` path, then submit the job by `sbatch ~/submit.sh`.
+We will run the test with relaxed structure after step 1.3, by renaming the `geometry.in.next_step` to `geometry.in`, add it and the `submit.sh` to current `./band` path, then submit the job by `sbatch ~/aims_utils/submit.sh`.
   ```bash
   cp ../relax/geometry.in.next_step ./geometry.in
   ```
 
-After the run finishes, use `~/aimsplot.py` to plot the band structure and density of states (DOS).
-Run `python ~/aimsplot.py --help` for full flag descriptions and to customize the figure appearance.
+After the run finishes, use `~/aims_utils/aimsplot.py` to plot the band structure and density of states (DOS).
+Run `python ~/aims_utils/aimsplot.py --help` for full flag descriptions and to customize the figure appearance.
 
 ### **How to extract the band gap**
 
@@ -291,7 +294,7 @@ Note that these values are estimated from the SCF k-mesh — the true band extre
 
 **Method 2 — From the band structure plot (more reliable):**
 
-The `output band` calculation samples many k-points along high-symmetry paths, giving a much finer picture. Visually identify the VBM (highest point of the topmost filled band) and CBM (lowest point of the bottommost empty band) in your plot. The energy difference between them is the band gap. If they occur at different k-points, the gap is indirect. You can also use `~/aimsplot.py` or [GIMS](https://gims.ms1p.org/static/index.html#) to extract the gap numerically from the band data files.
+The `output band` calculation samples many k-points along high-symmetry paths, giving a much finer picture. Visually identify the VBM (highest point of the topmost filled band) and CBM (lowest point of the bottommost empty band) in your plot. The energy difference between them is the band gap. If they occur at different k-points, the gap is indirect. You can also use `~/aims_utils/aimsplot.py` or [GIMS](https://gims.ms1p.org/static/index.html#) to extract the gap numerically from the band data files.
 
 > **Note for metals (e.g., Na, Fe):** Metals have **no band gap** — bands cross the Fermi level, meaning there are always available states for electrons. In the DOS, you will see non-zero density at the Fermi energy. This is the key distinction between metals and semiconductors.
 
@@ -355,7 +358,7 @@ You could build the structure from scratch using `atom_frac`, but you could also
 ### **2.2 k-point convergence**
 
   ```bash
-  python ~/write_control.py --elements Fe
+  python ~/aims_utils/write_control.py --elements Fe
   ```
 
 Same protocol as EX1 , but rebuild the `control.in` with Fe species, set `relativistic atomic_zora scalar`,`spin none` and different `k_grid` in `control.in` and test both lattices. (We use `spin none` here for the k-point convergence test to keep it fast; the magnetic calculation with `spin collinear` is introduced in §2.3.)
@@ -368,16 +371,18 @@ Same protocol as EX1 , but rebuild the `control.in` with Fe species, set `relati
 > occupation_type  gaussian  0.1
 > ```
 > This applies a Gaussian broadening (0.1 eV width, which is the FHI-aims default for periodic systems) to smooth the step-function occupation at the Fermi level. You may also try `fermi` (Fermi-Dirac) or `mp` (Methfessel-Paxton) instead of `gaussian`. A typical broadening width is 0.01–0.1 eV — too small and oscillations persist, too large and you smear out real electronic structure features. When reporting converged energies, note that a small smearing correction is included. For publication-quality results, you can test multiple broadening widths and extrapolate to zero broadening.
+>
+> If a single scan point fails to converge (typical for magnetic FCC Fe at large *a*), rerun just that point with a larger width, e.g. `gaussian 0.2`.
 
 For your convenience, you can use this command to create and submit jobs for all k_grid values automatically. You can estimate a rough range of k_grid satisfying `N*a > 40`:
 
   ```bash
-  python ~/Automation.py --make_k_grid --k_grid_min 10 --k_grid_max 18
+  python ~/aims_utils/Automation.py --make_k_grid --k_grid_min 10 --k_grid_max 18
   ```
 After the job finished, use this command to plot the convergence curve automatically:
 
   ```bash
-  python ~/Automation.py --plot_k_grid
+  python ~/aims_utils/Automation.py --plot_k_grid
   ```
 
 ### **2.3 Energy vs. lattice constant**
@@ -387,18 +392,18 @@ You can use our automation script to save your effort, lattice type can be `bcc`
   ```bash
   mkdir lattice_grid
   cd lattice_grid
-  cp ~/submit.sh .
+  cp ~/aims_utils/submit.sh .
   cp ../control.in .
   ```
 **Remember to add k_grid to `control.in` file !**
 
   ```bash
-  python ~/Automation.py --Fe_grid_search --lattice_type bcc
+  python ~/aims_utils/Automation.py --Fe_grid_search --lattice_type bcc
   ```
 
 After the calculation finished, use this command to plot E vs lattice constant automatically:
   ```bash
-  python ~/Automation.py --plot_Fe_grid_search
+  python ~/aims_utils/Automation.py --plot_Fe_grid_search
   ```
 **Hint:** 
 - To use PBE as the exchange-correlation functional, simply change `xc pw-lda` to `xc pbe` in the `control.in` file.
@@ -460,7 +465,12 @@ write('geometry.in', ge_dc)
 - [LDA](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.45.566) (Local Density Approximation): LDA assumes the exchange–correlation energy depends only on the local electron density, similar to a uniform electron gas. It's fast and simple but tends to overbind and is less accurate for inhomogeneous systems. Set `xc pw-lda` in `control.in`.
 
 - [PBE-GGA](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.77.3865) (Perdew–Burke–Ernzerhof): PBE is a GGA functional that includes both the electron density and its gradient, offering improved accuracy over LDA for molecular and solid-state systems. It is widely used but still underestimates band gaps.Set `xc pbe` in `control.in`.
-- [SCAN](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.036402) (Strongly Constrained and Appropriately Normed): SCAN is a meta-GGA functional that incorporates kinetic energy density, achieving higher accuracy across diverse systems. It improves structural and energetic predictions but is more computationally demanding. Set `xc scan` in `control.in`
+- [r²SCAN](https://pubs.acs.org/doi/10.1021/acs.jpclett.0c02405) (regularized-restored [SCAN](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.036402)): a meta-GGA that incorporates the kinetic-energy density, achieving higher accuracy across diverse systems than GGAs. We use r²SCAN rather than the original SCAN because SCAN's well-known numerical-grid sensitivity breaks unit-cell relaxation in FHI-aims, while r²SCAN was designed by the SCAN authors precisely to fix those numerical problems at the same accuracy. Set in `control.in` (the first line must come **before** the `xc` line):
+
+    ```text
+    override_warning_libxc .true.
+    xc libxc MGGA_X_R2SCAN+MGGA_C_R2SCAN
+    ```
 
 - [HSE06](https://pubs.aip.org/aip/jcp/article-abstract/118/18/8207/460359/Hybrid-functionals-based-on-a-screened-Coulomb?redirectedFrom=fulltext) (Heyd–Scuseria–Ernzerhof 2006): HSE06 is a hybrid functional that mixes exact exchange with PBE, significantly improving electronic structure predictions like band gaps. It is accurate but computationally intensive, making it suitable for small- to medium-sized systems. 
 
@@ -473,10 +483,13 @@ write('geometry.in', ge_dc)
 ### **3.3 Test with different xc-functionals.**
 
 - Do k-point convergence test with LDA.
-- For each functional LDA PBE-GGA SCAN HSE06:
-  - Do lattice relaxation, record CPU time. 
-  - Plot band structure and density of states, record CPU Time.
-  - Compare gaps with [experimental result](https://www.researchgate.net/publication/299490580_DETERMINATION_OF_THE_BAND-GAP_OF_A_SEMICONDUCTOR_GERMANIUM_CHIP_USING_FOUR_PROBE_SET-UP) (~0.693 eV) and [GW](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.48.17791) results, discuss Jacob’s-Ladder accuracy vs. cost.
+- Optimize the lattice constant with each functional (record the CPU time):
+  - **LDA, PBE, r²SCAN**: cell relaxation as in §1.3 (`relax_geometry bfgs 1e-2` + `relax_unit_cell fixed_angles`).
+  - **HSE06**: relax starting from your **PBE-relaxed** geometry (`cp ../../PBE/relax/geometry.in.next_step geometry.in`); hybrids are slow, and the closer start saves most of the steps.
+- Plot band structure and density of states with each functional, record CPU time.
+- Compare gaps with [experimental result](https://www.researchgate.net/publication/299490580_DETERMINATION_OF_THE_BAND-GAP_OF_A_SEMICONDUCTOR_GERMANIUM_CHIP_USING_FOUR_PROBE_SET-UP) (~0.693 eV) and [GW](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.48.17791) results, discuss Jacob’s-Ladder accuracy vs. cost.
+
+> Don't be alarmed if LDA/PBE give a **(near-)zero gap** for Ge — with scalar relativity that *is* the correct semilocal-DFT result (a famous failure: these functionals predict Ge to be almost metallic). Climbing the ladder partially rescues it (r²SCAN ≈ 0.3 eV, HSE06 ≈ 0.5 eV vs. experiment 0.693 eV). This is exactly the behavior the assignment asks you to discuss.
 
 ### **Assignment 3**: Germanium Electronic Structure Analysis (30 Points)
 

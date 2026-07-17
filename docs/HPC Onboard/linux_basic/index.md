@@ -45,7 +45,7 @@ nav_order: 4            # 2,3,4 for the others
 * `ssh user@host`: Secure shell into remote machine in terminal
     * e.g., `ssh user_name@trace.cmu.edu`
     * e.g., `ssh user_name@bridges2.psc.edu`
-    * e.g., `ssh user_name@arjuna-local.lan.local.cmu.edu`
+    * e.g., `ssh user_name@mse-hpc-head.materials.local.cmu.edu`
 
 
 ### **📦 Package Management (Ubuntu/Debian)**

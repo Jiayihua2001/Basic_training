@@ -15,4 +15,4 @@ has_children: true
 - [Tutorial_2](./Tutorial_2/) — Periodic systems: Si, Na, Fe, and Ge.
 - [Tutorial_3](./Tutorial_3/) — 2D materials and surfaces: bilayer graphene and TCNQ on graphene.
 
-> All scripts you need (`write_control.py`, `Automation.py`, `Surfaces.py`, `aimsplot.py`, and `submit.sh`) are bundled in the [Tutorial files](../../Tutorials_files.zip) and installed to `~/` by `setup_utils.sh`.
+> All scripts you need (`write_control.py`, `Automation.py`, `Surfaces.py`, `aimsplot.py`, and `submit.sh`) are bundled in the [Tutorial files](../../Tutorials_files.zip) and installed to `~/aims_utils/` by `setup_utils.sh`.
