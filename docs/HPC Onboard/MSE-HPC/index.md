@@ -85,6 +85,7 @@ module purge                 # unload everything
 /mnt/beegfs/27-735/programs/fhi-aims.240507/
 ├── build/aims.240507.ifort.scalapack.mpi.x   # the MPI executable
 ├── aims_env.sh                          # sets up the Intel MPI + MKL runtime
+├── intel-classic-2021.13-rt/            # Intel Fortran runtime libs (used by aims_env.sh)
 └── species_defaults/                    # basis sets (used by write_control.py)
 ```
 

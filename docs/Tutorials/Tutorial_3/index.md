@@ -236,6 +236,8 @@ python ~/aims_utils/Surfaces.py --plot_vacuum
 
 This will automatically collect energies from all `vac_*` directories and generate a convergence plot. Choose the smallest vacuum where energy changes become negligible.
 
+> **Use a numeric criterion, not just the eye:** call the vacuum converged at the first spacing where the energy change to the next spacing is **below ~1 meV**. Reading a visually "still moving" tail of a curve whose total span is a few meV leads to wastefully large cells (40–50 Å) — with the dipole correction enabled, bilayer graphene is flat to well under 1 meV by ~20 Å. The same criterion applies to the k-grid tests.
+
 ---
 
 ### **Assignment 1** Bilayer Graphene k-Point and Vacuum Convergence (10 points)
