@@ -110,6 +110,29 @@ Classic `ifort` (2021.13.1, the final release) does not exist anywhere on MSE-HP
 
 Following the ifort experiment's results, `build/aims.240507.ifort.scalapack.mpi.x` is now the **canonical tutorial binary** (the GNU build stays alongside as reference, env preserved as `aims_env_gnu.sh`). Accessibility for every student was the gating concern and is verified: the binary is linked `-static-intel` and its remaining shared-library deps all resolve from world-readable `/home/.spack-system` paths via the rewritten shared `aims_env.sh` (Intel runtime + Intel MPI with `I_MPI_FABRICS=shm`, site-injected `I_MPI_OFI_PROVIDER` unset) — clean-shell `ldd` shows zero private-home dependencies. `submit.sh` (bundle, `~/aims_utils`, docs download) and the MSE-HPC page repointed; fresh-unzip smoke test reproduces H₂ = −30.934556449 eV with the aims.out header confirming `mpiifort (Intel)`.
 
+## Three-way end-to-end speed retest (full tutorial × 3 toolchains, identical conditions)
+
+Three complete tutorial campaigns (~507 runs each) ran back-to-back on the idle cluster via one parametrized wave script (`~/speedtest_campaign.sh`; workspaces `~/speedtest_{gnu,ifort,intel2021}`):
+
+| | gfortran + OpenMPI | ifort 2021.13 (static) + IntelMPI | **all-classic 2021.10 (dynamic) + IntelMPI** |
+|---|---|---|---|
+| campaign wall | 1 h 23 m 42 s | 1 h 24 m 31 s | 1 h 20 m 22 s |
+| total compute | 19.65 node-h | 18.88 node-h (−3.9%) | 19.54 node-h (−0.5%) |
+| TCNQ 118-atom median | 314.8 s | 295.7 s (1.06×) | 296.2 s (1.06×) |
+| max |ΔE| vs gnu | — | 1.1×10⁻⁸ eV | 4.7×10⁻⁷ eV |
+
+Conclusions: all three toolchains are **scientifically identical** (≤0.5 µeV over 507 runs each) and **wall-clock equivalent** for the tutorial; both Intel variants carry the same reproducible ~6% edge on the dominant 118-atom jobs; small-job categories are noise. The **all-classic 2021.10 variant** (`build/aims.240507.intel2021.scalapack.mpi.x` + `aims_env_intel2021.sh`) meets the design goals set in review: ifort+icc+icpc all classic 2021.10 (spack), Intel MPI 2021.17, same MKL, **zero 2025-oneAPI components**, **fully dynamic linking** with the complete classic runtime redistributed to the world-readable `intel-classic-2021.10-rt/` folder and the binary's private-home RPATH stripped (patchelf) — student-view `ldd` fully clean; smoke run bit-identical (−30.934556449 eV, header `ifort 2021.10.0`).
+
+## Static-vs-dynamic linking A/B (hypothesis test for the campaign compute-total differences)
+
+To test whether `-static-intel` vs `-shared-intel` explains the small-job compute differences between campaigns, the 2021.13 build was relinked fully dynamic (same objects, only the link step redone; smoke run bit-identical) and benchmarked against the static 2021.13 and dynamic 2021.10 binaries with same-node interleaved reps (TCNQ 118-atom ×8/arm on c014+c016; Si 12×12×12 k-grid ×15/arm on c018; per-job `mpirun` wall AND aims-internal time recorded; all 69 runs bit-identical energies per workload).
+
+Result: **linking mode has no measurable effect.** Big-job internal medians S/D/C = 248.0/250.5/252.0 s (S and D identical means, 249.5 s); startup overhead (wall − internal) medians 47/43/43 s — static is not faster to launch; all differences are inside within-arm scatter. The decisive observation: the identical small job on the same node with the same binary varies **2–37 s internal time** rep to rep, and ~4% of small runs stall for 6–7 min (392 s and 427 s stalls reproduced on healthy c018 during this benchmark). BeeGFS/OS jitter, not toolchain or linking, sets small-job timing on this cluster; only the 118-atom medians measure binary speed, and there all Intel variants agree. (Benchmark TCNQ ≈ 250 s on a 3-node-quiet cluster vs ≈ 296 s under 40-node campaign load — same binaries; the gap is filesystem contention, further confirming I/O dominates the noise.)
+
+## Final deployment decision (2026-07-17)
+
+One and only one binary ships for the course: **`build/aims.240507.ifort.scalapack.mpi.x` = classic ifort 2021.13, fully dynamic linking** (same objects as the validated static build, relinked `-shared-intel`; bit-identical energies). Its classic Fortran runtime is redistributed in the world-readable `intel-classic-2021.13-rt/` folder, the build-host RPATH is stripped, and `aims_env.sh` now uses only MKL + Intel MPI + that runtime dir (no oneAPI-2025 compiler runtime). Verified from the student's perspective: permission sweep over every path component, compute-node `ldd` with zero private/missing paths, and an H₂ smoke through the unmodified `submit.sh` reproducing the reference energy exactly. Removed by this decision: the `fhi-aims.250822/` sibling install, the gfortran 240507 binary (+ `aims_env_gnu.sh` + GNU cmake cache), the static 2021.13 binary, and the all-classic 2021.10 binary (+ its env, cmake cache, and `intel-classic-2021.10-rt/`). The three-toolchain validation record above stands as the evidence base for this consolidation.
+
 ## Bottom line
 
 Every exercise and assignment of Tutorials 1–3 runs end-to-end on MSE-HPC with the shared binary. All issues a student would hit were found and fixed in the docs/bundle (see lists above). Two flaky-node incidents (c015, c017) and two mid-run job deaths during the 180-job wave were recovered by resubmission — worth mentioning to mse-it, and students should know: if `aims.out` stops growing for minutes, cancel and resubmit (check `squeue` first so you don't double-submit into the same folder).
