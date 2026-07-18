@@ -205,11 +205,12 @@ By plotting the band structure along paths connecting these high-symmetry points
   exx_band_structure_version 1  
   output band   <kx1 ky1 kz1>   <kx2 ky2 kz2>   <Npts>   <start>   <end>
   # ------------ Density of States -------------------------------------
-  # 2000 points from −18 to 0 eV on FHI-aims' absolute energy scale (not
-  # E_F-relative — for Si this spans about −12…+6 eV around E_F, gap included;
-  # aimsplot.py plots the E_F-shifted DOS file that FHI-aims also writes).
-  # If you widen the window, keep the mesh ≤ 0.01 eV per point.
-  output dos_tetrahedron   -18.0   0.0   2000
+  # 2501 points from −20 to +5 eV on FHI-aims' absolute energy scale (not
+  # E_F-relative; the Fermi level sits near −5 eV, so after the shift this
+  # spans roughly −15…+10 eV around E_F — always covering the energy window
+  # of the band plot, so the band and DOS panels share a consistent range).
+  # Keep the mesh ≤ 0.01 eV per point: 25 eV / 2500 intervals = 0.01 eV.
+  output dos_tetrahedron   -20.0   5.0   2501
   ```
   The arguments after `output band` are defined here:
   - kx ky kz  – fractional coordinates of the start / end k-points **in reciprocal space** (not real space). These are fractions of the reciprocal lattice vectors.
