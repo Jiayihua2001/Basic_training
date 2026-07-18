@@ -122,7 +122,7 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
     charge        0.
     k_grid        n n n          # test n = 4,5,…,12
   ```
-  Convergence test is to run single-point calculations for each k grid `n` from 4-12, collect total energies, and plot E and |dE/dn| (numerical derivative) vs. `n`; choose the smallest `n` where both flatten.
+  Convergence test is to run single-point calculations for each k grid `n` from 4-12, collect total energies, and plot E and |dE/dn| (numerical derivative) vs. `n` (the automation plots E relative to the densest grid, in meV, with a ±1 meV band, and |dE/dn| on a log scale against the 1 meV threshold); choose the smallest `n` where both settle inside the threshold.
 
 **Copy submit.sh to current folder.**
 

@@ -187,7 +187,7 @@ python ~/aims_utils/Surfaces.py --plot_k_grid_2d
 ```
 
 **Expected behavior:**
-Plot total energy E vs. k-grid density n. Look for where the energy curve flattens. Choose the smallest n where convergence is achieved.
+Plot the energy vs. k-grid density n (the plotting tool shows E relative to the densest grid, in meV, with a ±1 meV band). Choose the smallest n from which the curve stays inside the band.
 
 
 ### **1.4 Vacuum convergence test**
@@ -246,7 +246,7 @@ This will automatically collect energies from all `vac_*` directories and genera
 
 * **(5 points)** Next, perform a k-point convergence test by varying the k-grid from 6×6×1 up to 22×22×1 (or until you reach convergence),with step 2. For each k-grid, keep the vacuum spacing fixed at 20 Å and use the PBE functional without vdW corrections. Record k-grid settings and corresponding total energies in a table, and plot both E(n) and |dE/dn| as a function of k-grid density n. Determine the converged k-grid.
 
-* **(3 points)** Using the converged k-grid, perform vacuum convergence tests by varying the vacuum spacing from 15 Å to 50 Å (suggested: 15, 20, 25, 30... Å). For each vacuum size, maintain the same interlayer distance (3.30 Å) and only change the total z-component of the unit cell. Plot total energy E versus vacuum thickness. Choose the converged vacuum thickness.
+* **(3 points)** Using the converged k-grid, perform vacuum convergence tests by varying the vacuum spacing from 15 Å to 50 Å (suggested: 15, 20, 25, 30... Å). For each vacuum size, maintain the same interlayer distance (3.30 Å) and only change the total z-component of the unit cell. Plot the energy change versus vacuum thickness (the plotting tool shows E − E(largest vacuum) in meV with a ±1 meV band). The converged vacuum is the smallest one from which the curve stays inside the band.
 
 ---
 
@@ -629,7 +629,7 @@ converged k-grid
   python ~/aims_utils/Surfaces.py --plot_k_grid_2d
   ```
 
-Plot total energy E vs. k-grid density n. Look for where the energy curve flattens. Choose the smallest n where convergence is achieved.
+Plot the energy vs. k-grid density n (the plotting tool shows E relative to the densest grid, in meV, with a ±1 meV band). Choose the smallest n from which the curve stays inside the band.
 
 ---
 
