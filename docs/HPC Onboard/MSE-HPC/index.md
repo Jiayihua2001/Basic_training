@@ -82,8 +82,8 @@ module purge                 # unload everything
 **You do not need to compile anything.** The group maintains a single shared, pre-built FHI-aims that every member can use directly from the BeeGFS filesystem:
 
 ```text
-/mnt/beegfs/27-735/programs/fhi-aims.240507/
-├── build/aims.240507.ifort.scalapack.mpi.x   # the MPI executable
+/mnt/beegfs/27-735/programs/fhi-aims.250822/
+├── build/aims.250822.ifort.scalapack.mpi.x   # the MPI executable
 ├── aims_env.sh                          # sets up the Intel MPI + MKL runtime
 ├── intel-classic-2021.13-rt/            # Intel Fortran runtime libs (used by aims_env.sh)
 └── species_defaults/                    # basis sets (used by write_control.py)
@@ -92,7 +92,7 @@ module purge                 # unload everything
 The tutorial's `submit.sh` and `write_control.py` already point at this location (they are installed for you by `setup_utils.sh` — see the [Quick Onboard](../../)), so there is nothing to install or build. Just make sure you can read it:
 
 ```bash
-ls /mnt/beegfs/27-735/programs/fhi-aims.240507/build/aims.240507.ifort.scalapack.mpi.x
+ls /mnt/beegfs/27-735/programs/fhi-aims.250822/build/aims.250822.ifort.scalapack.mpi.x
 ```
 
 If that path is ever missing or moved, only two files need updating — `AIMS_DIR` in `submit.sh` and `BASE_SPECIES_PATH` in `write_control.py`.

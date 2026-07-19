@@ -11,8 +11,8 @@ ulimit -s unlimited
 
 # --- FHI-aims: pre-built, shared group install on MSE-HPC -------------------
 # The group maintains ONE shared FHI-aims build; you do not compile anything.
-AIMS_DIR="/mnt/beegfs/27-735/programs/fhi-aims.240507"
-AIMS_BIN="$AIMS_DIR/build/aims.240507.ifort.scalapack.mpi.x"
+AIMS_DIR="/mnt/beegfs/27-735/programs/fhi-aims.250822"
+AIMS_BIN="$AIMS_DIR/build/aims.250822.ifort.scalapack.mpi.x"
 AIMS_ENV="$AIMS_DIR/aims_env.sh"
 
 # Load the Intel compiler runtime + Intel MPI + MKL. aims_env.sh sets these up directly,
