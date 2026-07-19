@@ -7,7 +7,7 @@ nav_order: 4
 ---
 
 # Bulk InAs (PBE+SOC)
-In this step we will run our second calculation on bulk InAs where we add in spin-orbit couple to make our calculation more accurate.
+In this step we will run our second calculation on bulk InAs where we add in spin-orbit coupling to make our calculation more accurate.
 
 ## Recommended Folder Layout
 - `basic_training`
@@ -293,7 +293,7 @@ MAGMOM     = 6*0      # 3 components (mx my mz) per atom
 ```
 
 ### KPOINTS
-For a band structure calculation, the KPOINTS file is the most important input because it determines the path of your band structure. Usually we find the path from literature or helpful tools such as <a href="https://www.materialscloud.org/work/tools/seekpath" target="_blank">SeeK-path</a>. For our zinc-blende structures such as InAs we choose the k-path $\Gamma-X-W-L-\Gamma-K$, which can be generated using the following code with `kpoints.py`.
+For a band structure calculation, the KPOINTS file is the most important input because it determines the path of your band structure. Usually we find the path from literature or helpful tools such as <a href="https://www.materialscloud.org/work/tools/seekpath" target="_blank">SeeK-path</a>. For our zinc-blende structures such as InAs we choose the k-path Γ–X–W–L–Γ–K, which can be generated using the following code with `kpoints.py`.
 
 ```bash
 kpoints.py --band --coords GXWLGK
@@ -339,6 +339,6 @@ band_spd(folder='band',   output='band_spd.png')
 ## Concluding Notes
 Some things to note about the results:
 - Adding SOC roughly triples the cost relative to plain PBE, but the whole sweep still finishes in a couple of minutes on one Perlmutter CPU node.
-- PBE+SOC is still predicting InAs to be a metal (no band gap) even though we know from experiments that is it a small band gap semiconductor with a band gap of ~0.35 eV.
-	- This is a common error for DFT as it underestimates the band gap due to the self interaction error. We will look at ways to fix this this in future calculation.
+- PBE+SOC is still predicting InAs to be a metal (no band gap) even though we know from experiments that it is a small band gap semiconductor with a band gap of ~0.35 eV.
+	- This is a common error for DFT as it underestimates the band gap due to the self interaction error. We will look at ways to fix this in future calculations.
 	- SOC can usually increase the size of the band gap, but for small band gap semiconductors, just adding SOC isn't enough.

@@ -1,7 +1,7 @@
 ---
 layout: default
 parent: "HPC Onboard"
-title: "linux_basic"
+title: "Linux Basics"
 nav_order: 4            # 2,3,4 for the others
 ---
 

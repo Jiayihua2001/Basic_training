@@ -2,13 +2,13 @@
 layout: default
 parent: "FHI-aims"
 grand_parent: "Tutorials"
-title: "Tutorial_3"
+title: "2D Materials & Surfaces"
 nav_order: 3
 ---
 
 # Tutorial 3 – 2D Materials and Surfaces
 
-### 📘**Introduction** 
+### 📘 Introduction
 
 Van der Waals (vdW) interactions play a crucial role in layered materials and surface adsorption phenomena. Unlike the covalent and ionic bonding within atomic layers, weak vdW forces govern interlayer binding in materials such as graphene, hexagonal boron nitride (hBN), and transition metal dichalcogenides. These weak interactions are challenging for standard DFT functionals to capture accurately, necessitating specialized dispersion corrections.
 
@@ -18,11 +18,11 @@ In this tutorial, we will explore:
 * **Surface slab models** with proper vacuum spacing and convergence testing
 * **Bilayer stacking configurations** and their effects on binding energies and electronic structure
 * **Molecule-on-surface adsorption** including site preferences and energetics
-* **Comparison of different dispersion correction** (PBE, PBE+TS, PBE+MBD) for vdW systems
+* **Comparison of different dispersion corrections** (PBE, PBE+TS, PBE+MBD) for vdW systems
 
 ---
 
-### 🎯**Learning Objectives**
+### 🎯 Learning Objectives
 
 By the end of this tutorial, you will be able to:
 
@@ -38,7 +38,9 @@ By the end of this tutorial, you will be able to:
 > **Please Note**
 > - Distances are in Å
 > - Activate your virtual env if the python script needs ase.
-> - You can find `write_control.py and submit.sh` under `utils` folder depend on the HPC you used.
+> - You can find `write_control.py` and `submit.sh` under the `utils` folder for the HPC you use.
+
+## Preparation
 - **Enter folder and run bash script**
   ```bash
   cd Tutorial_3
@@ -90,7 +92,7 @@ If you'd like to manually build the bilayer graphene structure (AA stacking), us
      (Total cell height = 3.3 Å + 20.0 Å = 23.3 Å)
 
 3. **Place atomic positions (AA stacking, using coordinates from `hex.jpg`):**
-   - In the primitive cell, graphene has atoms at (0, 0) and (-1/3, -2/3) in fractional coordinates, please check this [web](https://lampz.tugraz.at/~hadley/ams_ss/problems/3_crystal_structures/graphene.php) for reference. For AA stacking, the upper layer is positioned directly above the lower-layer atoms in x-y, only shifted in *z*.
+   - In the primitive cell, graphene has atoms at (0, 0) and (-1/3, -2/3) in fractional coordinates; please check this [page](https://lampz.tugraz.at/~hadley/ams_ss/problems/3_crystal_structures/graphene.php) for reference. For AA stacking, the upper layer is positioned directly above the lower-layer atoms in x-y, only shifted in *z*.
    - Bottom layer (z = 0.0):
      ```
      atom_frac  0.00000000  0.00000000  0.00000000  C
@@ -207,7 +209,7 @@ cd ../vacuum
 
 **Prepare structures with different vacuum spacings:**
 
-For each vacuum thickness (e.g., 15, 20, 25, 30 ....Å), you need to create a separate `geometry.in` with the same bilayer structure but different total z-lattice vector.
+For each vacuum thickness (e.g., 15, 20, 25, 30, ... Å), you need to create a separate `geometry.in` with the same bilayer structure but a different total z-lattice vector.
 
 **Run convergence test:**
 
@@ -244,7 +246,7 @@ This will automatically collect energies from all `vac_*` directories and genera
 
 * **(2 points)** First, construct a bilayer graphene structure with AA stacking and an initial interlayer separation of 3.30 Å. Set the initial vacuum spacing in the z-direction to 20 Å. Prepare the `geometry.in` file and visually inspect the structure to ensure correctness.
 
-* **(5 points)** Next, perform a k-point convergence test by varying the k-grid from 6×6×1 up to 22×22×1 (or until you reach convergence),with step 2. For each k-grid, keep the vacuum spacing fixed at 20 Å and use the PBE functional without vdW corrections. Record k-grid settings and corresponding total energies in a table, and plot both E(n) and |dE/dn| as a function of k-grid density n. Determine the converged k-grid.
+* **(5 points)** Next, perform a k-point convergence test by varying the k-grid from 6×6×1 up to 22×22×1 (or until you reach convergence), with step 2. For each k-grid, keep the vacuum spacing fixed at 20 Å and use the PBE functional without vdW corrections. Record k-grid settings and corresponding total energies in a table, and plot both E(n) and \|dE/dn\| as a function of k-grid density n. Determine the converged k-grid.
 
 * **(3 points)** Using the converged k-grid, perform vacuum convergence tests by varying the vacuum spacing from 15 Å to 50 Å (suggested: 15, 20, 25, 30... Å). For each vacuum size, maintain the same interlayer distance (3.30 Å) and only change the total z-component of the unit cell. Plot the energy change versus vacuum thickness (the plotting tool shows E − E(largest vacuum) in meV with a ±1 meV band). The converged vacuum is the smallest one from which the curve stays inside the band.
 
@@ -299,8 +301,6 @@ python ~/aims_utils/Surfaces.py --build_bilayer --stacking AB --interlayer_dista
 
 **What is binding energy?**
 
-**Binding Energy in Bilayer Graphene**
-
 The binding energy measures the strength of the interaction between two graphene layers. It is calculated as:
 
 E_binding = E_bilayer - 2 * E_monolayer
@@ -309,9 +309,9 @@ E_binding = E_bilayer - 2 * E_monolayer
 - **E_bilayer:** Total energy of the relaxed bilayer graphene system (4 carbon atoms)
 - **E_monolayer**: Total energy of an isolated single-layer graphene sheet (2 carbon atoms)
 
-This value tells you how strongly the two layers interact: the more negative E_binding, the stronger the binding between the layers. Minimum on curve corresponding to the equilibrium interlayer distance.
+This value tells you how strongly the two layers interact: the more negative E_binding, the stronger the binding between the layers. The minimum of the curve corresponds to the equilibrium interlayer distance.
 
-Now we test how different functionals perform for vdW interactions. For the both stackings at multiple interlayer distances, run calculations with each functional.
+Now we test how different functionals perform for vdW interactions. For both stackings, at multiple interlayer distances, run calculations with each functional.
 
 **Common vdW Correction Methods:**
 
@@ -354,7 +354,7 @@ layer.center(vacuum=<optimal>/2, axis=2)
 write("geometry.in", layer, format='aims')
 ```
 
-Copy `control.in` use your converged k-grid and `submit.sh`, then submit the job by `sbatch ~/aims_utils/submit.sh`.
+Copy `control.in` (use your converged k-grid) and `submit.sh`, then submit the job by `sbatch ~/aims_utils/submit.sh`.
 
 **Step 2: Scan interlayer distances for bilayer**
 
@@ -393,19 +393,19 @@ python ~/aims_utils/Surfaces.py --distance_scan --stacking AA --vacuum <optimal>
 ```
 
 
-Choose the best stacking with optimal distance of each functional. Then answer the following question:
+Choose the best stacking with the optimal distance for each functional. Then answer the following questions:
 
 **Analysis points:**
 - Which stacking is most stable?
 - What is the equilibrium distance for each functional?
-- How do results compare to the DMC(diffusion quantum Monte Carlo) result in Figure 3 of this [paper](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.115501)?
-- Which functional gives the most close distance with the DMC result according to the Table 1 in the paper? 
+- How do results compare to the DMC (diffusion quantum Monte Carlo) result in Figure 3 of this [paper](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.115501)?
+- Which functional gives the closest distance to the DMC result, according to Table 1 in the paper?
 
 ---
 
 ### **1.7 Band Structure and Density of States (DOS)**
 
-Before setting up the band structure and DOS calculations, let us choose the structure that is optimal in 1.6  as `geometry.in` for the following calculation:
+Before setting up the band structure and DOS calculations, let us choose the structure that is optimal in §1.6 as `geometry.in` for the following calculation:
 
 ```bash
 cd ../../band 
@@ -441,7 +441,7 @@ output dos                        -20 10 3001 0.1
 | K     | 0.33333 | 0.33333 | 0.0 |
 
 Run the calculation:
-Copy `submit.sh` in current folder , submit the job by `sbatch ~/aims_utils/submit.sh`
+copy `submit.sh` into the current folder, then submit the job by `sbatch ~/aims_utils/submit.sh`.
 
 **Plotting Results:**
 
@@ -456,13 +456,13 @@ Or you could import the ./band folder to [GIMS](https://gims.ms1p.org/static/ind
 
 ### **Assignment 2** Stacking, Functionals, and Binding Energy Analysis (30 points)
 
-* **(20 points)** For both **AB and AA stacking**, visualize the stackings and provide the screenshots. Scan interlayer distances from 3.0 Å to 4.5 Å ,with a step 0.1 Å. Compare and find the best  stacking,Then do fine-grid search for that stacking at the lowest energy region at step 0.01 Å.(for example, from 3.3 Å to 3.4 Å at 0.01 Å). For each distance, perform single-point calculations using **all three functionals** (PBE, PBE+TS, PBE+MBD). Plot binding energy curves (E_binding vs. distance) for all combinations. Clearly label each curve and mark equilibrium points. From your plots, extract and tabulate the equilibrium interlayer distance and binding energy for each functional. Compared with the[literature](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.115501).
+* **(20 points)** For both **AB and AA stacking**, visualize the stackings and provide the screenshots. Scan interlayer distances from 3.0 Å to 4.5 Å, with a step of 0.1 Å. Compare and find the best stacking, then do a fine-grid search for that stacking in the lowest-energy region at step 0.01 Å (for example, from 3.3 Å to 3.4 Å). For each distance, perform single-point calculations using **all three functionals** (PBE, PBE+TS, PBE+MBD). Plot binding energy curves (E_binding vs. distance) for all combinations. Clearly label each curve and mark equilibrium points. From your plots, extract and tabulate the equilibrium interlayer distance and binding energy for each functional. Compare with the [literature](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.115501).
 * **(10 points)** Discuss which functional is most accurate, which stacking is more stable (lower energy at equilibrium)? What is the energy difference between the two stackings? And why is that? 
 
 ### **Assignment 3** Bilayer Graphene Electronic Structure Analysis (20 points)
 
 * **(10 points)** Use the best functional and best stacking to relax the structures at their respective equilibrium distances. Then calculate and plot the band structures and DOS for that setting. Relate your observations to the electronic and density of states properties of bilayer graphene. 
-* **(10 points)** Compare with the band structure in [literature](https://www.sciencedirect.com/science/article/pii/S2352492824019135). What are the features of the bandstructure? why is that happen?
+* **(10 points)** Compare with the band structure in the [literature](https://www.sciencedirect.com/science/article/pii/S2352492824019135). What are the features of the band structure? Why does that happen?
 
 ---
 
@@ -521,7 +521,7 @@ To investigate TCNQ adsorption, follow these steps in order:
 
 #### **Step 1: Build the Graphene Slab**
 
-Back to Tutorial_3 folder, Navigate to the convergence folder:
+Back in the `Tutorial_3` folder, navigate to the convergence folder:
 ```bash
 cd tcnq_adsorption/convergence
 ```
@@ -547,7 +547,7 @@ python ~/aims_utils/Surfaces.py --place_tcnq_on_graphene --tcnq_site hollow --tc
 - Use `--tcnq_orientation` (`x` or `y`)
 - Adjust `--tcnq_height` as needed
 
-Rememeber to rename the file generated to `geometry.in` file for DFT calculation.
+Remember to rename the generated file to `geometry.in` for the DFT calculation.
 
 #### **Step 3: Generate and Edit `control.in`**
 
@@ -558,7 +558,7 @@ python ~/aims_utils/write_control.py --input_geometry
 ```
 Copy `submit.sh` in the current folder.
 Edit `control.in` to set the calculation parameters you require. Example minimal settings:
-  ```bash
+  ```text
   xc            pbe
   vdw_correction_hirshfeld  
   spin          none
@@ -604,9 +604,7 @@ For TCNQ adsorption on single-layer graphene, we need to systematically converge
   ```bash
   python ~/aims_utils/Surfaces.py --plot_vacuum
   ```
-
-
-4. **Plot E_ads vs. vacuum spacing** and choose converged vacuum.
+  - **Plot E_ads vs. vacuum spacing** and choose the converged vacuum.
 
 ---
 
@@ -622,12 +620,11 @@ For TCNQ adsorption on single-layer graphene, we need to systematically converge
    ```
 
 3. **For each k-grid**, calculate E_ads using the same procedure
-4. **Plot E_ads vs. k-grid** and choose 
-converged k-grid
+4. **Plot E_ads vs. k-grid** and choose the converged k-grid
 
-  ```bash
-  python ~/aims_utils/Surfaces.py --plot_k_grid_2d
-  ```
+   ```bash
+   python ~/aims_utils/Surfaces.py --plot_k_grid_2d
+   ```
 
 Plot the energy vs. k-grid density n (the plotting tool shows E relative to the densest grid, in meV, with a ±1 meV band). Choose the smallest n from which the curve stays inside the band.
 
@@ -638,7 +635,7 @@ Plot the energy vs. k-grid density n (the plotting tool shows E relative to the 
 
 #### **1. Build the molecule structure and graphene slab:**
 
-Please enter one of the three("PBE","PBE_TS","PBE_MBD") folders.
+Please enter one of the three folders (`PBE`, `PBE_TS`, `PBE_MBD`).
 
 ```bash
 python ~/aims_utils/Surfaces.py --build_molecule --molecule tcnq
@@ -701,9 +698,8 @@ cd ../adsorption_sites/topx
 ```
 
 **Step 3: Extract and analyze**
-Calculate the adsorption energy:
-E_ads = E_total- (E_slab+E_mol)
- and compare among different adsorption sites.
+
+Calculate the adsorption energy E_ads = E_total − (E_slab + E_mol) and compare among the different adsorption sites.
 
 
 ### **2.6 Height-dependent adsorption/binding energy: scan and curve**
@@ -733,7 +729,7 @@ To plot the resulting adsorption energy curve after calculations, use:
 python ~/aims_utils/Surfaces.py --plot_height_scan --tcnq_site <site> --tcnq_orientation <x|y> --E_slab <e> --E_molecule <e>
 ```
 
-Replace `<site>` with one of `top`, `bridge`, or `hollow`; `<x|y>` with the desired orientation.
+Replace `<site>` with one of `top`, `bridge`, or `hollow`, and the orientation flag with `x` or `y`.
 
 These tools automate both preparation and analysis of the height-dependent adsorption curves for all configurations.
 
@@ -759,7 +755,7 @@ For each functional (PBE, PBE+TS, PBE+MBD):
 **Task:** Select system: TCNQ on graphene.
 
 - (5 points) Perform convergence test. Determine minimum converged vacuum and k_grid.
-- (10 points) For each of 6 adsorption configurations, vary the height of molecules over graphene. Plot the adsorption energy curve as a function of TCNQ–graphene distance for dispersion correction methods (PBE,PBE_TS,PBE_MBD). From the curve, identify the optimal binding height (minimum energy), equilibrium adsorption energy, and compare how the energy curve changes for different configurations and heights. Compare between different dispersion correction methods.
+- (10 points) For each of the 6 adsorption configurations, vary the height of the molecule over graphene. Plot the adsorption energy curve as a function of TCNQ–graphene distance for the dispersion correction methods (PBE, PBE_TS, PBE_MBD). From the curve, identify the optimal binding height (minimum energy), equilibrium adsorption energy, and compare how the energy curve changes for different configurations and heights. Compare between different dispersion correction methods.
 - (5 points) Compare the optimal adsorption configurations, equilibrium distances and adsorption energy you get with the result in [literature](https://www.sciencedirect.com/science/article/pii/S0008622316308831). (Note: Compare the PBE_vdW result in paper with PBE_TS result you obtained.)
 
 ---

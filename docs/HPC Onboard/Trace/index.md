@@ -1,11 +1,15 @@
 ---
 layout: default
 parent: "HPC Onboard"
-title: "Trace"
+title: "TRACE"
 nav_order: 2
 ---
 
-## Logging In to Trace
+# TRACE
+
+The [Tartan Research Advanced Computing Environment (TRACE)](https://www.cmu.edu/engineering/trace/index.html) is the CMU College of Engineering's HPC cluster, housed at the Pittsburgh Supercomputing Center (PSC).
+
+## Logging In to TRACE
 
 - **Network Access:** Connect to CMU Wi‑Fi or use the [CMU VPN](https://www.cmu.edu/computing/services/endpoint/network-access/vpn/how-to/index.html) if you're off campus.
 
@@ -21,8 +25,8 @@ nav_order: 2
   `trace/group/marom/<your_user_name>`
 
 - **FHI-aims Submission Script:**  
-  You can download the `submit.sh` file for FHI-aims on Trace using the link below:  
-  [📥 Download `submit.sh` for FHI-aims on Trace](submit.sh)
+  You can download the `submit.sh` file for FHI-aims on TRACE using the link below:  
+  [📥 Download `submit.sh` for FHI-aims on TRACE](submit.sh)
 
 
 ## Common Commands
@@ -35,9 +39,9 @@ To load a specific module:
 ```bash
 module load <module_name>
 ```
-## Transferring Files Between Local and Trace
+## Transferring Files Between Local and TRACE
 
-### From Trace to Local
+### From TRACE to Local
 
 ```bash
 # Single file
@@ -47,7 +51,7 @@ scp <AndrewID>@trace.cmu.edu:<remote_file> <local_destination>
 scp -r <AndrewID>@trace.cmu.edu:<remote_dir> <local_destination>
 ```
 
-### From Local to Trace
+### From Local to TRACE
 
 ```bash
 # Single file
@@ -59,5 +63,5 @@ scp -r <local_dir> <AndrewID>@trace.cmu.edu:<remote_destination>
 
 ---
 
-For more detailed information, please refer to the introduction [TRACE](https://www.cmu.edu/engineering/trace/index.html) and [PSC](https://www.psc.edu/).
+For more detailed information, please refer to the official [TRACE](https://www.cmu.edu/engineering/trace/index.html) and [PSC](https://www.psc.edu/) pages.
 

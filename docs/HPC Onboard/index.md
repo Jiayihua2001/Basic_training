@@ -5,15 +5,15 @@ nav_order: 2            # 2,3,4 for the others
 has_children: true
 ---
 
-Welcome! This onboarding session will help you get up and running with different HPC system. Whether you're new to clusters or just need a refresher, we’ll walk through the basics you need to start working efficiently.
+Welcome! This onboarding session will help you get up and running with different HPC systems. Whether you're new to clusters or just need a refresher, we’ll walk through the basics you need to start working efficiently.
 
 ### **What we'll cover:**
 
 * **MSE-HPC:**
   The CMU MSE department cluster — the group's home for the FHI-aims (organic / molecular) tutorials.
 
-* **Trace:**
-  A quick intro to Trace HPC cluster.
+* **TRACE:**
+  A quick intro to the TRACE HPC cluster.
 
 * **Perlmutter (NERSC):**
   Logging in, file systems, modules, and how to run VASP 6.4.3 on the CPU partition and GPU partition. This is the cluster used for the [VASP tutorials](../Tutorials/VASP/).

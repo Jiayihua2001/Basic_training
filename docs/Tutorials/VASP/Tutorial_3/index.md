@@ -74,7 +74,7 @@ Every helper-script step in this tutorial has a [VASPKIT](../../../Utilities/#va
 | DOS grid (15×15×15) | `kpoints.py -g -d 15 15 15` | `vaspkit -task 102 -kpr 0.019` |
 | Band k-path | `kpoints.py -b -c GXWLGK` | `vaspkit -task 303` → writes `KPATH.in`; rename to `KPOINTS` |
 
-Task 303 writes the full Setyawan-Curtarolo path `Γ–X–U | K–Γ–L–W–X`; keep the `Γ–X–W–L–Γ–K` segments this tutorial uses. The complete task list is on the [Utilities page](../../../Utilities/#vaspkit).
+Task 303 writes the full Setyawan-Curtarolo path (`Γ–X–U` followed by `K–Γ–L–W–X`); keep the `Γ–X–W–L–Γ–K` segments this tutorial uses. The complete task list is on the [Utilities page](../../../Utilities/#vaspkit).
 
 ## Automation
 This entire calculation can be automated using a simple python script included below:
@@ -295,7 +295,7 @@ LORBIT     = 11       # lm-decomposed PROCAR
 ```
 
 ### KPOINTS
-For a band structure calculation, the KPOINTS file is the most important input because it determines the path of your band structure. Usually we find the path from literature or helpful tools such as <a href="https://www.materialscloud.org/work/tools/seekpath" target="_blank">SeeK-path</a>. For our zinc-blende structures such as InAs we choose the k-path $\Gamma-X-W-L-\Gamma-K$, which can be generated using the following code with `kpoints.py`.
+For a band structure calculation, the KPOINTS file is the most important input because it determines the path of your band structure. Usually we find the path from literature or helpful tools such as <a href="https://www.materialscloud.org/work/tools/seekpath" target="_blank">SeeK-path</a>. For our zinc-blende structures such as InAs we choose the k-path Γ–X–W–L–Γ–K, which can be generated using the following code with `kpoints.py`.
 
 ```bash
 kpoints.py --band --coords GXWLGK
@@ -341,5 +341,5 @@ band_spd(folder='band',   output='band_spd.png')
 ## Concluding Notes
 Some things to note about the results:
 - The full SCF → DOS → band sweep finishes in well under a minute on one Perlmutter CPU node.
-- PBE is predicting InAs to be a metal (no band gap) even though we know from experiments that is it a small band gap semiconductor with a band gap of ~0.35 eV.
-	- This is a common error for DFT as it underestimates the band gap due to the self interaction error. We will look at ways to fix this this in future calculation.
+- PBE is predicting InAs to be a metal (no band gap) even though we know from experiments that it is a small band gap semiconductor with a band gap of ~0.35 eV.
+	- This is a common error for DFT as it underestimates the band gap due to the self interaction error. We will look at ways to fix this in future calculations.

@@ -1,7 +1,7 @@
 ---
 layout: default
 parent: "HPC Onboard"
-title: "slurm_basic"
+title: "Slurm Basics"
 nav_order: 5            # 2,3,4 for the others
 ---
 

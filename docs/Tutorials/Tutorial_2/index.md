@@ -2,13 +2,13 @@
 layout: default
 parent: "FHI-aims"
 grand_parent: "Tutorials"
-title: "Tutorial_2"
+title: "Periodic Solids"
 nav_order: 2
 ---
 
 # Tutorial 2 – Periodic Systems
 
-### 📘**Introduction** 
+### 📘 Introduction
 
 Periodic systems form the foundation of solid-state physics and materials science. Unlike isolated molecules, crystals have translational symmetry that extends infinitely in space, requiring special computational techniques to handle their electronic structure.
 
@@ -47,7 +47,7 @@ The Si structure has a [Diamond-cubic (DC)](https://msestudent.com/diamond-cubic
   ```
 **Manually Write `geometry.in`**:
 
-- Use the **starting** lattice constants (5.5 Å for Si, 4.5 Å for Na). Add three `lattice_vector` lines—this turns on PBCs.;
+- Use the **starting** lattice constants (5.5 Å for Si, 4.5 Å for Na). Add three `lattice_vector` lines — this turns on PBCs.
     ```
     # Periodic cell (Å)
     lattice_vector  ax ay az   
@@ -57,20 +57,20 @@ The Si structure has a [Diamond-cubic (DC)](https://msestudent.com/diamond-cubic
     * `ax … cz` are the **Cartesian components in ångström**.
     * To convert lattice parameters (a,b,c,α,β,γ) to Cartesian vectors, you could use:
     
-      ```bash
+      ```python
       from ase.geometry import cellpar_to_cell
       print(cellpar_to_cell([a,b,c,α,β,γ]))
       ```  
 
 -  **Place atoms in fractional coordinates:**  
-    Always use `atom_frac` to start the line if you use fractional coordinates, each line should looks like this format:
+    Always use `atom_frac` to start the line if you use fractional coordinates; each line should look like this:
     ```text
     atom_frac 0.5 0.5 0.5 Si
     ```
 **Write `geometry.in` Automatically**:
 
-Or you could try to use `ase` to create Atoms object and write your geometry.in file, for example:
-  ```bash
+Or you could try to use `ase` to create an Atoms object and write your `geometry.in` file, for example:
+  ```python
   from ase.build import bulk
   from ase.io import write
   si_dc_prim = bulk('Si', crystalstructure='diamond', a=5.5)
@@ -93,7 +93,7 @@ Or you could try to use `ase` to create Atoms object and write your geometry.in 
 
 The primitive cell is computationally more efficient (fewer atoms = faster calculations), while the conventional cell better displays the crystal symmetry and is often preferred for visualization and structural analysis.
 
-**Visual-check in **OVITO**.**
+**Visual-check in OVITO.**
 
 ### **1.2 K-point convergence test**
 
@@ -112,7 +112,7 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
   ```bash
   python ~/aims_utils/write_control.py --elements Si
   ```
-  The control.in setting should looks like:
+  The `control.in` settings should look like:
 
   ```text
   control.in:
@@ -122,16 +122,16 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
     charge        0.
     k_grid        n n n          # test n = 4,5,…,12
   ```
-  Convergence test is to run single-point calculations for each k grid `n` from 4-12, collect total energies, and plot E and |dE/dn| (numerical derivative) vs. `n` (the automation plots E relative to the densest grid, in meV, with a ±1 meV band, and |dE/dn| on a log scale against the 1 meV threshold); choose the smallest `n` where both settle inside the threshold.
+  The convergence test is to run single-point calculations for each k grid `n` from 4–12, collect total energies, and plot E and \|dE/dn\| (numerical derivative) vs. `n` (the automation plots E relative to the densest grid, in meV, with a ±1 meV band, and \|dE/dn\| on a log scale against the 1 meV threshold); choose the smallest `n` where both settle inside the threshold.
 
 **Copy submit.sh to current folder.**
 
-  For your convenience, you can always this command to create and submit jobs for all k_grid automatically:
+  For your convenience, you can always use this command to create and submit jobs for all `k_grid` values automatically:
 
   ```bash
   python ~/aims_utils/Automation.py --make_k_grid
   ```
-  After the job finished, use this command to plot the convergence curve automatically:
+  After the jobs finish, use this command to plot the convergence curve automatically:
 
   ```bash
   python ~/aims_utils/Automation.py --plot_k_grid
@@ -151,7 +151,7 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
 
 Add the converged `k_grid` setting into `control.in`, also add these settings for periodic relaxation:
 
-  ```bash
+  ```text
   k_grid n n n
   relax_geometry  bfgs 1e-2 
   relax_unit_cell fixed_angles # fixed_angles or full
@@ -164,11 +164,11 @@ Add the converged `k_grid` setting into `control.in`, also add these settings fo
 
 **Get the relaxed lattice constant**
 
-Run this comand:
+Run this command:
 ```bash
 python ~/aims_utils/Automation.py --get_lattice_constant
 ```
-You will extract structure information from `geometry.in.next_step` in your current folder automatically, if you want to extract from other files , add `--lattice_file_name <your_filename>` to this command.
+You will extract structure information from `geometry.in.next_step` in your current folder automatically; if you want to extract from other files, add `--lattice_file_name <your_filename>` to this command.
 
 
 ### **1.4 Band structure & DOS**
@@ -181,22 +181,22 @@ By sampling only the IBZ instead of the full Brillouin zone, we avoid redundant 
 
 By plotting the band structure along paths connecting these high-symmetry points, we can efficiently capture the essential electronic behavior of the material while leveraging crystal symmetry to minimize computational effort. The k-path linking high-symmetry points in the Brillouin zone:
 
-  * **FCC Si(primitive cell)**: L-Γ-X-W-K.
-  * **BCC Na(primitive cell)**: N-Γ-H-N-P.
+  * **FCC Si (primitive cell)**: L-Γ-X-W-K.
+  * **BCC Na (primitive cell)**: N-Γ-H-N-P.
 
 
 <img src="../../images/band.PNG"
      alt="band_fcc"
      width="350">
 
-**Figure1 :** L-Γ-X-W-K band structure of Silicon (bottom) and FCC Brillouin zone illustration(top) of primitive cell.
+**Figure 1:** L-Γ-X-W-K band structure of Silicon (bottom) and FCC Brillouin zone illustration (top) of the primitive cell.
 
 **Enter band folder and Prepare `control.in`**
   ```bash
   cd ../band
   python ~/aims_utils/write_control.py --elements Si
   ```
-**Add Bandgap Settting manually**
+**Add Bandgap Setting manually**
   Add the converged `k_grid` and bandgap/dos setting into `control.in`:
   ```text
   k_grid n n n
@@ -217,8 +217,8 @@ By plotting the band structure along paths connecting these high-symmetry points
   - Npts      – number of k-points *along this segment* (≥20 gives smooth lines; 10 may look jagged).
   - start/end    – text labels for the high-symmetry points (used only for axis labels in plots, not by FHI-aims itself).
 
-Choose the High-symmetry points according to the cell type (primitive&conventional) in your `geometry.in` for consistency.
-The following tables([source](https://lampz.tugraz.at/~hadley/ss1/bzones)) give you the frac coordinate of high symmetry points in FCC and BCC (primitive cell):
+Choose the high-symmetry points according to the cell type (primitive or conventional) in your `geometry.in` for consistency.
+The following tables ([source](https://lampz.tugraz.at/~hadley/ss1/bzones)) give you the fractional coordinates of the high-symmetry points in FCC and BCC (primitive cell):
 
 **Table 1 – High-symmetry points for the FCC Brillouin zone (primitive cell)**
 
@@ -301,9 +301,9 @@ The `output band` calculation samples many k-points along high-symmetry paths, g
 
 ---
 
-**Add Bandgap Settting Automatically**
+**Add Bandgap Setting Automatically**
 
-The [Graphical Interface for Materials Simulation (GIMS)](https://gims.ms1p.org/static/index.html#) provides an automated platform for building crystal structures, choose `Band Structure workflow`, generating `control.in` files, and performing post-processing tasks such as band structure and DOS analysis.
+The [Graphical Interface for Materials Simulation (GIMS)](https://gims.ms1p.org/static/index.html#) provides an automated platform for building crystal structures (choose the `Band Structure` workflow), generating `control.in` files, and performing post-processing tasks such as band structure and DOS analysis.
 
 Once you're familiar with how it works, you can use this tool to streamline your research workflow.
 
@@ -311,9 +311,9 @@ Once you're familiar with how it works, you can use this tool to streamline your
 
 ### **Assignment 1** Si & Na. (40 points)
 
-* (7 points) Perform a convergence test by running single-point calculations for each k-grid density `n` from 4 to 12. Collect the total energies and plot both E and |dE/dn| (numerical derivative) versus `n`. Choose the smallest `n` where both curves flatten out. Determine the number of k-points you consider converged. Note: the convergence behavior can differ between materials.
+* (7 points) Perform a convergence test by running single-point calculations for each k-grid density `n` from 4 to 12. Collect the total energies and plot both E and \|dE/dn\| (numerical derivative) versus `n`. Choose the smallest `n` where both curves flatten out. Determine the number of k-points you consider converged. Note: the convergence behavior can differ between materials.
 
-* (3 points) With converged k-points settings, optimize the lattice constant of each material. Compare your results with experimental values. The relaxed *a* to experiment (Si ≈ 5.43 Å, Na ≈ 4.225 Å).
+* (3 points) With converged k-points settings, optimize the lattice constant of each material. Compare the relaxed *a* to experiment (Si ≈ 5.43 Å, Na ≈ 4.225 Å).
 
 * (10 points) With converged k-points settings and optimized lattice constant plot the band structure and density of states of each material.
 
@@ -330,7 +330,7 @@ Iron (Fe) has an atomic number of 26 and, at atmospheric pressure and under
 1184 K, a BCC Bravais lattice. At atmospheric pressure and between
 1184 K and 1665 K, Iron takes on an FCC. Iron is a conductor and a metal.
 
-- **Create `BCC.in` and `FCC.in` (atom frac format) according to the **table 3**.**
+- **Create `BCC.in` and `FCC.in` (atom frac format) according to Table 3.**
 
 ---
 **Table 3 –  BCC Iron and FCC Iron**
@@ -341,9 +341,10 @@ Iron (Fe) has an atomic number of 26 and, at atmospheric pressure and under
 | Iron    | 26             | FCC     | 3.5                           |
 
 ---
-- **Build use ase**
-You could build the structure from scratch using `atom_frac`, but you could also `ase` to build you structure, for example:
-  ```bash
+- **Build using ASE**
+
+You could build the structure from scratch using `atom_frac`, but you could also use `ase` to build your structure, for example:
+  ```python
   from ase.build import bulk
   # BCC Iron with lattice constant 3.0 Å
   iron_bcc_prim = bulk('Fe', crystalstructure='bcc', a=3.0)
@@ -362,7 +363,7 @@ You could build the structure from scratch using `atom_frac`, but you could also
   python ~/aims_utils/write_control.py --elements Fe
   ```
 
-Same protocol as EX1 , but rebuild the `control.in` with Fe species, set `relativistic atomic_zora scalar`,`spin none` and different `k_grid` in `control.in` and test both lattices. (We use `spin none` here for the k-point convergence test to keep it fast; the magnetic calculation with `spin collinear` is introduced in §2.3.)
+Same protocol as EX1, but rebuild the `control.in` with Fe species, set `relativistic atomic_zora scalar`, `spin none` and different `k_grid` in `control.in`, and test both lattices. (We use `spin none` here for the k-point convergence test to keep it fast; the magnetic calculation with `spin collinear` is introduced in §2.3.)
 - `relativistic atomic_zora scalar` is used to account for relativistic effects in atoms — especially heavy element, whose atomic number is greater than 20 — without including spin-orbit coupling.
 
 > **Dealing with energy fluctuations in k-point convergence for metals:**
@@ -375,34 +376,34 @@ Same protocol as EX1 , but rebuild the `control.in` with Fe species, set `relati
 >
 > If a single scan point fails to converge (typical for magnetic FCC Fe at large *a*), rerun just that point with a larger width, e.g. `gaussian 0.2`.
 
-For your convenience, you can use this command to create and submit jobs for all k_grid values automatically. You can estimate a rough range of k_grid satisfying `N*a > 40`:
+For your convenience, you can use this command to create and submit jobs for all `k_grid` values automatically. You can estimate a rough range of `k_grid` satisfying `N*a > 40`:
 
   ```bash
   python ~/aims_utils/Automation.py --make_k_grid --k_grid_min 10 --k_grid_max 18
   ```
-After the job finished, use this command to plot the convergence curve automatically:
+After the jobs finish, use this command to plot the convergence curve automatically:
 
   ```bash
   python ~/aims_utils/Automation.py --plot_k_grid
   ```
 
 ### **2.3 Energy vs. lattice constant**
-After you get converged k_grid, scan through different lattice constant *a* (try 2.0-4.5Å ,with step 0.25 Å), for each combination: (BCC | FCC) × (non-magnetic | magnetic state) using LDA or PBE xc-functionals. 
+After you get a converged `k_grid`, scan through different lattice constants *a* (try 2.0–4.5 Å, with step 0.25 Å) for each combination: (BCC \| FCC) × (non-magnetic \| magnetic state), using the LDA or PBE xc-functionals.
 
-You can use our automation script to save your effort, lattice type can be `bcc` or `fcc`, always prepare `submit.sh`,`control.in` before running this command. for example:
+You can use our automation script to save your effort. The lattice type can be `bcc` or `fcc`; always prepare `submit.sh` and `control.in` before running this command. For example:
   ```bash
   mkdir lattice_grid
   cd lattice_grid
   cp ~/aims_utils/submit.sh .
   cp ../control.in .
   ```
-**Remember to add k_grid to `control.in` file !**
+**Remember to add `k_grid` to the `control.in` file!**
 
   ```bash
   python ~/aims_utils/Automation.py --Fe_grid_search --lattice_type bcc
   ```
 
-After the calculation finished, use this command to plot E vs lattice constant automatically:
+After the calculations finish, use this command to plot E vs lattice constant automatically:
   ```bash
   python ~/aims_utils/Automation.py --plot_Fe_grid_search
   ```
@@ -433,13 +434,13 @@ After the calculation finished, use this command to plot E vs lattice constant a
 
 ## EX3  Germanium (Ge)
 Germanium (Ge) has an atomic number of 32 and an FCC — but more
-specifically, diamond cubic (DC) —Bravais lattice. Germanium is in
+specifically, diamond cubic (DC) — Bravais lattice. Germanium is in
 Group 14 of the periodic table of elements—the same group as Silicon. Germanium is a semiconductor and a semimetal.
 
 ### **3.1 Build diamond-cubic cell**
-Make geometry.in file for DC Germanium according to Table 4.
+Make a `geometry.in` file for DC Germanium according to Table 4.
 
-**Table 4 :** Information of Germanium.
+**Table 4:** Information of Germanium.
 
 | Species    | Atomic Number | Lattice   | Starting Lattice Constant (Å) |
 |------------|----------------|-----------|-------------------------------|
@@ -447,7 +448,7 @@ Make geometry.in file for DC Germanium according to Table 4.
 
 ---
 
-```bash
+```python
 from ase.io import read, write
 from ase import Atoms
 from ase.build import bulk
@@ -461,11 +462,11 @@ write('geometry.in', ge_dc)
 ---
 
 ### **3.2 Exchange-correlation functionals**
-**! Remember to set `relativistic atomic_zora scalar` in `control.in`**
+**Remember to set `relativistic atomic_zora scalar` in `control.in`!**
 
 - [LDA](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.45.566) (Local Density Approximation): LDA assumes the exchange–correlation energy depends only on the local electron density, similar to a uniform electron gas. It's fast and simple but tends to overbind and is less accurate for inhomogeneous systems. Set `xc pw-lda` in `control.in`.
 
-- [PBE-GGA](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.77.3865) (Perdew–Burke–Ernzerhof): PBE is a GGA functional that includes both the electron density and its gradient, offering improved accuracy over LDA for molecular and solid-state systems. It is widely used but still underestimates band gaps.Set `xc pbe` in `control.in`.
+- [PBE-GGA](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.77.3865) (Perdew–Burke–Ernzerhof): PBE is a GGA functional that includes both the electron density and its gradient, offering improved accuracy over LDA for molecular and solid-state systems. It is widely used but still underestimates band gaps. Set `xc pbe` in `control.in`.
 - [r²SCAN](https://pubs.acs.org/doi/10.1021/acs.jpclett.0c02405) (regularized-restored [SCAN](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.115.036402)): a meta-GGA that incorporates the kinetic-energy density, achieving higher accuracy across diverse systems than GGAs. We use r²SCAN rather than the original SCAN because SCAN's well-known numerical-grid sensitivity breaks unit-cell relaxation in FHI-aims, while r²SCAN was designed by the SCAN authors precisely to fix those numerical problems at the same accuracy. Set in `control.in` (the first line must come **before** the `xc` line):
 
     ```text
@@ -525,4 +526,5 @@ Select one material and one exchange-correlation functional from your previous c
 * (5 Points) Analyze the trade-offs between computational efficiency (time) and accuracy when selecting k-point grids
   - Discuss practical considerations for choosing appropriate k-point sampling in different scenarios
   - Provide recommendations for balancing accuracy requirements with available computational resources
+
 ---

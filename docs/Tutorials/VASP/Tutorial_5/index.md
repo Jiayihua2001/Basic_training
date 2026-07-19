@@ -313,7 +313,7 @@ TIME       = 0.4      # Trial time step for the ALGO = All band optimiser
 ```
 
 ### KPOINTS
-For a band structure calculation, the KPOINTS file is the most important input because it determines the path of your band structure. Usually we find the path from literature or helpful tools such as <a href="https://www.materialscloud.org/work/tools/seekpath" target="_blank">SeeK-path</a>. For our zinc-blende structures such as InAs we choose the k-path $\Gamma-X-W-L-\Gamma-K$, which can be generated using the following code with `kpoints.py`. The HSE calculation has a special format which is described in [Calculation Descriptions](../Tutorial_2/).
+For a band structure calculation, the KPOINTS file is the most important input because it determines the path of your band structure. Usually we find the path from literature or helpful tools such as <a href="https://www.materialscloud.org/work/tools/seekpath" target="_blank">SeeK-path</a>. For our zinc-blende structures such as InAs we choose the k-path Γ–X–W–L–Γ–K, which can be generated using the following code with `kpoints.py`. The HSE calculation has a special format which is described in [Calculation Descriptions](../Tutorial_2/).
 
 ```bash
 kpoints.py --band --coords GXWLGK --hse --ibzkpt ../scf/IBZKPT --nsegments 40

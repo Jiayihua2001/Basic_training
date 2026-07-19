@@ -7,11 +7,11 @@ nav_order: 2
 ---
 
 # Calculation Descriptions
-In this section we will discus the inputs you need in order to run all the different types of calculations that we run in the Marom group.
+In this section we will discuss the inputs you need in order to run all the different types of calculations that we run in the Marom group.
 
 ## General Inputs
 ### INCAR
-As stated in [VASP Basics](../Tutorial_1/), the INCAR contains the set of instructions that tells VASP what type of  calculation to perform. Although we perform many different types of calculations, there are some standard parameters that we always use. Sometimes, we may choose to alter   the following parameters slightly, but for the vast majority of our calculations, these will remain constant.
+As stated in [VASP Basics](../Tutorial_1/), the INCAR contains the set of instructions that tells VASP what type of calculation to perform. Although we perform many different types of calculations, there are some standard parameters that we always use. Sometimes, we may choose to alter the following parameters slightly, but for the vast majority of our calculations, these will remain constant.
 
 ```txt
 ALGO       = Fast     # Mixture of Davidson and RMM-DIIS algos
@@ -81,7 +81,7 @@ incar.py -s
 ```
 
 ### KPOINTS
-The KPOINTS file for an SCF calculation is one of the most basic and easy to generate  files. For the SCF calculation we use a Γ-centered Monkhorst-Pack grid of a specified density. Depending on the material, the size of the grid might change. For example, if you are working with a supercell, the k-point grid does not have to be as dense since the reciprocal lattice size is inversely proportional to the real space lattice size (i.e. large real space lattice $\rightarrow$ small reciprocal lattice $\rightarrow$ less dense grid required to fill the space)
+The KPOINTS file for an SCF calculation is one of the most basic and easy to generate  files. For the SCF calculation we use a Γ-centered Monkhorst-Pack grid of a specified density. Depending on the material, the size of the grid might change. For example, if you are working with a supercell, the k-point grid does not have to be as dense since the reciprocal lattice size is inversely proportional to the real space lattice size (i.e. large real space lattice → small reciprocal lattice → less dense grid required to fill the space)
 
 ```txt
 Automatic kpoint scheme  
@@ -135,7 +135,7 @@ Gamma
 15 15 15
 ```
 
-o generate the KPOINTS file for a DOS calculation the `kpoints.py` file can again be used.
+To generate the KPOINTS file for a DOS calculation the `kpoints.py` file can again be used.
 
 ```bash
 kpoints.py --grid --density 15 15 15
@@ -144,7 +144,7 @@ kpoints.py -g -d 15 15 15
 ```
 
 ## Band Structure Calculation (Band) Calculation
-In the INCAR there are five important parameters beyond the general parameters. The only parameters that can be changed are LWAVE and LORBIT. In the case of a calculation where it is desired to perform band unfolding the WAVECAR must be written (`LWAVE = .True.`). In the case where it is not important view the projected band structure (e.g. convergence tests) then the LORBIT tag can be removed.
+In the INCAR there are five important parameters beyond the general parameters. The only parameters that can be changed are LWAVE and LORBIT. In the case of a calculation where it is desired to perform band unfolding the WAVECAR must be written (`LWAVE = .True.`). In the case where it is not important to view the projected band structure (e.g. convergence tests) then the LORBIT tag can be removed.
 
 ```txt
 ICHARG = 11       # Calculate eigenvalues from preconverged CHGCAR
@@ -163,7 +163,7 @@ incar.py -b
 ```
 
 ### KPOINTS
-For a band structure calculation, the KPOINTS file can take on one of three forms: regular, HSE, or unfolded. The KPOINTS file for a regular calculation is the easiest to generate since all you need to specify is the location and labels of each high symmetry point. There are a variety of different ways to find the coordinates of the high symmetry points in a Brillouin zone, but one of the more convenient methods it to use SeeK-path where you just need to upload a POSCAR to the website and it will find and visualize the high symmetry points for you. The same algorithm used by this website is also implemented in the kpoints.py file and the following KPOINTS file can be generated using the following command:
+For a band structure calculation, the KPOINTS file can take on one of three forms: regular, HSE, or unfolded. The KPOINTS file for a regular calculation is the easiest to generate since all you need to specify is the location and labels of each high symmetry point. There are a variety of different ways to find the coordinates of the high symmetry points in a Brillouin zone, but one of the more convenient methods is to use <a href="https://www.materialscloud.org/work/tools/seekpath" target="_blank">SeeK-path</a>, where you just need to upload a POSCAR to the website and it will find and visualize the high symmetry points for you. The same algorithm used by this website is also implemented in the kpoints.py file and the following KPOINTS file can be generated using the following command:
 
 ```bash
 kpoints.py --band --coords GXWLGK --segments 50
@@ -171,7 +171,7 @@ or
 kpoints.py -b -c GXWLGK -n 50
 ```
 
-The ouput of the above for a Zinc-Blende structure such as InAs will be:
+The output of the above for a Zinc-Blende structure such as InAs will be:
 
 ```txt
 Line_mode KPOINTS file
@@ -303,7 +303,7 @@ In As H
 Structural optimization calculations are mostly used to relax atoms at a surface or at an interface.
 
 ### INCAR
-In the INCAR there are six important parameters beyond the general parameters. The first four parameters are essentially the same as an SCF calculation except for the fact that we typically do not write the CHG or CHGCAR files because we do not use them for anything after the OPT calculation in finished. The only parameter that can be changed is NSW which is the total number of ionic steps to be taken. Typically 50 ionic steps is more than enough, but is some cases this might need to be increased.
+In the INCAR there are six important parameters beyond the general parameters. The first four parameters are essentially the same as an SCF calculation except for the fact that we typically do not write the CHG or CHGCAR files because we do not use them for anything after the OPT calculation is finished. The only parameter that can be changed is NSW which is the total number of ionic steps to be taken. Typically 50 ionic steps is more than enough, but in some cases this might need to be increased.
 
 ```txt
 ICHARG = 2        # Generate CHG* from a superposition of atomic charge densities
@@ -377,7 +377,7 @@ incar.py -s -u
 Adding spin orbit coupling is very important for most of the materials that we study in the group because it models the spin-orbit interactions between electrons.
 
 ### INCAR
-In the INCAR there are two important parameters beyond the general parameters. The only parameter that needs to change is the `MAGMOM` parameter which defines the magnetic moment for each atom in the x, y, and z directions. The example shown below is for a bulk InAs calculation where there are only two atoms in the unit cell. Since both In and As have no magnetic moment, $m_x$, $m_y$, and $m_z$ are all 0.
+In the INCAR there are two important parameters beyond the general parameters. The only parameter that needs to change is the `MAGMOM` parameter which defines the magnetic moment for each atom in the x, y, and z directions. The example shown below is for a bulk InAs calculation where there are only two atoms in the unit cell. Since both In and As have no magnetic moment, m<sub>x</sub>, m<sub>y</sub>, and m<sub>z</sub> are all 0.
 
 ```txt
 LSORBIT = .True.       # Turn on spin-orbit coupling

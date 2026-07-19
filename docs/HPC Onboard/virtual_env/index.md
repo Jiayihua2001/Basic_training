@@ -1,7 +1,7 @@
 ---
 layout: default
 parent: "HPC Onboard"
-title: "virtual_env"
+title: "Virtual Environments"
 nav_order: 6            # 2,3,4 for the others
 ---
 

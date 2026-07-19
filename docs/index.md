@@ -15,7 +15,7 @@ Pick the track that matches your project:
 
 ## 🧪 Organic / molecular materials
 
-*(CSP, GAtor, Organic Interface, singlet-fission (SF) subgroups.)* These projects use the all-electron code **FHI-aims** on **Trace** or **MSE-HPC**.
+*(CSP, GAtor, Organic Interface, singlet-fission (SF) subgroups.)* These projects use the all-electron code **FHI-aims** on **TRACE** or **MSE-HPC**.
 
 1. **Download** the tutorial files:
    👉 <a href="Tutorials_files.zip" download>📥 Download Tutorial Files</a>
@@ -26,12 +26,12 @@ Pick the track that matches your project:
    ```
 
 3. **Run the setup script** to install the FHI-aims helper scripts (`write_control.py`, `Automation.py`, `Surfaces.py`, `aimsplot.py`, `submit.sh`) into `~/aims_utils/`:
-   - On Trace:&nbsp;&nbsp;&nbsp;`bash setup_utils.sh trace`
+   - On TRACE:&nbsp;&nbsp;&nbsp;`bash setup_utils.sh trace`
    - On MSE-HPC: `bash setup_utils.sh mse-hpc`
 
 4. Work through the [FHI-aims tutorials](Tutorials/FHI-aims/) — H₂ → periodic solids → 2D/surfaces.
 
-New to the clusters? Start with [HPC Onboard](HPC%20Onboard/) for Trace/MSE-HPC, Linux, Slurm, and Python environments.
+New to the clusters? Start with [HPC Onboard](HPC%20Onboard/) for TRACE/MSE-HPC, Linux, Slurm, and Python environments.
 
 ---
 

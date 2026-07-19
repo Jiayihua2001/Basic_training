@@ -184,9 +184,10 @@ Quick install:
 
 ```bash
 mkdir -p ~/bin
-curl -L -o ~/bin/incar.py    <docs URL>/Utilities/scripts/incar.py
-curl -L -o ~/bin/kpoints.py  <docs URL>/Utilities/scripts/kpoints.py
-curl -L -o ~/bin/potcar.sh   <docs URL>/Utilities/scripts/potcar.sh
+BASE=https://jiayihua2001.github.io/Basic_training
+curl -L -o ~/bin/incar.py    $BASE/Utilities/scripts/incar.py
+curl -L -o ~/bin/kpoints.py  $BASE/Utilities/scripts/kpoints.py
+curl -L -o ~/bin/potcar.sh   $BASE/Utilities/scripts/potcar.sh
 chmod +x ~/bin/*.py ~/bin/potcar.sh
 echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
 ```
