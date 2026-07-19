@@ -490,7 +490,7 @@ write('geometry.in', ge_dc)
 - Plot band structure and density of states with each functional, record CPU time.
 - Compare gaps with [experimental result](https://www.researchgate.net/publication/299490580_DETERMINATION_OF_THE_BAND-GAP_OF_A_SEMICONDUCTOR_GERMANIUM_CHIP_USING_FOUR_PROBE_SET-UP) (~0.693 eV) and [GW](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.48.17791) results, discuss Jacob’s-Ladder accuracy vs. cost.
 
-> Don't be alarmed if LDA/PBE give a **(near-)zero gap** for Ge — with scalar relativity that *is* the correct semilocal-DFT result (a famous failure: these functionals predict Ge to be almost metallic). Climbing the ladder partially rescues it (r²SCAN ≈ 0.3 eV, HSE06 ≈ 0.5 eV vs. experiment 0.693 eV). This is exactly the behavior the assignment asks you to discuss.
+> Don't be alarmed if LDA/PBE give a **zero gap** for Ge — with scalar relativity that *is* the correct semilocal-DFT result: the s-like conduction band inverts through the valence-band top and the bands **touch at Γ** (a famous failure — semilocal DFT turns Ge into a zero-gap semimetal). Look closely at your band plot near Γ: the direct separation shrinks to nothing as you approach Γ. Climbing the ladder reopens the gap (r²SCAN ≈ 0.3 eV, HSE06 ≈ 0.5 eV — both **direct at Γ** here — vs. experiment 0.693 eV, indirect Γ→L). This is exactly the behavior the assignment asks you to discuss.
 
 ### **Assignment 3**: Germanium Electronic Structure Analysis (30 Points)
 
