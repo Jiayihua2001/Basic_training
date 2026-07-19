@@ -44,14 +44,9 @@ else
 fi
 
 # ----- 4. Fix: conda activate in batch scripts needs init -----
-echo "--- 4. conda init in batch scripts (linux_basic) ---"
-if grep -q 'conda shell.bash hook' "$FILE"; then
-    pass "conda initialization added in linux_basic batch script example"
-else
-    fail "Missing 'eval \"\$(conda shell.bash hook)\"' in linux_basic"
-fi
-
-echo "--- 4b. conda init in batch scripts (slurm_basic) ---"
+# (the duplicated conda/SLURM sections were trimmed from linux_basic;
+#  the batch-script example now lives only in slurm_basic — checked below)
+echo "--- 4. conda init in batch scripts (slurm_basic) ---"
 FILE2="$DOCS_DIR/HPC Onboard/slurm_basic/index.md"
 if grep -q 'conda shell.bash hook' "$FILE2"; then
     pass "conda initialization added in slurm_basic batch script example"
