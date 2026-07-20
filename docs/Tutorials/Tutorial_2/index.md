@@ -22,6 +22,19 @@ In this tutorial, we will explore:
 
 ---
 
+### 🎯 Learning Objectives
+
+By the end of this tutorial, you will be able to:
+
+* Build periodic crystals in primitive and conventional cells and convert between their lattice constants
+* Perform and interpret k-point convergence tests, including the oscillatory behavior of metals
+* Optimize lattice constants with `relax_unit_cell` and compare them with experiment
+* Compute, plot, and read band structures and densities of states — including extracting band gaps from the bands rather than from printouts
+* Set up spin-polarized calculations and determine the magnetic ground state of a metal
+* Rank exchange-correlation functionals (LDA → GGA → meta-GGA → hybrid) by accuracy and cost on a real semiconductor
+
+---
+
 > **Please Note**
 > - Distances are in Å
 > - The files needed for the assignments ship in the `Tutorials_files` bundle you downloaded in the [Quick Onboard](../../) — work inside your copy of `Tutorials_files/Tutorial_2` (or copy that folder to wherever you want to work).

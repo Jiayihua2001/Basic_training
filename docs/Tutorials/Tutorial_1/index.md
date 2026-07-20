@@ -6,15 +6,35 @@ title: "Simple Molecules"
 nav_order: 1            # 2,3,4 for the others
 ---
 
-# Tutorial 1: H₂ Binding, Convergence, and Relaxation / Simple Molecules and Conformers
+# Tutorial 1 – Simple Molecules: H₂ Binding, Convergence, and Conformers
 
-## 📖 Learning objectives:
-- FHI-aims basics
-- submitting jobs on TRACE or MSE-HPC
-- numerical convergence & scaling
-- structure optimization
+### 📘 Introduction
 
-> **Notation used**
+First-principles (DFT) calculations turn atomic structures into energies — and comparing those energies is how bond strengths, stable geometries, and molecular properties are predicted. This first tutorial builds that workflow from the ground up on small molecules, where every calculation runs in seconds and every result can be checked against your chemical intuition.
+
+In this tutorial, we will explore:
+
+* **FHI-aims basics** — the input files, running on the HPC cluster, and reading the output
+* **The H₂ dissociation curve** — total energies vs. geometry, and bond energies as energy *differences*
+* **Numerical convergence** — basis tiers and species defaults, accuracy vs. cost
+* **Structure optimization** — letting the code find minimum-energy geometries
+* **Conformers and ionization** — relative energies of serine conformers, and the IP/EA of fumaronitrile
+
+---
+
+### 🎯 Learning Objectives
+
+By the end of this tutorial, you will be able to:
+
+* Set up and submit FHI-aims calculations on TRACE or MSE-HPC and recognize a successfully finished run
+* Construct `geometry.in`/`control.in` input pairs by hand and with the helper scripts
+* Perform convergence tests over basis tiers and species defaults and justify a choice of settings
+* Run structure relaxations and extract optimized geometries
+* Compute physically meaningful energy *differences* — bond energies, conformer orderings, and vertical/adiabatic IPs and EAs — and compare them with literature values
+
+---
+
+> **Please Note**
 > - Distances are in Å
 > - Activate your virtual env if the python script needs ase. If you don't have one, go [create one](../../HPC%20Onboard/virtual_env/)
 > - Please find `submit.sh` and `write_control.py` in the `utils/trace` or `utils/mse-hpc` folder.
