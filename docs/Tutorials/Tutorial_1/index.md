@@ -144,7 +144,7 @@ In this exercise, we will compare **basis tiers 1–3** and species defaults **l
 ### **Follow the steps**
 
 - The basis functions are classified in “tiers” (i.e., levels of importance). Not all basis functions are enabled by default. Rather, higher tiers than the desired one should be commented out using the “#” symbol.
-  - You can select the basis tiers by leaving the desired one and lower tiers uncommented in `control.in` files.
+  - You can select the basis tiers by leaving the desired one and lower tiers uncommented in `control.in` files. **Careful:** the `intermediate` and `tight` species files ship with some higher-tier lines *already enabled* (tight: all of tier 2; intermediate: part of it) — a clean tier comparison means commenting out as well as uncommenting, until exactly the tiers you want are active. (Lines starting `for_aux` are not basis functions — leave them alone.)
 - Species defaults control the numerical integration grids, cutoff radii, and other internal accuracy parameters. `light` is the fastest, `tight` is the most accurate.
   - You can change the species defaults by changing the param `--species_default` when preparing `control.in` files using `write_control.py`
 

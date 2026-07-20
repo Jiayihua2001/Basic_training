@@ -356,6 +356,8 @@ write("geometry.in", layer, format='aims')
 
 Copy `control.in` (use your converged k-grid) and `submit.sh`, then submit the job by `sbatch ~/aims_utils/submit.sh`.
 
+> **Both stackings need the reference:** `--plot_binding_curve` looks for `monolayer/` inside *each* scan directory. After the monolayer run finishes, copy the completed folder into the matching AB directory too (the reference is stacking-independent), e.g. from `stacking/AB/distance_scan/pbe_mbd`: `cp -r ../../../AA/distance_scan/pbe_mbd/monolayer .` — otherwise the AB plot stops with `monolayer/aims.out not found`.
+
 **Step 2: Scan interlayer distances for bilayer**
 
 For each stacking (AA and AB), create structures with different interlayer distances:
@@ -593,6 +595,8 @@ For TCNQ adsorption on single-layer graphene, we need to systematically converge
 - Use reasonable initial k-grid (4×4×1) for efficiency
 - Goal: Find the minimum vacuum where **adsorption energy** is converged
 
+> **Species check:** every TCNQ-related `control.in` must contain species blocks for **C, H, and N** — the vacuum series and placement helpers build TCNQ-on-graphene systems, and a carbon-only `control.in` (e.g. regenerated from the bare slab with `--elements C`) kills those runs instantly with `Non-existent species definition found while reading geometry.in`. The `control.in` from §2.2 Step 3 (generated with `--input_geometry` from a TCNQ geometry) is fine; `write_control.py --elements C H N` also works.
+
 **Test different vacuum spacings** (e.g., 15, 20, 25, 30, 35, 40 Å):
 
   - Enter the `tcnq_adsorption/convergence/vacuum` folder, make subfolders for each vacuum spacing, copy `control.in` and `submit.sh` to run the calculation.
@@ -712,7 +716,7 @@ For each height:
 
 You can use the automated functions in `Surfaces.py` to perform this scan and plot the adsorption curve. The relevant command is:
 
-Run it **in the same per-functional folder as §2.4** — the placement helpers need `geometry_graphene.in` in the current directory, and §2.4 already built it there (if it is missing, the helper reports "Created 0/6"-style output instead of failing loudly; copy the slab file in first):
+**One working directory per configuration:** the helper always writes its `h_*` folders into the *current* directory — running the six configurations' scans from the same place makes them overwrite each other (and race the queued jobs). Give each configuration its own folder (e.g. `adsorption_sites/hollowx/`) containing `geometry_graphene.in`, `control.in`, and `submit.sh`, and run the scan *inside* it:
 
 ```bash
 python ~/aims_utils/Surfaces.py --create_height_scan --tcnq_site <site> --tcnq_orientation <x|y>  --height_min 2.8 --height_max 3.6 --height_step 0.1 --vacuum <optimal>

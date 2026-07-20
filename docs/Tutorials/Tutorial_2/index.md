@@ -122,7 +122,7 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
     charge        0.
     k_grid        n n n          # test n = 4,5,…,12
   ```
-  The convergence test is to run single-point calculations for each k grid `n` from 4–12, collect total energies, and plot E and \|dE/dn\| (numerical derivative) vs. `n` (the automation plots E relative to the densest grid, in meV, with a ±1 meV band, and \|dE/dn\| on a log scale against the 1 meV threshold); choose the smallest `n` where both settle inside the threshold.
+  The convergence test is to run single-point calculations for each k grid `n` from 4–12, collect total energies, and plot E and \|dE/dn\| (numerical derivative) vs. `n` (the automation plots E relative to the densest grid, in meV, with a ±1 meV band, and \|dE/dn\| on a log scale against the 1 meV threshold); choose the smallest `n` where both settle inside the threshold. **For metals** (Na here, Fe later) the oscillation may never fully enter the ±1 meV band in an affordable range — a few-meV floor is inherent to smeared metallic occupations; take the `n` where the oscillation *amplitude stops shrinking* and say so in your report.
 
 **Copy submit.sh to current folder.**
 
@@ -410,6 +410,7 @@ After the calculations finish, use this command to plot E vs lattice constant au
 **Hint:** 
 - To use PBE as the exchange-correlation functional, simply change `xc pw-lda` to `xc pbe` in the `control.in` file.
 - To consider the system in a magnetic state, set `spin collinear` in `control.in` and specify initial magnetic moments in `geometry.in`. If you use ASE to generate `geometry.in`, the `initial_moment` parameter should be included automatically.
+  - The automation helper writes `initial_moment 2.3` automatically when `control.in` has `spin collinear`; if writing by hand, any reasonable guess of 2–2.5 μB converges to the same answer.
   - Initial moments represent the initial guess for the [magnetic moment](https://en.wikipedia.org/wiki/Magnetic_moment) used in [spin polarization](https://en.wikipedia.org/wiki/Spin_polarization) calculations, specified in [Bohr magnetons (μB)](https://en.wikipedia.org/wiki/Bohr_magneton). For iron, use an initial moment of 2 μB per atom. 
   - When using fractional coordinates, the `geometry.in` file should look like:
     ```text
