@@ -19,6 +19,8 @@ nav_order: 1            # 2,3,4 for the others
 > - Activate your virtual env if the python script needs ase. If you don't have one, go [create one](../../HPC%20Onboard/virtual_env/)
 > - Please find `submit.sh` and `write_control.py` in the `utils/trace` or `utils/mse-hpc` folder.
 > - Please find any other useful python scripts under `Tutorial_1` and its subfolders.
+> - The helper scripts may print a `FutureWarning` about ASE's aims file format — it is harmless; ignore it.
+> - If a job dies instantly complaining about missing keywords in `control.in`, your `write_control.py` step probably failed earlier (usually because `ase_env` was not active) while a later edit still created a stub file — delete `control.in`, activate the environment, and regenerate.
 
 ---
 ##  FHI-aims basic
@@ -51,7 +53,7 @@ For detailed settings, please check [FHI-aims Manual](https://fhi-aims.org/uploa
     ```
     Run ``python ~/aims_utils/write_control.py --help`` for full flag descriptions.
 
-    The `control.in` will look like:
+    The generated `control.in` starts with a block like this (comments added here for explanation — the generated file itself is bare):
     ```text
     xc pw-lda                # Exchange-correlation: LDA
     spin none                # Non-spin-polarized

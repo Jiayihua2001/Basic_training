@@ -704,7 +704,7 @@ Calculate the adsorption energy E_ads = E_total − (E_slab + E_mol) and compare
 
 ### **2.6 Height-dependent adsorption/binding energy: scan and curve**
 
-The adsorption (binding) energy depends on the vertical distance (height) between TCNQ and the graphene surface. For each of the 6 adsorption configurations shown in Figure 3, systematically vary the TCNQ height above the graphene (e.g., from 2.8 Å to 3.6 Å in 0.1 Å increments).
+The adsorption (binding) energy depends on the vertical distance (height) between TCNQ and the graphene surface. For each of the 6 adsorption configurations shown in Figure 3, systematically vary the TCNQ height above the graphene (e.g., from 2.8 Å to 3.6 Å in 0.1 Å increments; note the helper's range is end-inclusive, so this actually produces one extra point at 3.7 Å — harmless).
 
 For each height:
 1. Place TCNQ at the chosen adsorption site and height above the graphene (keeping x/y position fixed).
@@ -712,8 +712,9 @@ For each height:
 
 You can use the automated functions in `Surfaces.py` to perform this scan and plot the adsorption curve. The relevant command is:
 
+Run it **in the same per-functional folder as §2.4** — the placement helpers need `geometry_graphene.in` in the current directory, and §2.4 already built it there (if it is missing, the helper reports "Created 0/6"-style output instead of failing loudly; copy the slab file in first):
+
 ```bash
-cp ../../geometry_graphene.in .
 python ~/aims_utils/Surfaces.py --create_height_scan --tcnq_site <site> --tcnq_orientation <x|y>  --height_min 2.8 --height_max 3.6 --height_step 0.1 --vacuum <optimal>
 ```
 
