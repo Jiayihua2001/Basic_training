@@ -172,3 +172,32 @@ zero "not found". H₂ smoke through the unmodified student `submit.sh`:
 the smoke: first submission wedged at MPI startup on **c014** (R for 5+ min, 0-byte
 outputs — the c015 signature; single event, added to the watch list alongside
 c020/c026/c034/c035); resubmission excluding it completed normally on c016.
+
+## Post-cleanup full-campaign retest (2026-07-23, user request)
+
+The complete tutorial campaign (507 runs) was rerun via `speedtest_campaign.sh` in a
+throwaway BeeGFS workspace (`/mnt/beegfs/27-735/.validation_tmp`; head-node `/tmp` is
+node-local and invisible to compute nodes) — the first consumer of the repo-tracked
+`Tutorials_files/` → `make_zip.sh` bundle. **All 507 completed, zero MPI wedges,
+zero unconverged.**
+
+**Results vs the canonical literal workspace (`~/Tutorials_files`):** every pair with
+identical inputs (order-independent compare) is **bit-identical — ΔE = 0.0 exactly (85
+runs)**. The remaining 421 pairs differ only through *protocol drift* — the campaign
+script's recipe predates a few final-doc judgment calls (Fe grids `gaussian 0.1`/`16³`
+vs `0.2`/`14³`; Si/Na relax k-grids; bilayer scans `k 16×16×1` vs converged `12×12×1`;
+TCNQ slabs vacuum 25 Å vs converged 20 Å; convergence-series composition). Physics-level
+equivalence verified for every drift group: Fe a_min identical for all 8 states (2.75
+BCC / 3.50 FCC), relaxed BCC-mag a and moment agree (2.831 Å conv, 2.19 μB); Si relax a
+5.408 both (sparse-k 5.420 story intact); H₂ relaxation and all four IP/EA numbers
+bit-identical; Ge HSE06 gap 0.498 eV at Γ in both; TCNQ best site bridge-y at h = 3.3 Å
+for TS/MBD in both with E_ads within 13 meV (the vacuum choice); bilayer AB < AA for
+every functional with minima within 0.01–0.10 Å and E_b within 15 meV/cell (k-grid
+sensitivity — consistent with the solutions' grader tolerance).
+
+**Speed:** campaign wall 5694 s (vs 5054 s on 07-19 — queue-noise band); aims-internal
+total 18.10 node-h (vs 18.88 — ~4% faster, i.e. unchanged within noise); TCNQ
+118-atom-class median 293.9 s (vs ≈296 s — <1%). The binary and environment perform
+identically after the cleanup and compiler-tree restoration.
+
+Workspace deleted after the verdict.
