@@ -14,3 +14,10 @@ It is versioned here so the port's QA trail and the build recipe survive with th
   compiler tree were deleted in the 2026-07-23 cleanup; a rebuild starts from these.
 - `run_tests.sh` — physics regression tests (Si band gap, Fe k-convergence with/without
   smearing). Location-independent; run it from anywhere on the cluster.
+- `make_zip.sh` — regenerates `docs/Tutorials_files.zip` from the repo's unpacked
+  `Tutorials_files/` tree (repo root — the single source of truth for the student
+  bundle). Workflow: edit files in `Tutorials_files/`, run this script, commit both.
+  Never edit the zip directly. Empty scaffold dirs are tracked via `.gitkeep` and
+  written to the zip as real empty-directory entries. Note the installed copies in
+  `~/aims_utils` (and any live workspace) are downstream — refresh them after edits
+  the same way a student would (`setup_utils.sh`).
