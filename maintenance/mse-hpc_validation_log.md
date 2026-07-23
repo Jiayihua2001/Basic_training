@@ -201,3 +201,14 @@ total 18.10 node-h (vs 18.88 — ~4% faster, i.e. unchanged within noise); TCNQ
 identically after the cleanup and compiler-tree restoration.
 
 Workspace deleted after the verdict.
+
+## Install layout: build/ → bin/ + self-serve submit.sh (2026-07-23)
+
+The shared install now follows deployment convention: the binary lives in
+`bin/` (the old `build/` name suggested a build tree that no longer exists), and
+the install root gained a generic reference `submit.sh` (copy & sbatch — for
+group members not doing the tutorial) plus a quick-start `README.md`. All
+`submit.sh` copies (install root, bundle `utils/mse-hpc/`, website download,
+handout embed) updated in lock-step and upgraded from a hardcoded `-np 28` to
+`-np "$SLURM_NTASKS"`. Verified: H₂ through the install-root `submit.sh` on the
+new path → −30.925050488 eV, bit-exact; docs checks 39/39.

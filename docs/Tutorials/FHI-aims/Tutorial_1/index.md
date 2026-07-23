@@ -26,7 +26,7 @@ In this tutorial, we will explore:
 
 By the end of this tutorial, you will be able to:
 
-* Set up and submit FHI-aims calculations on TRACE or MSE-HPC and recognize a successfully finished run
+* Set up and submit FHI-aims calculations on MSE-HPC or TRACE and recognize a successfully finished run
 * Construct `geometry.in`/`control.in` input pairs by hand and with the helper scripts
 * Perform convergence tests over basis tiers and species defaults and justify a choice of settings
 * Run structure relaxations and extract optimized geometries
@@ -36,11 +36,11 @@ By the end of this tutorial, you will be able to:
 
 > **Please Note**
 > - Distances are in Å
-> - Activate your virtual env if the python script needs ase. If you don't have one, go [create one](../../../HPC%20Onboard/virtual_env/)
-> - Please find `submit.sh` and `write_control.py` in the `utils/trace` or `utils/mse-hpc` folder.
-> - Please find any other useful python scripts under `Tutorial_1` and its subfolders.
-> - The helper scripts may print a `FutureWarning` about ASE's aims file format — it is harmless; ignore it.
-> - If a job dies instantly complaining about missing keywords in `control.in`, your `write_control.py` step probably failed earlier (usually because `ase_env` was not active) while a later edit still created a stub file — delete `control.in`, activate the environment, and regenerate.
+> - Activate your virtual environement if the python script needs `ase`. If you don't have one, go [create one](../../../HPC%20Onboard/virtual_env/)
+> - Please find `submit.sh` and `write_control.py` in the `utils/mse-hpc` or `utils/trace`folder
+> - Please find any other useful python scripts under `Tutorial_1` and its subfolders
+> - The helper scripts may print a `FutureWarning` about ASE's aims file format — it is harmless; ignore it
+> - If a job dies instantly complaining about missing keywords in `control.in`, your `write_control.py` step probably failed earlier (usually because `ase_env` was not active) while a later edit still created a stub file — delete `control.in`, activate the environment, and regenerate
 
 ---
 ##  FHI-aims basic

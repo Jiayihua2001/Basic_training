@@ -2,7 +2,7 @@
 
 One binary is shipped for the course; students never compile.
 Shared install: `/mnt/beegfs/27-735/programs/fhi-aims.250822/`
-(`build/aims.250822.ifort.scalapack.mpi.x`, `aims_env.sh`, `intel-classic-2021.13-rt/`,
+(`bin/aims.250822.ifort.scalapack.mpi.x`, `aims_env.sh`, `submit.sh` + `README.md` (reference SLURM script + quick-start for non-tutorial users), `intel-classic-2021.13-rt/`,
 `species_defaults/` — student-facing only; maintainer material lives here.)
 
 - **Source**: `fhi-aims.250822.tar.gz` (this folder's parent), unmodified — no patches.
@@ -27,8 +27,8 @@ Shared install: `/mnt/beegfs/27-735/programs/fhi-aims.250822/`
      `mpiicx -v` → icx.
   3. `cmake -C initial_cache.intel-classic.cmake <src>` then
      `nice -n 19 cmake --build . -j 4`; afterwards `patchelf --remove-rpath` on the
-     binary and smoke-test H₂ through the student `submit.sh`
-     (reference: −30.925050488 eV at d = 0.8 Å, pw-lda light).
+     binary, deploy it to the install's `bin/`, and smoke-test H₂ through the student
+     `submit.sh` (reference: −30.925050488 eV at d = 0.8 Å, pw-lda light).
 - **Version-switch validation (2026-07-19)**: full tutorial campaign (507 runs) vs the
   240507 references — 505/507 agree to ≤7×10⁻⁸ eV; Ge LDA/PBE band eigenvalues identical
   to 4 decimals (zero-gap inversion in both versions — the old "0.115 vs 0.00 gap
