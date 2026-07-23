@@ -71,7 +71,7 @@ cd ./bilayer_graphene/convergence/k_grid
 If you'd like to manually build the bilayer graphene structure (AA stacking), use the lattice shown in Figure 1. Follow these steps to write your `geometry.in` by hand:
 
 **Figure 1:** Schematic of hexagonal graphene lattice used to build AA/AB stacking.
-<img src="../../images/hex.jpg"
+<img src="../../../images/hex.jpg"
      alt="Hexagonal graphene lattice"
      width="240">
      
@@ -268,14 +268,14 @@ When two graphene layers come together, the relative lateral positioning of atom
 
 **Figure 2: Common stacking arrangements of bilayer graphene (AA and AB configurations)**
 
-<img src="../../images/stacking.jpg"
+<img src="../../../images/stacking.jpg"
      alt="AA/AB stacking"
      width="500">
      
 **Build stacking configurations:**
 
 ```bash
-cd ../../stacking/AA #(or AB)
+cd ../../../stacking/AA #(or AB)
 ```
 
 Use `surfaces.py` to build different stacking configurations:
@@ -356,7 +356,7 @@ write("geometry.in", layer, format='aims')
 
 Copy `control.in` (use your converged k-grid) and `submit.sh`, then submit the job by `sbatch ~/aims_utils/submit.sh`.
 
-> **Both stackings need the reference:** `--plot_binding_curve` looks for `monolayer/` inside *each* scan directory. After the monolayer run finishes, copy the completed folder into the matching AB directory too (the reference is stacking-independent), e.g. from `stacking/AB/distance_scan/pbe_mbd`: `cp -r ../../../AA/distance_scan/pbe_mbd/monolayer .` — otherwise the AB plot stops with `monolayer/aims.out not found`.
+> **Both stackings need the reference:** `--plot_binding_curve` looks for `monolayer/` inside *each* scan directory. After the monolayer run finishes, copy the completed folder into the matching AB directory too (the reference is stacking-independent), e.g. from `stacking/AB/distance_scan/pbe_mbd`: `cp -r ../../../../AA/distance_scan/pbe_mbd/monolayer .` — otherwise the AB plot stops with `monolayer/aims.out not found`.
 
 **Step 2: Scan interlayer distances for bilayer**
 
@@ -410,7 +410,7 @@ Choose the best stacking with the optimal distance for each functional. Then ans
 Before setting up the band structure and DOS calculations, let us choose the structure that is optimal in §1.6 as `geometry.in` for the following calculation:
 
 ```bash
-cd ../../band 
+cd ../../../band 
 ```
 
 Use the geometry with the equilibrium interlayer distance obtained from your binding energy curves.
@@ -509,7 +509,7 @@ where:
 - **Hollow site**: Above the center of a hexagonal ring (3-fold coordination)
 
 **Figure 3: TCNQ Adsorption Sites on Graphene**
-<img src="../../images/adsorption_sites.jpg"
+<img src="../../../images/adsorption_sites.jpg"
      alt="Six different TCNQ adsorption configurations on graphene: bridge-x, bridge-y, hollow-x, hollow-y, top-x, top-y"
      width="500">
 

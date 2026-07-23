@@ -36,7 +36,7 @@ By the end of this tutorial, you will be able to:
 
 > **Please Note**
 > - Distances are in Å
-> - Activate your virtual env if the python script needs ase. If you don't have one, go [create one](../../HPC%20Onboard/virtual_env/)
+> - Activate your virtual env if the python script needs ase. If you don't have one, go [create one](../../../HPC%20Onboard/virtual_env/)
 > - Please find `submit.sh` and `write_control.py` in the `utils/trace` or `utils/mse-hpc` folder.
 > - Please find any other useful python scripts under `Tutorial_1` and its subfolders.
 > - The helper scripts may print a `FutureWarning` about ASE's aims file format — it is harmless; ignore it.
@@ -233,13 +233,13 @@ To evaluate the cost, grep the time of each run:
 
 ### **How do we describe conformers?**
 
-<img src="../../images/serine.png"
+<img src="../../../images/serine.png"
      alt="serine"
      width="100">
 
 **Figure 1:** serine
 
-<img src="../../images/NP.jpg"
+<img src="../../../images/NP.jpg"
      alt="np"
      width="300">
 
@@ -258,7 +258,7 @@ To evaluate the cost, grep the time of each run:
 * Multiple **local minima** (stable conformers).
 * One **global minimum** (most stable).
 
-<img src="../../images/butane.png"
+<img src="../../../images/butane.png"
      alt="butane"
      width="450">
 
@@ -300,7 +300,7 @@ To evaluate the cost, grep the time of each run:
 
 Here is the structure of **fumaronitrile**: 
 
-<img src="../../images/fumaronitrile.PNG"
+<img src="../../../images/fumaronitrile.PNG"
      alt="fumaronitrile"
      width="200">
 
@@ -316,7 +316,7 @@ Here is the structure of **fumaronitrile**:
 - Vertical (V): Energy difference computed at the **neutral ground-state geometry** — the ionized species is **not** relaxed. This corresponds to the instantaneous ionization/attachment process (Franck–Condon principle).
 - Adiabatic (A): Energy difference where the ionized species is **relaxed to its own equilibrium geometry**. This gives the true thermodynamic IP or EA.
 
-<img src="../../images/vertical_adiabatic.PNG"
+<img src="../../../images/vertical_adiabatic.PNG"
      alt="vertical_adiabatic plot"
      width="450">
 

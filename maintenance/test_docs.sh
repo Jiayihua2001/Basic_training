@@ -4,7 +4,7 @@
 # Run: bash test_docs.sh
 # =============================================================================
 
-DOCS_DIR="$(cd "$(dirname "$0")" && pwd)"
+DOCS_DIR="$(cd "$(dirname "$0")/../docs" && pwd)"
 PASS=0
 FAIL=0
 WARN=0
@@ -75,7 +75,7 @@ fi
 
 # ----- 7. Fix: Chrome extension URL removed -----
 echo "--- 7. Chrome extension URL fix (Tutorial_1) ---"
-FILE4="$DOCS_DIR/Tutorials/Tutorial_1/index.md"
+FILE4="$DOCS_DIR/Tutorials/FHI-aims/Tutorial_1/index.md"
 if grep -q 'chrome-extension://' "$FILE4"; then
     fail "Chrome extension URL still present in Tutorial_1"
 else
@@ -129,7 +129,7 @@ fi
 
 # ----- 11. Fix: BFGS ≠ TRM (Tutorial_2) -----
 echo "--- 11. BFGS/TRM fix (Tutorial_2) ---"
-FILE5="$DOCS_DIR/Tutorials/Tutorial_2/index.md"
+FILE5="$DOCS_DIR/Tutorials/FHI-aims/Tutorial_2/index.md"
 if grep -q 'same as trm' "$FILE5"; then
     fail "'same as trm' still present — BFGS and TRM are different algorithms"
 else
@@ -146,7 +146,7 @@ fi
 
 # ----- 13. Fix: use_dipole_correction .true. kept -----
 echo "--- 13. use_dipole_correction .true. preserved (Tutorial_3) ---"
-FILE6="$DOCS_DIR/Tutorials/Tutorial_3/index.md"
+FILE6="$DOCS_DIR/Tutorials/FHI-aims/Tutorial_3/index.md"
 if grep -q 'use_dipole_correction.*\.true\.' "$FILE6"; then
     pass "use_dipole_correction .true. preserved (user confirmed it works)"
 else
@@ -234,7 +234,7 @@ fi
 # ----- 20. Cross-file: no broken image references -----
 echo "--- 20. Image references ---"
 ALL_OK=true
-for md_file in "$DOCS_DIR"/Tutorials/Tutorial_*/index.md; do
+for md_file in "$DOCS_DIR"/Tutorials/FHI-aims/Tutorial_*/index.md; do
     # Extract image src paths
     grep -oP 'src="([^"]+)"' "$md_file" | sed 's/src="//;s/"//' | while read -r img_path; do
         md_dir="$(dirname "$md_file")"
@@ -251,7 +251,7 @@ fi
 
 # ----- 21. Markdown: code blocks are balanced -----
 echo "--- 21. Code block balance ---"
-for md_file in "$DOCS_DIR"/Tutorials/Tutorial_*/index.md "$DOCS_DIR"/HPC\ Onboard/*/index.md; do
+for md_file in "$DOCS_DIR"/Tutorials/FHI-aims/Tutorial_*/index.md "$DOCS_DIR"/HPC\ Onboard/*/index.md; do
     name="$(basename "$(dirname "$md_file")")"
     FENCES=$(grep -c '```' "$md_file" 2>/dev/null || echo 0)
     if [ $((FENCES % 2)) -ne 0 ]; then

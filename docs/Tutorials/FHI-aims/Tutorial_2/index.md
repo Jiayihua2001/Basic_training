@@ -37,7 +37,7 @@ By the end of this tutorial, you will be able to:
 
 > **Please Note**
 > - Distances are in Å
-> - The files needed for the assignments ship in the `Tutorials_files` bundle you downloaded in the [Quick Onboard](../../) — work inside your copy of `Tutorials_files/Tutorial_2` (or copy that folder to wherever you want to work).
+> - The files needed for the assignments ship in the `Tutorials_files` bundle you downloaded in the [Quick Onboard](../../../) — work inside your copy of `Tutorials_files/Tutorial_2` (or copy that folder to wherever you want to work).
 > - The arguments or discussion in all you assignments should be supported by **data**, **tables** or preferably **graphs**.
 > - Activate your virtual env if the python script needs ase.
 > - **All input/output files and scripts used for the performance of hands-on assignments and the final project should be placed in an organized directory and available for review. A README file explaining what all the files are should be placed in the directory.**
@@ -198,7 +198,7 @@ By plotting the band structure along paths connecting these high-symmetry points
   * **BCC Na (primitive cell)**: N-Γ-H-N-P.
 
 
-<img src="../../images/band.PNG"
+<img src="../../../images/band.PNG"
      alt="band_fcc"
      width="350">
 
@@ -279,7 +279,7 @@ The **band gap** is the energy difference between the **valence band maximum (VB
 - **Direct gap**: The VBM and CBM occur at the **same k-point**. Electrons can transition between them without a change in crystal momentum. Example: GaAs.
 - **Indirect gap**: The VBM and CBM occur at **different k-points**. A phonon (lattice vibration) is needed to supply the momentum difference. Example: Si has its VBM at Γ and CBM near X.
 
-<img src="../../images/band.PNG"
+<img src="../../../images/band.PNG"
      alt="band_fcc"
      width="350">
 
@@ -501,7 +501,7 @@ write('geometry.in', ge_dc)
 - Do k-point convergence test with LDA.
 - Optimize the lattice constant with each functional (record the CPU time):
   - **LDA, PBE, r²SCAN**: cell relaxation as in §1.3 (`relax_geometry bfgs 1e-2` + `relax_unit_cell fixed_angles`).
-  - **HSE06**: relax starting from your **PBE-relaxed** geometry (`cp ../../PBE/relax/geometry.in.next_step geometry.in`); hybrids are slow, and the closer start saves most of the steps.
+  - **HSE06**: relax starting from your **PBE-relaxed** geometry (`cp ../../../PBE/relax/geometry.in.next_step geometry.in`); hybrids are slow, and the closer start saves most of the steps.
 - Plot band structure and density of states with each functional, record CPU time.
 - Compare gaps with [experimental result](https://www.researchgate.net/publication/299490580_DETERMINATION_OF_THE_BAND-GAP_OF_A_SEMICONDUCTOR_GERMANIUM_CHIP_USING_FOUR_PROBE_SET-UP) (~0.693 eV) and [GW](https://journals.aps.org/prb/abstract/10.1103/PhysRevB.48.17791) results, discuss Jacob’s-Ladder accuracy vs. cost.
 
