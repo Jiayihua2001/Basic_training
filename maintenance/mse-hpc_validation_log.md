@@ -146,3 +146,29 @@ Since the user's switch condition ("same results") was met, `/mnt/beegfs/27-735/
 ## Bottom line
 
 Every exercise and assignment of Tutorials 1–3 runs end-to-end on MSE-HPC with the shared binary. All issues a student would hit were found and fixed in the docs/bundle (see lists above). Two flaky-node incidents (c015, c017) and two mid-run job deaths during the 180-job wave were recovered by resubmission — worth mentioning to mse-it, and students should know: if `aims.out` stops growing for minutes, cancel and resubmit (check `squeue` first so you don't double-submit into the same folder).
+
+## Final state after the 2026-07-23 cleanup
+
+The whole deployment was consolidated to its minimal final form. Shared area
+(`/mnt/beegfs/27-735/programs/`): exactly `fhi-aims.250822/` and `miniforge3/`.
+Maintainer home: `~/Basic_training` (this repo; maintainer records now in
+`maintenance/`, outside the published Jekyll source), `~/Tutorials_files` (the
+canonical 545-run workspace from the 2026-07-20 fully literal assignment
+execution — its findings ledger lives in the private canvas repo,
+`records/literal_run_findings.md`), `~/aims_utils`, `~/canvas` (one private git
+repo: handouts + instructor solutions + grading + records), `~/texlive`. Deleted:
+all build material — both FHI-aims maintainer source trees, build objects, the
+240507 rollback binary, and the spack tree carrying classic ifort 2021.13 (19 GB).
+The rebuild recipe survives as `maintenance/aims-250822-BUILD_NOTES.md` +
+`aims-250822-initial_cache.intel-classic.cmake`.
+
+**Post-deletion re-verification of the shared binary** (the spack tree held the
+compiler that built it, so prove nothing at runtime pointed there): `ldd` under
+`aims_env.sh` resolves every library from the system-wide spack
+(`/home/.spack-system`, mse-it's) or the redistributed
+`intel-classic-2021.13-rt/` inside the install — zero paths into any user home,
+zero "not found". H₂ smoke through the unmodified student `submit.sh`:
+−30.925050488 eV, bit-identical to the campaign reference. One incident during
+the smoke: first submission wedged at MPI startup on **c014** (R for 5+ min, 0-byte
+outputs — the c015 signature; single event, added to the watch list alongside
+c020/c026/c034/c035); resubmission excluding it completed normally on c016.
