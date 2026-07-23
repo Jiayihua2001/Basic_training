@@ -11,7 +11,6 @@ nav_order: 1
 
 Hardware / scheduler at a glance:
 
-<!-- Why no header -->
 | | |
 |---|---|
 | Compute nodes | 43 × dual–socket Intel **Broadwell**, **28 cores** / node, 128 GB RAM |
@@ -71,8 +70,10 @@ module list                  # show what's loaded
 module purge                 # unload everything
 ```
 
-> The provided FHI-aims `submit.sh` does **not** rely on `module load` — it sources the
-> compiler / MPI / MKL environment directly (via `aims_env.sh`).
+> The FHI-aims `submit.sh` does **not** rely on `module load` — it sources the
+> compiler / MPI / MKL environment directly (via `aims_env.sh`), because
+> `module load` is not available inside batch jobs on the compute nodes. You only
+> need `module` for interactive work.
 
 ---
 
@@ -102,7 +103,7 @@ If that path is ever missing or moved, only two files need updating — `AIMS_DI
 
 ## Python environment (for the helper scripts)
 
-The tutorial helper scripts (`write_control.py`, `automation.py`, `surfaces.py`, `aimsplot.py`) need Python with **ASE**. MSE-HPC has no conda module, so we provide a shared **base conda** (read-only — it plays the role of the conda module on the group's other clusters), and **you create your own environment with it**. Creating and managing your environment is part of the training — the commands are explained in [Virtual Environments](../virtual_env/):
+The tutorial helper scripts (`write_control.py`, `automation.py`, `surfaces.py`, `aimsplot.py`) need Python with **ASE**. MSE-HPC has no conda module, so the class provides a shared **base conda** (read-only — it plays the role of the conda module on the group's other clusters), and **you create your own environment with it**. Creating and managing your environment is part of the training — the commands are explained in [Virtual Environments](../virtual_env/):
 
 ```bash
 # every session (best: add this line to your ~/.bashrc):
