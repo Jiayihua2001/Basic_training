@@ -15,4 +15,4 @@ has_children: true
 2. [Periodic Solids](../Tutorial_2/) — Si, Na, Fe, and Ge: k-point convergence, lattice relaxation, band structures, and functionals.
 3. [2D Materials & Surfaces](../Tutorial_3/) — bilayer graphene and TCNQ adsorption with van der Waals corrections.
 
-> All scripts you need (`write_control.py`, `Automation.py`, `Surfaces.py`, `aimsplot.py`, and `submit.sh`) are bundled in the [Tutorial files](../../Tutorials_files.zip) and installed to `~/aims_utils/` by `setup_utils.sh`.
+> All scripts you need (`write_control.py`, `automation.py`, `surfaces.py`, `aimsplot.py`, and `submit.sh`) are bundled in the [Tutorial files](../../Tutorials_files.zip) and installed to `~/aims_utils/` by `setup_utils.sh`.

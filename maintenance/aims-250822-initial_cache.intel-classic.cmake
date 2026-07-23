@@ -1,4 +1,4 @@
-# FHI-aims 240507 — canonical MSE-HPC build (classic Intel, fully dynamic)
+# FHI-aims 250822 — canonical MSE-HPC build (classic Intel, fully dynamic)
 # Fortran: classic ifort 2021.13 (spack intel-oneapi-compilers-classic) via mpiifort
 # C/C++  : LLVM icx/icpx via Intel MPI wrappers (classic icc no longer exists)
 # Math   : MKL (Intel interface + Intel MPI BLACS)

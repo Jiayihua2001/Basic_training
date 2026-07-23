@@ -142,12 +142,12 @@ Therefore, we need to perform a **convergence test** to determine the optimal k-
   For your convenience, you can always use this command to create and submit jobs for all `k_grid` values automatically:
 
   ```bash
-  python ~/aims_utils/Automation.py --make_k_grid
+  python ~/aims_utils/automation.py --make_k_grid
   ```
   After the jobs finish, use this command to plot the convergence curve automatically:
 
   ```bash
-  python ~/aims_utils/Automation.py --plot_k_grid
+  python ~/aims_utils/automation.py --plot_k_grid
   ```
 
 
@@ -179,7 +179,7 @@ Add the converged `k_grid` setting into `control.in`, also add these settings fo
 
 Run this command:
 ```bash
-python ~/aims_utils/Automation.py --get_lattice_constant
+python ~/aims_utils/automation.py --get_lattice_constant
 ```
 You will extract structure information from `geometry.in.next_step` in your current folder automatically; if you want to extract from other files, add `--lattice_file_name <your_filename>` to this command.
 
@@ -392,12 +392,12 @@ Same protocol as EX1, but rebuild the `control.in` with Fe species, set `relativ
 For your convenience, you can use this command to create and submit jobs for all `k_grid` values automatically. You can estimate a rough range of `k_grid` satisfying `N*a > 40`:
 
   ```bash
-  python ~/aims_utils/Automation.py --make_k_grid --k_grid_min 10 --k_grid_max 18
+  python ~/aims_utils/automation.py --make_k_grid --k_grid_min 10 --k_grid_max 18
   ```
 After the jobs finish, use this command to plot the convergence curve automatically:
 
   ```bash
-  python ~/aims_utils/Automation.py --plot_k_grid
+  python ~/aims_utils/automation.py --plot_k_grid
   ```
 
 ### **2.3 Energy vs. lattice constant**
@@ -413,12 +413,12 @@ You can use our automation script to save your effort. The lattice type can be `
 **Remember to add `k_grid` to the `control.in` file!**
 
   ```bash
-  python ~/aims_utils/Automation.py --Fe_grid_search --lattice_type bcc
+  python ~/aims_utils/automation.py --Fe_grid_search --lattice_type bcc
   ```
 
 After the calculations finish, use this command to plot E vs lattice constant automatically:
   ```bash
-  python ~/aims_utils/Automation.py --plot_Fe_grid_search
+  python ~/aims_utils/automation.py --plot_Fe_grid_search
   ```
 **Hint:** 
 - To use PBE as the exchange-correlation functional, simply change `xc pw-lda` to `xc pbe` in the `control.in` file.

@@ -1,5 +1,5 @@
 """
-Surfaces.py - Comprehensive utility library for Tutorial 3
+surfaces.py - Comprehensive utility library for Tutorial 3
 DFT calculations for van der Waals-layered systems and surfaces
 
 This module provides comprehensive functionality for:
@@ -12,18 +12,18 @@ This module provides comprehensive functionality for:
 - Height-dependent adsorption energy scanning
 
 Usage:
-    python Surfaces.py --help
+    python surfaces.py --help
 
 Examples:
     # Build bilayer graphene
-    python Surfaces.py --build_bilayer --stacking AB --interlayer_distance 3.30
+    python surfaces.py --build_bilayer --stacking AB --interlayer_distance 3.30
     
     # k-point convergence
-    python Surfaces.py --make_k_grid_2d --k_grid_min 4 --k_grid_max 16
-    python Surfaces.py --plot_k_grid_2d
+    python surfaces.py --make_k_grid_2d --k_grid_min 4 --k_grid_max 16
+    python surfaces.py --plot_k_grid_2d
     
     # TCNQ adsorption
-    python Surfaces.py --place_tcnq_on_graphene --tcnq_site hollow --tcnq_orientation x
+    python surfaces.py --place_tcnq_on_graphene --tcnq_site hollow --tcnq_orientation x
 
 Author: Tutorial 3 Materials
 """
@@ -1538,54 +1538,54 @@ def plot_height_scan(
 # ============================================================================
 
 def main():
-    """Main command-line interface for Surfaces.py"""
+    """Main command-line interface for surfaces.py"""
     
     parser = argparse.ArgumentParser(
-        description="Surfaces.py - Comprehensive utility for Tutorial 3",
+        description="surfaces.py - Comprehensive utility for Tutorial 3",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   # Build bilayer graphene
-  python Surfaces.py --build_bilayer --stacking AB --interlayer_distance 3.30
+  python surfaces.py --build_bilayer --stacking AB --interlayer_distance 3.30
   
   # Create distance scan for binding curve
-  python Surfaces.py --distance_scan --stacking AB
+  python surfaces.py --distance_scan --stacking AB
   
   # k-point convergence
-  python Surfaces.py --make_k_grid_2d --k_grid_min 4 --k_grid_max 16
-  python Surfaces.py --plot_k_grid_2d
+  python surfaces.py --make_k_grid_2d --k_grid_min 4 --k_grid_max 16
+  python surfaces.py --plot_k_grid_2d
   
   # Vacuum convergence
-  python Surfaces.py --vacuum_series
-  python Surfaces.py --plot_vacuum
+  python surfaces.py --vacuum_series
+  python surfaces.py --plot_vacuum
   
   # Build metal slab
-  python Surfaces.py --build_slab --element Au --layers 5
+  python surfaces.py --build_slab --element Au --layers 5
   
   # Build graphene slab
-  python Surfaces.py --build_graphene_slab --layers 2 --size 4 4
+  python surfaces.py --build_graphene_slab --layers 2 --size 4 4
   
   # Create slab thickness series
-  python Surfaces.py --slab_thickness_series --element Au
-  python Surfaces.py --graphene_thickness_series
+  python surfaces.py --slab_thickness_series --element Au
+  python surfaces.py --graphene_thickness_series
   
   # Build molecule
-  python Surfaces.py --build_molecule --molecule benzene
-  python Surfaces.py --build_molecule --molecule tcnq
+  python surfaces.py --build_molecule --molecule benzene
+  python surfaces.py --build_molecule --molecule tcnq
   
   # Place TCNQ on graphene
-  python Surfaces.py --place_tcnq_on_graphene --tcnq_site hollow --tcnq_orientation x --tcnq_height 2.5
-  python Surfaces.py --create_tcnq_adsorption_series
+  python surfaces.py --place_tcnq_on_graphene --tcnq_site hollow --tcnq_orientation x --tcnq_height 2.5
+  python surfaces.py --create_tcnq_adsorption_series
   
   # Height-dependent adsorption scan
-  python Surfaces.py --create_height_scan --tcnq_site hollow --tcnq_orientation x --height_min 2.0 --height_max 3.4
-  python Surfaces.py --plot_height_scan --tcnq_site hollow --tcnq_orientation x
+  python surfaces.py --create_height_scan --tcnq_site hollow --tcnq_orientation x --height_min 2.0 --height_max 3.4
+  python surfaces.py --plot_height_scan --tcnq_site hollow --tcnq_orientation x
   
   # Plot binding curve
-  python Surfaces.py --plot_binding_curve
+  python surfaces.py --plot_binding_curve
   
   # Extract energy from aims.out
-  python Surfaces.py --extract_energy aims.out
+  python surfaces.py --extract_energy aims.out
         """
     )
     

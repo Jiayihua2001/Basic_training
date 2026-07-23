@@ -25,7 +25,7 @@ Pick the track that matches your project:
    cd Tutorials_files
    ```
 
-3. **Run the setup script** to install the FHI-aims helper scripts (`write_control.py`, `Automation.py`, `Surfaces.py`, `aimsplot.py`, `submit.sh`) into `~/aims_utils/`:
+3. **Run the setup script** to install the FHI-aims helper scripts (`write_control.py`, `automation.py`, `surfaces.py`, `aimsplot.py`, `submit.sh`) into `~/aims_utils/`:
    - On TRACE:&nbsp;&nbsp;&nbsp;`bash setup_utils.sh trace`
    - On MSE-HPC: `bash setup_utils.sh mse-hpc`
 

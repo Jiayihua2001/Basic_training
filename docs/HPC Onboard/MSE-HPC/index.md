@@ -101,7 +101,7 @@ If that path is ever missing or moved, only two files need updating — `AIMS_DI
 
 ## Python environment (for the helper scripts)
 
-The tutorial helper scripts (`write_control.py`, `Automation.py`, `Surfaces.py`, `aimsplot.py`) need Python with **ASE**. MSE-HPC has no conda module, so the class provides a shared **base conda** (read-only — it plays the role of the conda module on the group's other clusters), and **you create your own environment with it**. Creating and managing your environment is part of the training — the commands are explained in [Virtual Environments](../virtual_env/):
+The tutorial helper scripts (`write_control.py`, `automation.py`, `surfaces.py`, `aimsplot.py`) need Python with **ASE**. MSE-HPC has no conda module, so the class provides a shared **base conda** (read-only — it plays the role of the conda module on the group's other clusters), and **you create your own environment with it**. Creating and managing your environment is part of the training — the commands are explained in [Virtual Environments](../virtual_env/):
 
 ```bash
 # every session (best: add this line to your ~/.bashrc):

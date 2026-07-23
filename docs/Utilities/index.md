@@ -194,7 +194,7 @@ echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
 
 > Both `incar.py --help` and `kpoints.py --help` list every flag. Edit `potcar.sh` once to point at your `potpaw_PBE` directory; on Perlmutter the group typically keeps it under `/global/common/software/<repo>/`.
 
-> The Marom-group VASP scripts and the FHI-aims tutorial helpers (`write_control.py`, `Automation.py`, `Surfaces.py`, `aimsplot.py`) are conceptually similar — they wrap argparse around the parts of the workflow that don't change. Use VASPKIT when you want a richer interactive menu.
+> The Marom-group VASP scripts and the FHI-aims tutorial helpers (`write_control.py`, `automation.py`, `surfaces.py`, `aimsplot.py`) are conceptually similar — they wrap argparse around the parts of the workflow that don't change. Use VASPKIT when you want a richer interactive menu.
 
 ---
 
